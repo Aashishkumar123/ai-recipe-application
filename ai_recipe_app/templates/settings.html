@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Settings — Recipe Chef{% endblock %}
+
+{% block content %}
+<div class="flex flex-col flex-1 overflow-hidden page-settings">
+
+    <!-- Top bar -->
+    <header class="page-top-bar flex items-center gap-3 px-3 md:px-6 py-3 border-b shrink-0">
+        <button id="sidebar-toggle" class="md:hidden p-2 -ml-1 rounded-lg transition-colors" aria-label="Toggle sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <a href="{% url 'index' %}" class="p-1.5 rounded-lg transition-colors" title="Back to chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+            </svg>
+        </a>
+        <h1 class="text-sm font-semibold">Settings</h1>
+    </header>
+
+    <!-- Settings body -->
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- Desktop settings nav -->
+        <nav class="settings-sidebar-nav hidden sm:flex flex-col w-48 shrink-0 border-r p-3 gap-0.5 overflow-y-auto">
+            <button data-tab="general"      class="settings-nav-btn active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                General
+            </button>
+            <button data-tab="privacy"      class="settings-nav-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Privacy
+            </button>
+            <button data-tab="integrations" class="settings-nav-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Integrations
+            </button>
+            <button data-tab="account"      class="settings-nav-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Account
+            </button>
+        </nav>
+
+        <!-- Mobile tab bar -->
+        <div class="settings-mobile-tabs sm:hidden flex border-b overflow-x-auto shrink-0 absolute top-[49px] left-0 right-0 z-10">
+            <button data-tab="general"      class="settings-tab-btn active px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">General</button>
+            <button data-tab="privacy"      class="settings-tab-btn px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">Privacy</button>
+            <button data-tab="integrations" class="settings-tab-btn px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">Integrations</button>
+            <button data-tab="account"      class="settings-tab-btn px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">Account</button>
+        </div>
+
+        <!-- Content -->
+        <div class="settings-body flex-1 overflow-y-auto pt-10 sm:pt-0">
+            <div class="max-w-2xl mx-auto px-4 md:px-8 py-8">
+
+                <!-- ── General ── -->
+                <div id="panel-general" class="settings-panel space-y-10">
+
+                    <!-- Profile -->
+                    <section>
+                        <div class="mb-5">
+                            <h2 class="text-base font-semibold mb-0.5">Profile</h2>
+                            <p class="page-text-muted text-xs">Update how your name appears in the app.</p>
+                        </div>
+                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
+                                <div class="sm:w-40 shrink-0">
+                                    <label class="text-sm font-medium" for="display-name">Display Name</label>
+                                    <p class="page-text-muted text-xs mt-0.5">Shown in chat history</p>
+                                </div>
+                                <div class="flex flex-1 gap-2">
+                                    <input id="display-name" type="text" value="Aashish Kumar"
+                                        class="settings-input flex-1 px-3 py-2 border rounded-xl text-sm outline-none transition-all">
+                                    <button id="save-name-btn"
+                                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-colors shrink-0">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="save-name-toast" class="hidden flex items-center gap-2 px-5 py-2.5 bg-green-50 text-green-700 text-xs font-medium">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                Name saved successfully
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Notifications -->
+                    <section>
+                        <div class="mb-5">
+                            <h2 class="text-base font-semibold mb-0.5">Notifications</h2>
+                            <p class="page-text-muted text-xs">Choose what updates you want to receive.</p>
+                        </div>
+                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <div>
+                                    <p class="text-sm font-medium">Recipe suggestions</p>
+                                    <p class="page-text-muted text-xs mt-0.5">Weekly personalised recipe ideas based on your history</p>
+                                </div>
+                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
+                            </div>
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <div>
+                                    <p class="text-sm font-medium">Weekly digest</p>
+                                    <p class="page-text-muted text-xs mt-0.5">A summary of your saved recipes every Sunday</p>
+                                </div>
+                                <button class="toggle-switch" role="switch" aria-checked="false"><span class="toggle-thumb"></span></button>
+                            </div>
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <div>
+                                    <p class="text-sm font-medium">Tips &amp; updates</p>
+                                    <p class="page-text-muted text-xs mt-0.5">Product news, cooking tips, and feature announcements</p>
+                                </div>
+                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Appearance -->
+                    <section>
+                        <div class="mb-5">
+                            <h2 class="text-base font-semibold mb-0.5">Appearance</h2>
+                            <p class="page-text-muted text-xs">Customise how Recipe Chef looks and feels.</p>
+                        </div>
+
+                        <!-- Theme picker -->
+                        <div class="settings-card rounded-2xl border overflow-hidden shadow-sm mb-4">
+                            <div class="px-5 py-4 border-b">
+                                <p class="text-sm font-medium">Theme</p>
+                                <p class="page-text-muted text-xs mt-0.5">Choose your preferred colour mode</p>
+                            </div>
+                            <div class="p-4">
+                                <div class="grid grid-cols-3 gap-3">
+
+                                    <!-- Light -->
+                                    <button data-theme-choice="light"
+                                        class="theme-card rounded-xl border-2 overflow-hidden text-left {% if theme == 'light' %}active{% endif %}">
+                                        <div class="h-16 flex pointer-events-none">
+                                            <div class="w-8 bg-zinc-800 shrink-0"></div>
+                                            <div class="flex-1 bg-white p-2 space-y-1.5">
+                                                <div class="h-1.5 rounded-sm bg-gray-200 w-4/5"></div>
+                                                <div class="h-1.5 rounded-sm bg-gray-200 w-3/5"></div>
+                                                <div class="h-3 rounded-sm bg-orange-100 mt-1 w-full"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between px-3 py-2">
+                                            <span class="text-xs font-medium">Light</span>
+                                            <svg class="theme-check {% if theme != 'light' %}hidden{% endif %} text-orange-500 shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        </div>
+                                    </button>
+
+                                    <!-- Dark -->
+                                    <button data-theme-choice="dark"
+                                        class="theme-card rounded-xl border-2 overflow-hidden text-left {% if theme == 'dark' %}active{% endif %}">
+                                        <div class="h-16 flex pointer-events-none">
+                                            <div class="w-8 bg-zinc-900 shrink-0"></div>
+                                            <div class="flex-1 p-2 space-y-1.5" style="background:#0f0f10">
+                                                <div class="h-1.5 rounded-sm bg-zinc-700 w-4/5"></div>
+                                                <div class="h-1.5 rounded-sm bg-zinc-700 w-3/5"></div>
+                                                <div class="h-3 rounded-sm bg-zinc-800 mt-1 w-full"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between px-3 py-2">
+                                            <span class="text-xs font-medium">Dark</span>
+                                            <svg class="theme-check {% if theme != 'dark' %}hidden{% endif %} text-orange-500 shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        </div>
+                                    </button>
+
+                                    <!-- System -->
+                                    <button data-theme-choice="system"
+                                        class="theme-card rounded-xl border-2 overflow-hidden text-left {% if theme == 'system' %}active{% endif %}">
+                                        <div class="h-16 flex pointer-events-none">
+                                            <div class="w-8 bg-zinc-800 shrink-0"></div>
+                                            <div class="flex-1 flex">
+                                                <div class="flex-1 bg-white p-1.5 space-y-1">
+                                                    <div class="h-1 rounded-sm bg-gray-200 w-full"></div>
+                                                    <div class="h-1 rounded-sm bg-gray-200 w-3/4"></div>
+                                                </div>
+                                                <div class="flex-1 p-1.5 space-y-1" style="background:#0f0f10">
+                                                    <div class="h-1 rounded-sm bg-zinc-700 w-full"></div>
+                                                    <div class="h-1 rounded-sm bg-zinc-700 w-3/4"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between px-3 py-2">
+                                            <span class="text-xs font-medium">System</span>
+                                            <svg class="theme-check {% if theme != 'system' %}hidden{% endif %} text-orange-500 shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        </div>
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Other appearance options -->
+                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <div>
+                                    <p class="text-sm font-medium">Background animations</p>
+                                    <p class="page-text-muted text-xs mt-0.5">Subtle motion effects in the interface</p>
+                                </div>
+                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4">
+                                <div>
+                                    <p class="text-sm font-medium">Chat font</p>
+                                    <p class="page-text-muted text-xs mt-0.5">Font used for recipe text</p>
+                                </div>
+                                <select id="chat-font-select" class="settings-input w-full sm:w-auto px-3 py-2 border rounded-xl text-sm outline-none transition-all">
+                                    <option value="system">System Default</option>
+                                    <option value="inter">Inter</option>
+                                    <option value="georgia">Georgia (Serif)</option>
+                                    <option value="mono">Courier New (Mono)</option>
+                                    <option value="dyslexic">OpenDyslexic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- ── Privacy ── -->
+                <div id="panel-privacy" class="settings-panel hidden">
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <div class="settings-card w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border">
+                            <svg class="page-text-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <p class="text-sm font-medium">Privacy settings coming soon</p>
+                        <p class="page-text-muted text-xs mt-1">Data export, deletion, and consent controls</p>
+                    </div>
+                </div>
+
+                <!-- ── Integrations ── -->
+                <div id="panel-integrations" class="settings-panel hidden">
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <div class="settings-card w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border">
+                            <svg class="page-text-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        </div>
+                        <p class="text-sm font-medium">Integrations coming soon</p>
+                        <p class="page-text-muted text-xs mt-1">Connect with meal planners, grocery apps, and more</p>
+                    </div>
+                </div>
+
+                <!-- ── Account ── -->
+                <div id="panel-account" class="settings-panel hidden">
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <div class="settings-card w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border">
+                            <svg class="page-text-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <p class="text-sm font-medium">Account settings coming soon</p>
+                        <p class="page-text-muted text-xs mt-1">Password, linked accounts, and subscription</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Tab switching
+function activateTab(tab) {
+    document.querySelectorAll(".settings-nav-btn, .settings-tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+    document.querySelectorAll(".settings-panel").forEach((panel) => {
+        panel.classList.toggle("hidden", panel.id !== `panel-${tab}`);
+    });
+}
+document.querySelectorAll(".settings-nav-btn, .settings-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+});
+
+// Toggle switches
+document.querySelectorAll(".toggle-switch").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        btn.setAttribute("aria-checked", btn.getAttribute("aria-checked") !== "true");
+    });
+});
+
+// Save name
+document.getElementById("save-name-btn")?.addEventListener("click", () => {
+    const toast = document.getElementById("save-name-toast");
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
+});
+
+// Theme selection — saves to Django session
+async function selectTheme(choice) {
+    // 1. Update card UI
+    document.querySelectorAll(".theme-card").forEach((card) => {
+        const active = card.dataset.themeChoice === choice;
+        card.classList.toggle("active", active);
+        card.querySelector(".theme-check")?.classList.toggle("hidden", !active);
+    });
+
+    // 2. Apply immediately (resolve "system" to light/dark)
+    const resolved = choice === "system"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : choice;
+    document.documentElement.setAttribute("data-theme", resolved);
+
+    // 3. Persist in Django session
+    try {
+        await fetch("{% url 'set_theme' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: JSON.stringify({ theme: choice }),
+        });
+    } catch (e) {
+        console.error("Failed to save theme:", e);
+    }
+}
+
+document.querySelectorAll(".theme-card").forEach((card) => {
+    card.addEventListener("click", () => selectTheme(card.dataset.themeChoice));
+});
+
+// Keep system theme in sync with OS changes
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    const saved = document.documentElement.getAttribute("data-theme");
+    // only re-apply if the session stored "system" — check a card
+    const systemCard = document.querySelector('[data-theme-choice="system"]');
+    if (systemCard?.classList.contains("active")) {
+        document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+    }
+});
+</script>
+{% endblock %}

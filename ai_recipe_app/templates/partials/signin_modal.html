@@ -1,0 +1,132 @@
+<!-- Sign-in Modal -->
+<div id="signin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+
+    <!-- Backdrop -->
+    <div id="signin-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+    <!-- Card -->
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+        <!-- Close button -->
+        <button id="signin-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition-colors z-10">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <!-- ── Step 1: Main sign-in ── -->
+        <div id="modal-step-main" class="px-8 pt-10 pb-8">
+
+            <!-- Brand -->
+            <div class="flex flex-col items-center mb-7">
+                <div class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm">🍳</div>
+                <h2 class="text-xl font-bold text-gray-900">Welcome back</h2>
+                <p class="text-sm text-gray-500 mt-1 text-center">Sign in to save your recipes and history</p>
+            </div>
+
+            <!-- Social buttons -->
+            <div class="space-y-3 mb-5">
+
+                <!-- Google -->
+                <button class="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-medium text-gray-700 shadow-sm">
+                    <svg viewBox="0 0 24 24" width="18" height="18" class="shrink-0">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continue with Google
+                </button>
+
+                <!-- Apple -->
+                <button class="w-full flex items-center gap-3 px-4 py-3 bg-black hover:bg-zinc-800 border border-black rounded-xl transition-all text-sm font-medium text-white shadow-sm">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="white" class="shrink-0">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    Continue with Apple
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-3 mb-5">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs text-gray-400 font-medium">or continue with email</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- Email form -->
+            <form id="email-form" novalidate>
+                <div class="mb-3">
+                    <input
+                        id="signin-email"
+                        type="email"
+                        placeholder="Enter your email address"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
+                        required
+                        autocomplete="email"
+                    >
+                    <p id="email-error" class="hidden text-xs text-red-500 mt-1.5 px-1">Please enter a valid email address.</p>
+                </div>
+                <button
+                    type="submit"
+                    class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+                >
+                    Continue with Email
+                </button>
+            </form>
+
+            <!-- Terms -->
+            <p class="text-center text-[11px] text-gray-400 mt-5 leading-relaxed">
+                By continuing, you agree to our
+                <a href="#" class="underline hover:text-gray-600">Terms of Service</a>
+                and
+                <a href="#" class="underline hover:text-gray-600">Privacy Policy</a>
+            </p>
+        </div>
+
+        <!-- ── Step 2: OTP verification ── -->
+        <div id="modal-step-otp" class="hidden px-8 pt-8 pb-8">
+
+            <!-- Back -->
+            <button id="otp-back" class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors mb-6 -ml-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                Back
+            </button>
+
+            <!-- Heading -->
+            <div class="text-center mb-7">
+                <div class="w-12 h-12 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">📬</div>
+                <h2 class="text-xl font-bold text-gray-900">Check your inbox</h2>
+                <p class="text-sm text-gray-500 mt-1.5">We sent a 6-digit code to</p>
+                <p id="otp-email-display" class="text-sm font-semibold text-gray-800 mt-0.5"></p>
+            </div>
+
+            <!-- OTP inputs -->
+            <div class="flex gap-2 justify-center mb-6">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+                <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+            </div>
+
+            <!-- Verify button -->
+            <button id="verify-btn" class="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm mb-4">
+                Verify Code
+            </button>
+
+            <!-- Resend -->
+            <div class="text-center text-xs text-gray-400">
+                Didn't receive it?
+                <button id="resend-btn" class="text-orange-500 hover:text-orange-600 font-medium disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">
+                    Resend
+                </button>
+                <span id="resend-timer" class="text-gray-400"></span>
+            </div>
+
+        </div>
+    </div>
+</div>

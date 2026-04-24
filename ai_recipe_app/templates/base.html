@@ -1,14 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{{ theme }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Recipe Chef{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'chat.css' %}">
+    <link rel="stylesheet" href="{% static 'output.css' %}">
+    <!-- Resolve "system" theme before paint to prevent flash -->
+    <script>
+        (function () {
+            var t = document.documentElement.getAttribute("data-theme");
+            if (t === "system") {
+                var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+            }
+        })();
+    </script>
 </head>
-<body>
-    {% block content %}{% endblock %}
+<body class="flex h-screen overflow-hidden antialiased">
+    <!-- CSRF token available to every page's JS -->
+    <div hidden>{% csrf_token %}</div>
+
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
+    {% include "partials/sidebar.html" %}
+
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/signin_modal.html" %}
+    <script src="{% static 'sidebar.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

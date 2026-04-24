@@ -4,37 +4,94 @@
 {% block title %}Recipe Chef — What are we cooking?{% endblock %}
 
 {% block content %}
-<div class="chat-container">
-    <header class="chat-header">
-        <h1>🍳 Recipe Chef</h1>
-        <p>Tell me what you're craving and I'll cook up a recipe.</p>
+<div class="flex flex-col flex-1 overflow-hidden page-chat">
+
+    <!-- Top bar -->
+    <header class="page-top-bar flex items-center justify-between px-3 md:px-6 py-3 border-b shrink-0">
+        <div class="flex items-center gap-2 md:gap-2.5">
+            <button id="sidebar-toggle" class="md:hidden p-2 -ml-1 rounded-lg transition-colors" aria-label="Toggle sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <span class="text-sm font-semibold">Recipe Chef</span>
+            <span class="text-[11px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium hidden sm:inline">mistral-large</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <button class="p-2 rounded-lg transition-colors" title="Share">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+            </button>
+        </div>
     </header>
 
-    <div id="messages" class="messages">
-        <div class="message message--bot">
-            <div class="message-bubble">
-                Hey! What should we make today? Try something like <em>"chicken tikka masala"</em> or <em>"miso ramen"</em>.
+    <!-- Messages area -->
+    <div id="message-list" class="page-messages flex-1 overflow-y-auto scroll-smooth">
+
+        <!-- Welcome screen -->
+        <div id="welcome-screen" class="flex flex-col items-center justify-center py-12 md:py-24 px-4 text-center">
+            <div class="w-14 h-14 md:w-16 md:h-16 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 md:mb-6 shadow-sm">🍳</div>
+            <h1 class="text-xl md:text-2xl font-bold mb-2">What are we cooking today?</h1>
+            <p class="page-text-muted text-sm mb-8 md:mb-10 max-w-sm leading-relaxed">
+                Tell me a dish name, a craving, or a cuisine — I'll generate a detailed step-by-step recipe.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 w-full max-w-xs sm:max-w-lg">
+                <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
+                    <span class="text-xl leading-none">🇮🇳</span>
+                    <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Chicken Tikka Masala</span>
+                    <span class="text-xs page-text-muted">Indian classic</span>
+                </button>
+                <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
+                    <span class="text-xl leading-none">🇯🇵</span>
+                    <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Miso Ramen</span>
+                    <span class="text-xs page-text-muted">Japanese comfort food</span>
+                </button>
+                <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
+                    <span class="text-xl leading-none">🇮🇹</span>
+                    <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Tiramisu</span>
+                    <span class="text-xs page-text-muted">Italian dessert</span>
+                </button>
+                <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
+                    <span class="text-xl leading-none">🇹🇭</span>
+                    <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Pad Thai</span>
+                    <span class="text-xs page-text-muted">Thai street food</span>
+                </button>
             </div>
         </div>
+
     </div>
 
-    <form id="chat-form" class="chat-form">
-        {% csrf_token %}
-        <input
-            type="text"
-            id="message-input"
-            name="message"
-            placeholder="What do you want to cook?"
-            autocomplete="off"
-            required
-        >
-        <button type="submit" id="send-btn">Send</button>
-    </form>
+    <!-- Input area -->
+    <div class="chat-input-area px-3 md:px-4 pb-4 md:pb-5 pt-2 md:pt-3 shrink-0">
+        <form id="chat-form" class="max-w-3xl mx-auto">
+            {% csrf_token %}
+            <div class="chat-input-box flex items-end gap-2 md:gap-3 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 shadow-sm transition-all">
+                <textarea
+                    id="message-input"
+                    name="message"
+                    placeholder="Ask for a recipe..."
+                    autocomplete="off"
+                    rows="1"
+                    class="flex-1 resize-none outline-none text-sm bg-transparent leading-relaxed max-h-40 py-0.5"
+                ></textarea>
+                <button type="submit" id="send-btn"
+                    class="shrink-0 w-8 h-8 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center transition-colors mb-0.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="page-text-muted text-center text-[11px] mt-2 hidden sm:block">Recipe Chef may make mistakes. Always verify with trusted culinary sources.</p>
+        </form>
+    </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Marked.js for rendering the Markdown recipes -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{% static 'chat.js' %}"></script>
 {% endblock %}
