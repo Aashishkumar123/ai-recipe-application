@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ai_recipe_app.apps.AiRecipeAppConfig'
+    'ai_recipe_app.apps.AiRecipeAppConfig',
+    'authentication.apps.AuthenticationConfig',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,14 @@ MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
 
 USE_I18N = True
+
+# Use the custom user model from the local `auth` app
+AUTH_USER_MODEL = 'authentication.User'
+
+# Use the Email+OTP authentication backend by default. Keep Django's
+# ModelBackend in the back so permissions and admin login continue to work
+# if you also want to support password authentication.
+AUTHENTICATION_BACKENDS = [
+    'authentication.backends.EmailOTPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
