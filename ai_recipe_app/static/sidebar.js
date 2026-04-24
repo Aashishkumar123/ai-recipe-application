@@ -22,6 +22,36 @@ sidebarToggle?.addEventListener("click", () => {
 
 sidebarOverlay?.addEventListener("click", closeSidebar);
 
+// --- Sidebar collapse (desktop) ---
+const sidebarCollapseBtn = document.getElementById("sidebar-collapse-btn");
+const collapseChevron    = document.getElementById("collapse-chevron");
+
+function setSidebarCollapsed(collapsed) {
+    if (!sidebar) return;
+    sidebar.classList.toggle("is-collapsed", collapsed);
+    if (collapseChevron) {
+        // Point right (expand) when collapsed, left (collapse) when expanded
+        collapseChevron.innerHTML = collapsed
+            ? '<path d="m9 18 6-6-6-6"/>'
+            : '<path d="m15 18-6-6 6-6"/>';
+    }
+    localStorage.setItem("sidebarCollapsed", collapsed);
+}
+
+// Restore state on load (desktop only — don't collapse on mobile)
+if (window.innerWidth >= 768) {
+    setSidebarCollapsed(localStorage.getItem("sidebarCollapsed") === "true");
+}
+
+sidebarCollapseBtn?.addEventListener("click", () => {
+    setSidebarCollapsed(!sidebar.classList.contains("is-collapsed"));
+});
+
+// Wire collapsed new-chat icon to the real new-chat button
+document.getElementById("new-chat-btn-icon")?.addEventListener("click", () => {
+    document.getElementById("new-chat-btn")?.click();
+});
+
 // --- Profile dropdown ---
 const profileBtn        = document.getElementById("profile-btn");
 const profileDropdown   = document.getElementById("profile-dropdown");
@@ -40,10 +70,16 @@ function closeProfileDropdown() {
 profileBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     const isOpen = !profileDropdown.classList.contains("hidden");
-    isOpen ? closeProfileDropdown() : (
-        profileDropdown.classList.remove("hidden"),
-        profileChevron?.classList.add("rotate-180")
-    );
+    if (isOpen) {
+        closeProfileDropdown();
+    } else {
+        const rect = profileBtn.getBoundingClientRect();
+        profileDropdown.style.left   = rect.left + "px";
+        profileDropdown.style.bottom = (window.innerHeight - rect.top + 6) + "px";
+        profileDropdown.style.width  = Math.max(220, rect.width) + "px";
+        profileDropdown.classList.remove("hidden");
+        profileChevron?.classList.add("rotate-180");
+    }
 });
 
 profileDropdown?.addEventListener("click", (e) => e.stopPropagation());

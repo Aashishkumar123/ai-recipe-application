@@ -262,6 +262,23 @@ body {
     @apply border-orange-500 ring-orange-900/50;
 }
 
+/* ── Sidebar collapse ── */
+#sidebar {
+    overflow-x: clip; /* clip horizontal overflow during width transition; doesn't affect vertical so the dropdown can open above */
+}
+
+.sc-show { display: none; }
+
+#sidebar.is-collapsed {
+    width: 3.5rem; /* 56px */
+}
+#sidebar.is-collapsed .sc-hide {
+    display: none !important;
+}
+#sidebar.is-collapsed .sc-show {
+    display: flex !important;
+}
+
 /* ── Custom sidebar scrollbar ── */
 aside ::-webkit-scrollbar { width: 4px; }
 aside ::-webkit-scrollbar-track { background: transparent; }
