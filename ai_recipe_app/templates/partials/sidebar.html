@@ -150,10 +150,14 @@
 
         <!-- Profile button -->
         <button id="profile-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-800/80 transition-colors group">
-            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">A</div>
+            {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover shrink-0" alt="Avatar">
+            {% else %}
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">{{ user.get_short_name|first|upper }}</div>
+            {% endif %}
             <div class="flex-1 min-w-0 text-left">
-                <p class="text-zinc-200 text-xs font-medium truncate">Aashish Kumar</p>
-                <p class="text-zinc-600 text-[11px] truncate">aashishkumar12376@gmail.com</p>
+                <p class="text-zinc-200 text-xs font-medium truncate">{{ user.get_full_name }}</p>
+                <p class="text-zinc-600 text-[11px] truncate">{{ user.email }}</p>
             </div>
             <svg id="profile-chevron" class="text-zinc-600 group-hover:text-zinc-400 shrink-0 transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m18 15-6-6-6 6"/>

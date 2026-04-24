@@ -22,7 +22,7 @@
     </header>
 
     <!-- Settings body -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="relative flex flex-1 overflow-hidden">
 
         <!-- Desktop settings nav -->
         <nav class="settings-sidebar-nav hidden sm:flex flex-col w-48 shrink-0 border-r p-3 gap-0.5 overflow-y-auto">
@@ -71,9 +71,52 @@
                     <section>
                         <div class="mb-5">
                             <h2 class="text-base font-semibold mb-0.5">Profile</h2>
-                            <p class="page-text-muted text-xs">Update how your name appears in the app.</p>
+                            <p class="page-text-muted text-xs">Update your photo and display name.</p>
                         </div>
-                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
+                        <div class="settings-card rounded-2xl border pt-3 divide-y overflow-hidden shadow-sm">
+
+                            <!-- Avatar row -->
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-5">
+                                <div class="sm:w-40 shrink-0">
+                                    <p class="text-sm font-medium">Profile Photo</p>
+                                    <p class="page-text-muted text-xs mt-0.5">JPG, PNG, WebP · max 5 MB</p>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <!-- Avatar preview -->
+                                    <div class="relative group shrink-0">
+                                        {% if user.is_authenticated and user.profile_picture %}
+                                        <img id="avatar-preview" src="{{ user.profile_picture.url }}"
+                                            class="w-12 h-12 rounded-full object-cover ring-2 ring-orange-200" alt="Profile photo">
+                                        {% else %}
+                                        <div id="avatar-preview-initials"
+                                            class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-2xl font-bold select-none ring-2 ring-orange-200">
+                                            {% if user.is_authenticated %}{{ user.get_short_name|first|upper }}{% else %}?{% endif %}
+                                        </div>
+                                        <img id="avatar-preview" src="" class="hidden w-16 h-16 rounded-full object-cover ring-2 ring-orange-200" alt="Profile photo">
+                                        {% endif %}
+                                        <!-- Overlay -->
+                                        <label for="avatar-input"
+                                            class="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                            <svg class="text-white" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                                            </svg>
+                                        </label>
+                                    </div>
+                                    <!-- Controls -->
+                                    <div class="flex flex-col gap-2 mx-5">
+                                        <label for="avatar-input"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                            Upload photo
+                                        </label>
+                                        <input id="avatar-input" type="file" accept="image/*" class="hidden">
+                                        <p id="avatar-status" class="text-xs page-text-muted hidden"></p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
                                 <div class="sm:w-40 shrink-0">
                                     <label class="text-sm font-medium" for="display-name">Display Name</label>
@@ -270,6 +313,45 @@
 
 {% block scripts %}
 <script>
+// Avatar upload
+document.getElementById("avatar-input")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Instant local preview
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const preview = document.getElementById("avatar-preview");
+        const initials = document.getElementById("avatar-preview-initials");
+        if (preview) { preview.src = ev.target.result; preview.classList.remove("hidden"); }
+        if (initials) initials.classList.add("hidden");
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const status = document.getElementById("avatar-status");
+    if (status) { status.textContent = "Uploading…"; status.classList.remove("hidden", "text-red-500", "text-green-600"); status.classList.add("page-text-muted"); }
+
+    const form = new FormData();
+    form.append("avatar", file);
+    try {
+        const res = await fetch("{% url 'upload_avatar' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+            body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            if (status) { status.textContent = data.error || "Upload failed."; status.classList.add("text-red-500"); status.classList.remove("page-text-muted"); }
+        } else {
+            if (status) { status.textContent = "Photo saved!"; status.classList.add("text-green-600"); status.classList.remove("page-text-muted"); }
+            setTimeout(() => status?.classList.add("hidden"), 3000);
+        }
+    } catch {
+        if (status) { status.textContent = "Network error."; status.classList.add("text-red-500"); status.classList.remove("page-text-muted"); }
+    }
+});
+
 // Tab switching
 function activateTab(tab) {
     document.querySelectorAll(".settings-nav-btn, .settings-tab-btn").forEach((btn) => {

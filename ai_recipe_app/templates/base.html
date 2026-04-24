@@ -31,6 +31,28 @@
     </main>
 
     {% include "partials/signin_modal.html" %}
+
+    <!-- Full-page spinner (logout / page transitions) -->
+    <div id="page-spinner" class="hidden fixed inset-0 z-[200] bg-white/80 backdrop-blur-sm flex items-center justify-center">
+        <div class="flex flex-col items-center gap-5">
+            <div class="relative w-20 h-20">
+                <svg class="absolute inset-0 text-orange-100" viewBox="0 0 80 80" fill="none">
+                    <circle cx="40" cy="40" r="34" stroke="currentColor" stroke-width="6"/>
+                </svg>
+                <svg class="absolute inset-0 text-orange-500 animate-spin" viewBox="0 0 80 80" fill="none" style="animation-duration:0.8s">
+                    <circle cx="40" cy="40" r="34" stroke="currentColor" stroke-width="6"
+                        stroke-linecap="round" stroke-dasharray="60 154"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-2xl select-none">🍳</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0s"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0.15s"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0.3s"></span>
+            </div>
+        </div>
+    </div>
+
     <script src="{% static 'sidebar.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>
