@@ -5,10 +5,12 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .chat import stream_recipe
 from .context_processors import VALID_LANGUAGES
+from django.contrib.auth.decorators import login_required
 
 def chat(request):
     return render(request, "chat.html")
 
+@login_required()
 def settings_page(request):
     return render(request, "settings.html")
 

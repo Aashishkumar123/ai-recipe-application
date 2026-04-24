@@ -68,8 +68,9 @@
                     <p id="email-error" class="hidden text-xs text-red-500 mt-1.5 px-1">Please enter a valid email address.</p>
                 </div>
                 <button
+                    id="email-submit-btn"
                     type="submit"
-                    class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+                    class="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
                 >
                     Continue with Email
                 </button>
@@ -82,6 +83,30 @@
                 and
                 <a href="#" class="underline hover:text-gray-600">Privacy Policy</a>
             </p>
+        </div>
+
+        <!-- ── Step 3: Success loader ── -->
+        <div id="modal-step-success" class="hidden px-8 py-20 flex-col items-center justify-center text-center">
+            <!-- Spinner -->
+            <div class="relative w-20 h-20 mb-5">
+                <!-- Track ring -->
+                <svg class="absolute inset-0 text-orange-100" viewBox="0 0 80 80" fill="none">
+                    <circle cx="40" cy="40" r="34" stroke="currentColor" stroke-width="6"/>
+                </svg>
+                <!-- Spinning arc -->
+                <svg class="absolute inset-0 text-orange-500 animate-spin" viewBox="0 0 80 80" fill="none" style="animation-duration:0.8s">
+                    <circle cx="40" cy="40" r="34" stroke="currentColor" stroke-width="6"
+                        stroke-linecap="round" stroke-dasharray="60 154"/>
+                </svg>
+                <!-- Centre emoji -->
+                <div class="absolute inset-0 flex items-center justify-center text-2xl select-none">🍳</div>
+            </div>
+            <!-- Animated dots -->
+            <div class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0s"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0.15s"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style="animation-delay:0.3s"></span>
+            </div>
         </div>
 
         <!-- ── Step 2: OTP verification ── -->
@@ -112,6 +137,9 @@
                 <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
                 <input class="otp-input w-11 h-12 text-center border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all caret-transparent" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
             </div>
+
+            <!-- OTP error -->
+            <p id="otp-error" class="hidden text-xs text-red-500 text-center mb-3 px-1">Invalid or expired code. Please try again.</p>
 
             <!-- Verify button -->
             <button id="verify-btn" class="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm mb-4">

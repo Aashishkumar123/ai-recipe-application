@@ -83,9 +83,13 @@ document.querySelectorAll(".language-option").forEach((btn) => {
     });
 });
 
-document.getElementById("logout-btn")?.addEventListener("click", () => {
+document.getElementById("logout-btn")?.addEventListener("click", async () => {
     closeProfileDropdown();
-    alert("Logout clicked"); // wire to Django logout URL when auth is added
+    await fetch("/auth/logout/", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRF() },
+    });
+    window.location.reload();
 });
 
 // --- Sign-in modal ---
@@ -95,6 +99,7 @@ const signinClose   = document.getElementById("signin-close");
 const signinBtn     = document.getElementById("signin-btn");
 const stepMain      = document.getElementById("modal-step-main");
 const stepOtp       = document.getElementById("modal-step-otp");
+const stepSuccess   = document.getElementById("modal-step-success");
 const emailForm     = document.getElementById("email-form");
 const emailInput    = document.getElementById("signin-email");
 const emailError    = document.getElementById("email-error");
@@ -160,17 +165,45 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && signinModal && !signinModal.classList.contains("hidden")) closeSigninModal();
 });
 
-emailForm?.addEventListener("submit", (e) => {
+function getCSRF() {
+    return document.querySelector("[name=csrfmiddlewaretoken]")?.value ?? "";
+}
+
+emailForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (emailError) emailError.textContent = "Please enter a valid email address.";
         emailError?.classList.remove("hidden");
         emailInput?.classList.add("border-red-400");
         return;
     }
     emailError?.classList.add("hidden");
     emailInput?.classList.remove("border-red-400");
-    showOtpStep(email);
+
+    const submitBtn = document.getElementById("email-submit-btn");
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
+
+    try {
+        const res = await fetch("/auth/request-otp/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+            body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            if (emailError) emailError.textContent = data.error || "Failed to send code.";
+            emailError?.classList.remove("hidden");
+            emailInput?.classList.add("border-red-400");
+            return;
+        }
+        showOtpStep(email);
+    } catch {
+        if (emailError) emailError.textContent = "Network error. Please try again.";
+        emailError?.classList.remove("hidden");
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Continue with Email"; }
+    }
 });
 
 emailInput?.addEventListener("input", () => {
@@ -180,17 +213,56 @@ emailInput?.addEventListener("input", () => {
 
 otpBack?.addEventListener("click", () => { clearInterval(resendInterval); showMainStep(); });
 
-resendBtn?.addEventListener("click", () => {
+resendBtn?.addEventListener("click", async () => {
+    const email = otpEmailLabel?.textContent;
+    if (!email) return;
     otpInputs.forEach((i) => (i.value = ""));
     otpInputs[0]?.focus();
     startResendTimer();
+    await fetch("/auth/request-otp/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ email }),
+    });
 });
 
-verifyBtn?.addEventListener("click", () => {
+const otpError = document.getElementById("otp-error");
+
+verifyBtn?.addEventListener("click", async () => {
     const code = Array.from(otpInputs).map((i) => i.value).join("");
-    if (code.length < 6) { otpInputs.forEach((i) => i.classList.add("border-red-400")); return; }
-    alert(`OTP submitted: ${code}`); // wire to Django OTP endpoint
-    closeSigninModal();
+    if (code.length < 6) {
+        otpInputs.forEach((i) => i.classList.add("border-red-400"));
+        return;
+    }
+    otpError?.classList.add("hidden");
+    const email = otpEmailLabel?.textContent;
+
+    if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = "Verifying…"; }
+
+    try {
+        const res = await fetch("/auth/verify-otp/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+            body: JSON.stringify({ email, code }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            if (otpError) otpError.textContent = data.error || "Invalid code.";
+            otpError?.classList.remove("hidden");
+            otpInputs.forEach((i) => i.classList.add("border-red-400"));
+            return;
+        }
+        // Show success loader then reload
+        stepMain?.classList.add("hidden");
+        stepOtp?.classList.add("hidden");
+        if (stepSuccess) { stepSuccess.classList.remove("hidden"); stepSuccess.style.display = "flex"; }
+        setTimeout(() => window.location.reload(), 2000);
+    } catch {
+        if (otpError) otpError.textContent = "Network error. Please try again.";
+        otpError?.classList.remove("hidden");
+    } finally {
+        if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.textContent = "Verify Code"; }
+    }
 });
 
 otpInputs.forEach((inp, idx) => {

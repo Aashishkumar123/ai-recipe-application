@@ -8,9 +8,9 @@ button, a, [role="button"], label[for] {
     cursor: pointer;
 }
 
-/* ── Base / body ── */
+/* ── Base ── */
 body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-white text-gray-900;
 }
 
 [data-theme="dark"] body {
@@ -22,85 +22,90 @@ body {
 .page-text-muted {
     @apply text-gray-500;
 }
-
 [data-theme="dark"] .page-text-muted {
     @apply text-zinc-500;
 }
 
-/* ── Top bar (shared: chat + settings) ── */
+/* ── Top bar ── */
 .page-top-bar {
     @apply bg-white border-gray-200 text-gray-700;
 }
-
 [data-theme="dark"] .page-top-bar {
-    background: #0f0f10;
+    background: #17171a;
     @apply border-zinc-800 text-zinc-300;
 }
 
-/* ── Chat page ── */
+/* ── Chat page shell ── */
 .page-chat {
-    @apply bg-gray-50;
+    @apply bg-white;
 }
-
 [data-theme="dark"] .page-chat {
     background: #0f0f10;
 }
 
 /* ── Messages area ── */
 .page-messages {
-    @apply bg-gray-50;
+    @apply bg-white;
 }
-
 [data-theme="dark"] .page-messages {
     background: #0f0f10;
 }
 
-/* ── Chat input area (bottom bar) ── */
+/* ── Chat input area (bottom bar wrapper) ── */
 .chat-input-area {
-    @apply bg-gray-50;
+    @apply bg-white border-gray-100;
 }
-
 [data-theme="dark"] .chat-input-area {
     background: #0f0f10;
+    @apply border-zinc-800/60;
 }
 
-/* ── Chat input box (the text + send button wrapper) ── */
+/* ── Chat input box ── */
 .chat-input-box {
-    @apply bg-white border border-gray-200 focus-within:border-orange-300;
+    @apply bg-gray-50 border border-gray-200 focus-within:border-orange-300 focus-within:ring-2 focus-within:ring-orange-100;
 }
-
 [data-theme="dark"] .chat-input-box {
-    @apply bg-zinc-900 border-zinc-700 focus-within:border-orange-700;
+    @apply bg-zinc-900 border-zinc-700/80 focus-within:border-orange-700 focus-within:ring-orange-900/20;
 }
 
+.chat-input-box textarea {
+    @apply text-gray-900;
+}
+.chat-input-box textarea::placeholder {
+    @apply text-gray-400;
+}
 [data-theme="dark"] .chat-input-box textarea {
-    @apply text-zinc-100 placeholder-zinc-500;
+    @apply text-zinc-100;
+}
+[data-theme="dark"] .chat-input-box textarea::placeholder {
+    color: #71717a; /* zinc-500 */
 }
 
 /* ── Suggestion chips ── */
 .suggestion-chip {
-    @apply bg-white border border-gray-200 text-gray-700 hover:border-orange-200 hover:bg-orange-50;
+    @apply bg-white border border-gray-200 text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:shadow-md;
 }
-
 [data-theme="dark"] .suggestion-chip {
-    @apply bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-orange-800/60 hover:bg-zinc-800;
+    @apply bg-zinc-900 border-zinc-700/80 text-zinc-300 hover:border-orange-800/50 hover:bg-zinc-800;
 }
 
-/* ── User message bubble (created by JS) ── */
+/* ── User message bubble (JS-created) ── */
 .user-bubble {
-    @apply max-w-[75%] bg-blue-600 text-white px-4 py-3 rounded-2xl rounded-br-sm text-sm leading-relaxed;
+    @apply max-w-[75%] bg-orange-500 text-white px-4 py-3 rounded-2xl rounded-br-sm text-sm leading-relaxed shadow-sm;
 }
 
-/* ── Bot avatar (created by JS) ── */
+/* ── Bot avatar (JS-created) ── */
 .bot-avatar {
-    @apply w-8 h-8 bg-orange-50 border border-orange-100 rounded-full flex items-center justify-center text-base leading-none;
+    @apply w-8 h-8 bg-orange-50 border border-orange-100 rounded-full flex items-center justify-center text-base leading-none shrink-0;
+}
+[data-theme="dark"] .bot-avatar {
+    @apply bg-zinc-800 border-zinc-700;
 }
 
-/* ── Bot message content area (created by JS) ── */
+/* ── Bot bubble (JS-created) ── */
 .bot-bubble {
     @apply text-sm leading-relaxed text-gray-800 min-w-0 w-full;
 }
-
 [data-theme="dark"] .bot-bubble {
     @apply text-zinc-200;
 }
@@ -113,143 +118,93 @@ body {
     animation: blink 1s step-end infinite;
     @apply text-orange-400;
 }
+@keyframes blink { 50% { opacity: 0; } }
 
-@keyframes blink {
-    50% { opacity: 0; }
-}
-
-/* Markdown rendered inside bot bubbles */
-.bot-bubble h1 {
-    @apply text-xl font-bold mt-4 mb-3 text-gray-900;
-}
-[data-theme="dark"] .bot-bubble h1 { @apply text-zinc-100; }
-
-.bot-bubble h2 {
-    @apply text-base font-semibold mt-4 mb-2 text-gray-900;
-}
-[data-theme="dark"] .bot-bubble h2 { @apply text-zinc-100; }
-
-.bot-bubble h3 {
-    @apply text-sm font-semibold mt-3 mb-2 text-gray-700;
-}
-[data-theme="dark"] .bot-bubble h3 { @apply text-zinc-300; }
-
-.bot-bubble ul {
-    @apply my-2 ml-5 list-disc space-y-1;
-}
-
-.bot-bubble ol {
-    @apply my-2 ml-5 list-decimal space-y-1;
-}
-
-.bot-bubble li {
-    @apply text-gray-700;
-}
-[data-theme="dark"] .bot-bubble li { @apply text-zinc-300; }
-
-.bot-bubble p {
-    @apply mb-2 text-gray-700;
-}
-[data-theme="dark"] .bot-bubble p { @apply text-zinc-300; }
-
-.bot-bubble strong {
-    @apply font-semibold text-gray-900;
-}
-[data-theme="dark"] .bot-bubble strong { @apply text-zinc-100; }
-
-.bot-bubble em {
-    @apply italic text-gray-600;
-}
-[data-theme="dark"] .bot-bubble em { @apply text-zinc-400; }
-
-.bot-bubble hr {
-    @apply my-4 border-gray-200;
-}
-[data-theme="dark"] .bot-bubble hr { @apply border-zinc-700; }
-
+/* ── Markdown inside bot bubbles ── */
+.bot-bubble h1 { @apply text-xl font-bold mt-4 mb-3 text-gray-900; }
+.bot-bubble h2 { @apply text-base font-semibold mt-4 mb-2 text-gray-900; }
+.bot-bubble h3 { @apply text-sm font-semibold mt-3 mb-2 text-gray-700; }
+.bot-bubble ul  { @apply my-2 ml-5 list-disc space-y-1; }
+.bot-bubble ol  { @apply my-2 ml-5 list-decimal space-y-1; }
+.bot-bubble li  { @apply text-gray-700; }
+.bot-bubble p   { @apply mb-2 text-gray-700; }
+.bot-bubble strong { @apply font-semibold text-gray-900; }
+.bot-bubble em     { @apply italic text-gray-600; }
+.bot-bubble hr     { @apply my-4 border-gray-200; }
 .bot-bubble blockquote {
-    @apply border-l-4 border-orange-200 pl-4 italic text-gray-600 my-3 bg-orange-50/60 py-2 rounded-r-lg;
+    @apply border-l-4 border-orange-200 pl-4 italic text-gray-600 my-3 bg-orange-50/50 py-2 rounded-r-lg;
 }
-[data-theme="dark"] .bot-bubble blockquote {
-    @apply border-orange-800/60 text-zinc-400 bg-orange-950/20;
-}
+.bot-bubble code { @apply bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono; }
 
-.bot-bubble code {
-    @apply bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono;
-}
-[data-theme="dark"] .bot-bubble code {
-    @apply bg-zinc-800 text-zinc-200;
-}
+[data-theme="dark"] .bot-bubble h1     { @apply text-zinc-100; }
+[data-theme="dark"] .bot-bubble h2     { @apply text-zinc-100; }
+[data-theme="dark"] .bot-bubble h3     { @apply text-zinc-300; }
+[data-theme="dark"] .bot-bubble li     { @apply text-zinc-300; }
+[data-theme="dark"] .bot-bubble p      { @apply text-zinc-300; }
+[data-theme="dark"] .bot-bubble strong { @apply text-zinc-100; }
+[data-theme="dark"] .bot-bubble em     { @apply text-zinc-400; }
+[data-theme="dark"] .bot-bubble hr     { @apply border-zinc-700; }
+[data-theme="dark"] .bot-bubble blockquote { @apply border-orange-800/50 text-zinc-400 bg-orange-950/20; }
+[data-theme="dark"] .bot-bubble code   { @apply bg-zinc-800 text-zinc-200; }
 
-/* ── Settings page wrapper ── */
+/* ── Settings page ── */
 .page-settings {
     @apply bg-gray-50;
 }
-
 [data-theme="dark"] .page-settings {
     background: #0f0f10;
 }
 
-/* ── Settings sidebar nav ── */
 .settings-sidebar-nav {
     @apply bg-white border-gray-200;
 }
-
 [data-theme="dark"] .settings-sidebar-nav {
-    background: #0f0f10;
+    background: #17171a;
     @apply border-zinc-800;
 }
 
-/* ── Settings mobile tabs ── */
 .settings-mobile-tabs {
     @apply bg-white border-gray-200;
 }
-
 [data-theme="dark"] .settings-mobile-tabs {
-    background: #0f0f10;
+    background: #17171a;
     @apply border-zinc-800;
 }
 
-/* ── Settings body scrollable area ── */
 .settings-body {
     @apply bg-gray-50;
 }
-
 [data-theme="dark"] .settings-body {
     background: #0f0f10;
 }
 
-/* ── Settings cards ── */
 .settings-card {
     @apply bg-white border-gray-200 divide-gray-100;
 }
-
 [data-theme="dark"] .settings-card {
     @apply bg-zinc-900 border-zinc-800 divide-zinc-800;
 }
 
-/* ── Settings inputs / selects ── */
 .settings-input {
-    @apply bg-white border-gray-300 text-gray-800 focus:border-orange-400 focus:ring-1 focus:ring-orange-200;
+    @apply bg-white border-gray-300 text-gray-800 focus:border-orange-400 focus:ring-1 focus:ring-orange-100;
 }
-
 [data-theme="dark"] .settings-input {
-    @apply bg-zinc-800 border-zinc-700 text-zinc-200 focus:border-orange-600 focus:ring-orange-900/30;
+    @apply bg-zinc-800 border-zinc-700 text-zinc-200 focus:border-orange-600;
 }
+.settings-input::placeholder { @apply text-gray-400; }
+[data-theme="dark"] .settings-input::placeholder { color: #71717a; }
 
-/* ── Settings nav items ── */
+/* ── Settings nav buttons ── */
 .settings-nav-btn {
-    @apply w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors text-left;
+    @apply w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 rounded-lg
+           hover:bg-gray-100 hover:text-gray-900 transition-colors text-left;
 }
-
 .settings-nav-btn.active {
     @apply bg-orange-50 text-orange-700 font-medium;
 }
-
 [data-theme="dark"] .settings-nav-btn {
     @apply text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100;
 }
-
 [data-theme="dark"] .settings-nav-btn.active {
     @apply bg-orange-950/40 text-orange-400;
 }
@@ -258,17 +213,24 @@ body {
 .settings-tab-btn {
     @apply text-gray-500 border-b-2 border-transparent hover:text-gray-800 transition-colors;
 }
-
 .settings-tab-btn.active {
     @apply text-orange-600 border-orange-500 font-semibold;
 }
-
 [data-theme="dark"] .settings-tab-btn {
     @apply text-zinc-500 hover:text-zinc-200;
 }
-
 [data-theme="dark"] .settings-tab-btn.active {
     @apply text-orange-400 border-orange-500;
+}
+
+/* ── Settings text colors in dark mode ── */
+[data-theme="dark"] .settings-card p,
+[data-theme="dark"] .settings-card label,
+[data-theme="dark"] .settings-card span:not(.toggle-thumb) {
+    @apply text-zinc-200;
+}
+[data-theme="dark"] h2 {
+    @apply text-zinc-100;
 }
 
 /* ── Toggle switch ── */
@@ -276,62 +238,31 @@ body {
     @apply relative w-10 h-6 rounded-full bg-gray-200 transition-colors duration-200 shrink-0;
     outline: none;
 }
-
-.toggle-switch[aria-checked="true"] {
-    @apply bg-orange-500;
-}
-
+.toggle-switch[aria-checked="true"] { @apply bg-orange-500; }
 .toggle-thumb {
-    @apply absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 pointer-events-none;
+    @apply absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm
+           transition-transform duration-200 pointer-events-none;
 }
+.toggle-switch[aria-checked="true"] .toggle-thumb { @apply translate-x-4; }
 
-.toggle-switch[aria-checked="true"] .toggle-thumb {
-    @apply translate-x-4;
-}
-
-[data-theme="dark"] .toggle-switch {
-    @apply bg-zinc-700;
-}
-
-[data-theme="dark"] .toggle-switch[aria-checked="true"] {
-    @apply bg-orange-500;
-}
+[data-theme="dark"] .toggle-switch { @apply bg-zinc-700; }
+[data-theme="dark"] .toggle-switch[aria-checked="true"] { @apply bg-orange-500; }
 
 /* ── Theme cards ── */
 .theme-card {
-    @apply border-gray-200 bg-white transition-all;
+    @apply border-gray-200 bg-white transition-all hover:border-gray-300;
 }
-
 .theme-card.active {
-    @apply border-orange-500 ring-1 ring-orange-400/40;
+    @apply border-orange-500 ring-2 ring-orange-200;
 }
-
 [data-theme="dark"] .theme-card {
-    @apply border-zinc-700 bg-zinc-900 text-zinc-200;
+    @apply border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-600;
 }
-
 [data-theme="dark"] .theme-card.active {
-    @apply border-orange-500 ring-orange-600/30;
+    @apply border-orange-500 ring-orange-900/50;
 }
 
-/* ── Color mode pill buttons (legacy, kept for compatibility) ── */
-.color-mode-btn {
-    @apply text-gray-500 hover:text-gray-700 transition-all;
-}
-
-.color-mode-btn.active {
-    @apply bg-white text-gray-900 font-semibold shadow-sm rounded-lg;
-}
-
-/* ── Custom scrollbar for sidebar ── */
-aside ::-webkit-scrollbar {
-    width: 4px;
-}
-
-aside ::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-aside ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-700 rounded-full;
-}
+/* ── Custom sidebar scrollbar ── */
+aside ::-webkit-scrollbar { width: 4px; }
+aside ::-webkit-scrollbar-track { background: transparent; }
+aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }

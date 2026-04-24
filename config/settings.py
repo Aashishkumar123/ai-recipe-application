@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ai_recipe_app.apps.AiRecipeAppConfig'
+    'ai_recipe_app.apps.AiRecipeAppConfig',
+    'authentication.apps.AuthenticationConfig',
 ]
 
 MIDDLEWARE = [
@@ -125,4 +126,31 @@ STATIC_URL = 'static/'
 MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
 
+# Email — defaults to console backend so OTP codes are printed to the terminal
+# during development. Set EMAIL_BACKEND and SMTP_* vars in .env for production.
+EMAIL_BACKEND   = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@recipechef.app")
+EMAIL_HOST      = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT      = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS   = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+
 USE_I18N = True
+
+# Use the custom user model from the local `auth` app
+AUTH_USER_MODEL = 'authentication.User'
+
+# Use the Email+OTP authentication backend by default. Keep Django's
+# ModelBackend in the back so permissions and admin login continue to work
+# if you also want to support password authentication.
+AUTHENTICATION_BACKENDS = [
+    'authentication.backends.EmailOTPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}}
+
+LOGIN_URL = "/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
