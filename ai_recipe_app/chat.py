@@ -14,7 +14,7 @@ LLM = ChatMistralAI(
 
 recipe_chain = RECIPE_PROMPT | LLM | StrOutputParser()
 
-def stream_recipe(dish_name: str) -> Iterator[str]:
+def stream_recipe(dish_name: str, language: str = "English") -> Iterator[str]:
     """Yield recipe tokens as they're generated."""
-    for chunk in recipe_chain.stream({"dish_name": dish_name}):
+    for chunk in recipe_chain.stream({"dish_name": dish_name, "language": language}):
         yield chunk

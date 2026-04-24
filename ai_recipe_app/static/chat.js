@@ -1,86 +1,110 @@
-const form = document.getElementById("chat-form");
-const input = document.getElementById("message-input");
-const messages = document.getElementById("messages");
-const sendBtn = document.getElementById("send-btn");
+// Chat-page only logic. sidebar.js handles sidebar/modal/profile (loaded via base.html).
+
+const form        = document.getElementById("chat-form");
+const input       = document.getElementById("message-input");
+const messageList = document.getElementById("message-list");
+const welcomeScreen = document.getElementById("welcome-screen");
+const sendBtn     = document.getElementById("send-btn");
+const newChatBtn  = document.getElementById("new-chat-btn");
+
+let hasMessages = false;
+
+// Auto-resize textarea
+input?.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 160) + "px";
+});
+
+// Submit on Enter (Shift+Enter adds newline)
+input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+});
+
+// Suggestion chip clicks
+document.querySelectorAll(".suggestion-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+        const label = chip.querySelector("span.font-semibold");
+        input.value = label ? label.textContent.trim() : chip.textContent.trim();
+        input.dispatchEvent(new Event("input"));
+        form.requestSubmit();
+    });
+});
+
+// New chat — reset to welcome screen
+newChatBtn?.addEventListener("click", () => {
+    messageList?.querySelectorAll(".chat-msg").forEach((el) => el.remove());
+    if (welcomeScreen) welcomeScreen.style.display = "";
+    hasMessages = false;
+    if (input) { input.value = ""; input.style.height = "auto"; input.focus(); }
+});
 
 function getCsrfToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
 
-function createMessageBubble(sender) {
+function showMessages() {
+    if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; }
+}
+
+function appendUserMessage(content) {
+    showMessages();
     const wrapper = document.createElement("div");
-    wrapper.classList.add("message", `message--${sender}`);
-
+    wrapper.className = "chat-msg flex justify-end px-4 md:px-6 py-3 max-w-4xl mx-auto w-full";
     const bubble = document.createElement("div");
-    bubble.classList.add("message-bubble");
-
+    bubble.className = "user-bubble";
+    bubble.textContent = content;
     wrapper.appendChild(bubble);
-    messages.appendChild(wrapper);
-    messages.scrollTop = messages.scrollHeight;
+    messageList.appendChild(wrapper);
+    messageList.scrollTop = messageList.scrollHeight;
+}
+
+function appendBotMessage() {
+    showMessages();
+    const wrapper = document.createElement("div");
+    wrapper.className = "chat-msg flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full";
+    const avatar = document.createElement("div");
+    avatar.className = "bot-avatar shrink-0 mt-0.5";
+    avatar.textContent = "🍳";
+    const contentWrap = document.createElement("div");
+    contentWrap.className = "flex-1 min-w-0";
+    const bubble = document.createElement("div");
+    bubble.className = "bot-bubble";
+    contentWrap.appendChild(bubble);
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(contentWrap);
+    messageList.appendChild(wrapper);
+    messageList.scrollTop = messageList.scrollHeight;
     return bubble;
 }
 
-function addMessage(content, sender, isMarkdown = false) {
-    const bubble = createMessageBubble(sender);
-    if (isMarkdown) {
-        bubble.innerHTML = marked.parse(content);
-    } else {
-        bubble.textContent = content;
-    }
-    messages.scrollTop = messages.scrollHeight;
-}
-
 async function streamResponse(userMessage) {
-    const bubble = createMessageBubble("bot");
+    const bubble = appendBotMessage();
     bubble.classList.add("streaming");
     let fullText = "";
-
     try {
         const response = await fetch("/api/message/", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCsrfToken(),
-            },
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
             body: JSON.stringify({ message: userMessage }),
         });
-
-        if (!response.ok) {
-            bubble.textContent = "⚠️ Error generating recipe";
-            return;
-        }
-
+        if (!response.ok) { bubble.textContent = "⚠️ Error generating recipe."; return; }
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
-
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-
             buffer += decoder.decode(value, { stream: true });
-
-            // SSE messages are separated by double newlines
             const parts = buffer.split("\n\n");
-            buffer = parts.pop(); // keep the incomplete chunk for next iteration
-
+            buffer = parts.pop();
             for (const part of parts) {
                 if (!part.startsWith("data: ")) continue;
-                const jsonStr = part.slice(6);
                 try {
-                    const data = JSON.parse(jsonStr);
-                    if (data.token) {
-                        fullText += data.token;
-                        bubble.innerHTML = marked.parse(fullText);
-                        messages.scrollTop = messages.scrollHeight;
-                    } else if (data.error) {
-                        bubble.innerHTML = `⚠️ ${data.error}`;
-                    } else if (data.done) {
-                        bubble.classList.remove("streaming");
-                    }
-                } catch (e) {
-                    console.error("Failed to parse SSE data:", jsonStr);
-                }
+                    const data = JSON.parse(part.slice(6));
+                    if (data.token) { fullText += data.token; bubble.innerHTML = marked.parse(fullText); messageList.scrollTop = messageList.scrollHeight; }
+                    else if (data.error) { bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`; }
+                    else if (data.done) { bubble.classList.remove("streaming"); }
+                } catch (e) { console.error("SSE parse error", e); }
             }
         }
     } catch (error) {
@@ -90,19 +114,15 @@ async function streamResponse(userMessage) {
     }
 }
 
-form.addEventListener("submit", async (e) => {
+form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const userMessage = input.value.trim();
     if (!userMessage) return;
-
-    addMessage(userMessage, "user");
+    if (window.innerWidth < 768) closeSidebar();
+    appendUserMessage(userMessage);
     input.value = "";
+    input.style.height = "auto";
     sendBtn.disabled = true;
-
-    try {
-        await streamResponse(userMessage);
-    } finally {
-        sendBtn.disabled = false;
-        input.focus();
-    }
+    try { await streamResponse(userMessage); }
+    finally { sendBtn.disabled = false; input.focus(); }
 });

@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ai_recipe_app.context_processors.theme',
             ],
         },
     },
@@ -123,3 +124,5 @@ STATIC_URL = 'static/'
 
 MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
+
+USE_I18N = True

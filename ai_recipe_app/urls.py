@@ -3,5 +3,8 @@ from .import views
 
 urlpatterns = [
     path("", views.chat, name="index"),
+    path("settings/", views.settings_page, name="settings"),
     path("api/message/", views.chat_message, name="message"),
+    path("api/set-theme/", views.set_theme, name="set_theme"),
+    path("api/set-language/", views.set_language, name="set_language"),
 ]

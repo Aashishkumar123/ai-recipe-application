@@ -20,6 +20,21 @@ uv run python manage.py migrate
 uv run python manage.py shell
 ```
 
+## Tailwind CSS
+
+Tailwind is set up via the standalone CLI binary (`./tailwindcss`) — no Node.js required.
+
+```bash
+# One-off build (minified)
+./tailwindcss -i ai_recipe_app/static/src/input.css -o ai_recipe_app/static/output.css --minify
+
+# Watch mode during development
+./tailwindcss -i ai_recipe_app/static/src/input.css -o ai_recipe_app/static/output.css --watch
+```
+
+- Edit styles in `ai_recipe_app/static/src/input.css` (uses `@apply` directives)
+- The compiled `output.css` is committed; the `tailwindcss` binary is gitignored (re-download for macOS arm64 from the latest GitHub release)
+
 ## Environment
 
 Requires a `.env` file at the project root with:
@@ -49,4 +64,4 @@ The app is a single-page Django app with a streaming chat interface for recipe g
 - `ai_recipe_app/views.py` — SSE streaming via `StreamingHttpResponse`
 - `config/settings.py` — reads `MISTRAL_API_KEY` and `MISTRAL_MODEL` from environment
 
-**Frontend:** `chat.js` and `chat.css` live in `ai_recipe_app/static/`. The UI uses the browser's native `EventSource`-style fetch with streaming to receive and render SSE tokens as Markdown.
+**Frontend:** `chat.js` lives in `ai_recipe_app/static/`. Styles are authored in `static/src/input.css` (Tailwind `@apply`) and compiled to `static/output.css`. The UI uses the browser's native `EventSource`-style fetch with streaming to receive and render SSE tokens as Markdown.
