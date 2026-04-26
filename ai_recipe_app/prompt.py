@@ -23,13 +23,13 @@ Return valid Markdown with this structure and nothing else — no preamble, no s
 
 **Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}}
 
-## Ingredients
+## 🧂 Ingredients
 - {{quantity}} {{unit}} {{ingredient}}{{, prep note if needed}}
 
-## Instructions
+## 👨‍🍳 Instructions
 1. {{Imperative step with a sensory cue — "until golden", "when fragrant" — not just a timer.}}
 
-## Tips
+## 💡 Tips
 - {{One or two practical notes: common mistakes, storage, substitutions, or variations.}}
 
 ## Rules

@@ -91,9 +91,20 @@ function addChatToSidebar(chatId, title) {
     todayList.prepend(link);
 }
 
+function applyRecipeStyles(bubble) {
+    bubble.querySelectorAll("p").forEach((p) => {
+        if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
+            p.classList.add("recipe-meta");
+        }
+    });
+}
+
 function showMessages() {
     if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; }
 }
+
+// Apply to any history bubbles already in the DOM
+document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
 
 function appendUserMessage(content) {
     showMessages();
@@ -158,6 +169,7 @@ async function streamResponse(userMessage) {
                         bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`;
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
+                        applyRecipeStyles(bubble);
                         // Update URL, track chat ID, and add to sidebar after first exchange
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
