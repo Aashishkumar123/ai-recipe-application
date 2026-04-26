@@ -5,8 +5,11 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+
+from context_processors import VALID_LANGUAGES
 from .models import EmailOTP
 from .utils import email_users
+from django.shortcuts import render
 
 User = get_user_model()
 
@@ -85,3 +88,28 @@ def upload_avatar(request):
 
     user.profile_picture.save(file.name, file, save=True)
     return JsonResponse({"ok": True, "url": request.build_absolute_uri(user.profile_picture.url)})
+
+
+@login_required()
+def settings_page(request):
+    return render(request, "settings.html")
+
+@csrf_protect
+@require_http_methods(["POST"])
+def set_theme(request):
+    data = json.loads(request.body)
+    theme = data.get("theme", "light")
+    if theme not in ("light", "dark", "system"):
+        return JsonResponse({"error": "Invalid theme"}, status=400)
+    request.session["theme"] = theme
+    return JsonResponse({"ok": True})
+
+@csrf_protect
+@require_http_methods(["POST"])
+def set_language(request):
+    data = json.loads(request.body)
+    language = data.get("language", "English")
+    if language not in VALID_LANGUAGES:
+        return JsonResponse({"error": "Invalid language"}, status=400)
+    request.session["language"] = language
+    return JsonResponse({"ok": True})

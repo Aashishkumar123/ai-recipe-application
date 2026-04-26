@@ -21,30 +21,6 @@ def chat(request, chat_id=None):
     print(chat_history)
     return render(request, "chat.html", {"chat_history": chat_history})
 
-@login_required()
-def settings_page(request):
-    return render(request, "settings.html")
-
-@csrf_protect
-@require_http_methods(["POST"])
-def set_theme(request):
-    data = json.loads(request.body)
-    theme = data.get("theme", "light")
-    if theme not in ("light", "dark", "system"):
-        return JsonResponse({"error": "Invalid theme"}, status=400)
-    request.session["theme"] = theme
-    return JsonResponse({"ok": True})
-
-@csrf_protect
-@require_http_methods(["POST"])
-def set_language(request):
-    data = json.loads(request.body)
-    language = data.get("language", "English")
-    if language not in VALID_LANGUAGES:
-        return JsonResponse({"error": "Invalid language"}, status=400)
-    request.session["language"] = language
-    return JsonResponse({"ok": True})
-
 @csrf_protect
 @require_http_methods(["POST"])
 def chat_message(request):

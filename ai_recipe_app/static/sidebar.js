@@ -97,7 +97,7 @@ languageToggleBtn?.addEventListener("click", () => {
 async function saveLanguage(lang) {
     try {
         const csrf = document.querySelector("[name=csrfmiddlewaretoken]")?.value;
-        await fetch("/api/set-language/", {
+        await fetch("/auth/api/set-language/", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
             body: JSON.stringify({ language: lang }),

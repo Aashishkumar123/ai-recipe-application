@@ -131,7 +131,7 @@ async function streamResponse(userMessage) {
     bubble.classList.add("streaming");
     let fullText = "";
     try {
-        const response = await fetch("/api/message/", {
+        const response = await fetch("/chat/api/message/", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
             body: JSON.stringify({ message: userMessage, chat_id: currentChatId }),
@@ -166,7 +166,7 @@ async function streamResponse(userMessage) {
                         }
                         // Save rendered HTML to DB so history loads identically
                         if (data.chat_id) {
-                            fetch("/api/save-bot-message/", {
+                            fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
                                 body: JSON.stringify({ chat_id: data.chat_id, content: bubble.innerHTML }),
