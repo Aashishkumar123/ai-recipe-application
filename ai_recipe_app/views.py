@@ -3,11 +3,10 @@ from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
+from langchain_core.messages import HumanMessage, AIMessage
 from .chat import stream_recipe
-from context_processors import VALID_LANGUAGES
-from django.contrib.auth.decorators import login_required
 from .models import ChatMessage, Chat
-
+from .utils import html_to_text
 
 def chat(request, chat_id=None):
     if chat_id:
@@ -39,16 +38,25 @@ def chat_message(request):
 
     # Resolve or create the Chat row (authenticated users only)
     chat_obj = None
+    lc_history = []
     if request.user.is_authenticated:
         if chat_id:
             chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
         if chat_obj is None:
             chat_obj = Chat.objects.create(title=dish_name[:255], user=request.user)
+        else:
+            # Build LangChain history from the last 10 saved messages (before this turn)
+            past = ChatMessage.objects.filter(chat=chat_obj).order_by("timestamp")[:10]
+            for msg in past:
+                if msg.sender == "user":
+                    lc_history.append(HumanMessage(content=msg.content))
+                else:
+                    lc_history.append(AIMessage(content=html_to_text(msg.content)))
         ChatMessage.objects.create(chat=chat_obj, sender="user", content=dish_name)
 
     def event_stream():
         try:
-            for token in stream_recipe(dish_name, language):
+            for token in stream_recipe(dish_name, language, lc_history):
                 yield f"data: {json.dumps({'token': token})}\n\n"
 
             done_payload = {"done": True}
