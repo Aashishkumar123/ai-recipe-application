@@ -45,32 +45,71 @@
     </div>
 
     <!-- History (hidden when collapsed) -->
-    <div class="sc-hide flex-1 overflow-y-auto px-2 py-2 space-y-4">
+    <div class="sc-hide flex-1 overflow-y-auto px-2 py-2 space-y-3">
+        {% with active_id=request.resolver_match.kwargs.chat_id %}
+        {% if chats_today %}
         <div>
-            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 py-1.5">Today</p>
+            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1">Today</p>
             <div class="space-y-0.5">
-                <button class="w-full text-left px-3 py-2 text-zinc-200 text-xs rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 truncate transition-colors">Pad Thai noodles with shrimp</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Chicken Tikka Masala</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Miso ramen from scratch</button>
+                {% for chat in chats_today %}
+                <a href="{% url 'chat-history' chat.id %}"
+                   class="flex items-center px-3 py-2 text-xs
+                          {% if chat.id == active_id %} text-zinc-200 text-xs rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 truncate transition-colors {% else %} text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors {% endif %}">
+                    {{ chat.title }}
+                </a>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
+        {% if chats_yesterday %}
         <div>
-            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 py-1.5">Yesterday</p>
+            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Yesterday</p>
             <div class="space-y-0.5">
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Classic beef lasagne</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Tiramisu</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Vegan mushroom risotto</button>
+                {% for chat in chats_yesterday %}
+                <a href="{% url 'chat-history' chat.id %}"
+                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
+                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
+                    {{ chat.title }}
+                </a>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
+        {% if chats_week %}
         <div>
-            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 py-1.5">Last 7 days</p>
+            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Last 7 days</p>
             <div class="space-y-0.5">
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Korean BBQ short ribs</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Sourdough bread</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Thai green curry</button>
-                <button class="w-full text-left px-3 py-2 text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors">Vegan chocolate cake</button>
+                {% for chat in chats_week %}
+                <a href="{% url 'chat-history' chat.id %}"
+                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
+                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
+                    {{ chat.title }}
+                </a>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
+        {% if chats_older %}
+        <div>
+            <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Older</p>
+            <div class="space-y-0.5">
+                {% for chat in chats_older %}
+                <a href="{% url 'chat-history' chat.id %}"
+                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
+                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
+                    {{ chat.title }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if not chats_today and not chats_yesterday and not chats_week and not chats_older %}
+        <div class="flex flex-col items-center gap-2 py-8 px-4">
+            <div class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-base">🍳</div>
+            <p class="text-zinc-600 text-xs text-center">No conversations yet.<br>Start a new chat!</p>
+        </div>
+        {% endif %}
+        {% endwith %}
     </div>
 
     <!-- Collapsed icon rail (shown only when collapsed) -->

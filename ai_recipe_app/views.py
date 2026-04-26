@@ -4,11 +4,21 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .chat import stream_recipe
-from .context_processors import VALID_LANGUAGES
+from context_processors import VALID_LANGUAGES
 from django.contrib.auth.decorators import login_required
+from .models import ChatMessage, Chat
 
-def chat(request):
-    return render(request, "chat.html")
+
+def chat(request, chat_id=None):
+    if chat_id:
+        chat = Chat.objects.get(id=chat_id, user=request.user)
+        if not chat:
+            return JsonResponse({"error": "Chat not found"}, status=404)
+        chat_history = ChatMessage.objects.filter(chat=chat)
+    else:
+        chat_history = []
+    print(chat_history)
+    return render(request, "chat.html", {"chat_history": chat_history})
 
 @login_required()
 def settings_page(request):
