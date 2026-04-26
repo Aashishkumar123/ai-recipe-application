@@ -60,7 +60,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
@@ -151,6 +152,6 @@ AUTHENTICATION_BACKENDS = [
 
 TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}}
 
-LOGIN_URL = "/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "/chat/"
+LOGIN_REDIRECT_URL = "/chat/"
+LOGOUT_REDIRECT_URL = "/chat/"
