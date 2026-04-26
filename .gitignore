@@ -5,3 +5,15 @@ __pycache__/
 db.sqlite3
 .ruff_cache/
 tailwindcss
+logs/*
+media/*
+migrations/*
+staticfiles/*
+*.log
+*.pot
+*.pyc
+*.mo
+*.sqlite3
+*.db
+*.sqlite3-journal
+*.DS_Store
