@@ -46,6 +46,10 @@ newChatBtn?.addEventListener("click", () => {
     hasMessages = false;
     currentChatId = null;
     history.pushState(null, "", "/");
+    // Clear active highlight from sidebar
+    document.querySelectorAll("#sidebar-history a").forEach((a) => {
+        a.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-200";
+    });
     if (input) { input.value = ""; input.style.height = "auto"; input.focus(); }
 });
 
