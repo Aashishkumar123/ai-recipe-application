@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found — Recipe Chef</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'output.css' %}">
+    <style>
+        /* Subtle dot-grid background */
+        body {
+            background-color: #fff;
+            background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        /* Gradient 404 number */
+        .text-404 {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        /* Floating food emojis */
+        .floater {
+            position: absolute;
+            font-size: 1.75rem;
+            animation: float linear infinite;
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.55;
+        }
+
+        @keyframes float {
+            0%   { transform: translateY(0px) rotate(0deg);   opacity: 0.55; }
+            50%  { transform: translateY(-18px) rotate(8deg); opacity: 0.75; }
+            100% { transform: translateY(0px) rotate(0deg);   opacity: 0.55; }
+        }
+
+        /* Spinning pan icon */
+        @keyframes pan-wobble {
+            0%, 100% { transform: rotate(-6deg); }
+            50%       { transform: rotate(6deg);  }
+        }
+        .pan-wobble { animation: pan-wobble 2s ease-in-out infinite; }
+
+        /* Pulse ring */
+        @keyframes ring-pulse {
+            0%   { transform: scale(1);   opacity: 0.3; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .ring-pulse {
+            animation: ring-pulse 2s ease-out infinite;
+        }
+
+        /* CTA hover lift */
+        .btn-home {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249,115,22,0.35);
+        }
+        .btn-ghost {
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        .btn-ghost:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center overflow-hidden">
+
+    <!-- Floating food particles -->
+    <span class="floater" style="top:8%;  left:7%;  animation-duration:4.1s; animation-delay:0s;   font-size:2rem;">🍅</span>
+    <span class="floater" style="top:15%; left:88%; animation-duration:5.2s; animation-delay:0.8s; font-size:1.5rem;">🥕</span>
+    <span class="floater" style="top:72%; left:5%;  animation-duration:6.0s; animation-delay:1.2s; font-size:1.75rem;">🧄</span>
+    <span class="floater" style="top:80%; left:85%; animation-duration:4.7s; animation-delay:0.4s; font-size:2rem;">🌿</span>
+    <span class="floater" style="top:55%; left:93%; animation-duration:5.5s; animation-delay:2.0s; font-size:1.4rem;">🧅</span>
+    <span class="floater" style="top:40%; left:3%;  animation-duration:4.8s; animation-delay:1.6s; font-size:1.5rem;">🫑</span>
+    <span class="floater" style="top:25%; left:50%; animation-duration:7.0s; animation-delay:3.0s; font-size:1.2rem;">✨</span>
+    <span class="floater" style="top:90%; left:45%; animation-duration:5.8s; animation-delay:0.6s; font-size:1.4rem;">🌶️</span>
+
+    <!-- Card -->
+    <div class="relative z-10 flex flex-col items-center text-center px-6 py-12 max-w-lg w-full mx-auto">
+
+        <!-- Animated icon -->
+        <div class="relative mb-8 flex items-center justify-center">
+            <!-- Pulse rings -->
+            <span class="ring-pulse absolute w-28 h-28 rounded-full bg-orange-400 block" style="animation-delay:0s;"></span>
+            <span class="ring-pulse absolute w-28 h-28 rounded-full bg-orange-300 block" style="animation-delay:0.6s;"></span>
+
+            <!-- Circle badge -->
+            <div class="relative w-24 h-24 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 border-4 border-orange-300 shadow-lg flex items-center justify-center">
+                <span class="pan-wobble text-4xl leading-none select-none">🍳</span>
+            </div>
+        </div>
+
+        <!-- 404 -->
+        <p class="text-404 text-[7rem] sm:text-[9rem] font-black mb-1 select-none">404</p>
+
+        <!-- Heading & sub-text -->
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 tracking-tight">
+            Recipe not on the menu
+        </h1>
+        <p class="text-sm sm:text-base text-gray-500 leading-relaxed mb-10 max-w-sm">
+            Looks like this dish wandered off the menu. The page you're looking for
+            doesn't exist, was moved, or never made it to the table.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <a href="/"
+               class="btn-home w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-orange-500 text-white text-sm font-semibold shadow-md">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Back to Recipe Chef
+            </a>
+            <a href="javascript:history.back()"
+               class="btn-ghost w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:bg-gray-50">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 5l-7 7 7 7"/>
+                </svg>
+                Go back
+            </a>
+        </div>
+
+        <!-- Error code badge -->
+        <p class="mt-10 text-xs text-gray-400 tracking-widest uppercase font-medium">
+            Error&nbsp;404&nbsp;·&nbsp;Page Not Found
+        </p>
+
+    </div>
+</body>
+</html>

@@ -11,9 +11,10 @@ from .models import ChatMessage, Chat
 
 def chat(request, chat_id=None):
     if chat_id:
-        chat = Chat.objects.get(id=chat_id, user=request.user)
-        if not chat:
-            return JsonResponse({"error": "Chat not found"}, status=404)
+        try:
+            chat = Chat.objects.get(id=chat_id, user=request.user)
+        except Chat.DoesNotExist:
+            return render(request, "404.html")
         chat_history = ChatMessage.objects.filter(chat=chat)
     else:
         chat_history = []
