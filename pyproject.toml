@@ -8,6 +8,7 @@ dependencies = [
     "django>=6.0.4",
     "langchain>=1.2.15",
     "langchain-mistralai>=1.1.2",
+    "loguru>=0.7.3",
     "pillow>=12.2.0",
     "python-dotenv>=1.2.2",
 ]
