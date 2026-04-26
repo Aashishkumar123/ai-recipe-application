@@ -1,0 +1,517 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Chef — AI-Powered Recipe Generator</title>
+    <link rel="stylesheet" href="{% static 'output.css' %}">
+    <style>
+        /* ── Gradient text ── */
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 60%, #c2410c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Dot-grid background ── */
+        .dot-grid {
+            background-color: #fff;
+            background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+            background-size: 26px 26px;
+        }
+
+        /* ── Floating ingredients ── */
+        @keyframes float-up {
+            0%,100% { transform: translateY(0) rotate(0deg);   opacity: .45; }
+            50%      { transform: translateY(-18px) rotate(8deg); opacity: .7;  }
+        }
+        .floater {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            animation: float-up linear infinite;
+        }
+
+        /* ── Fade-in on scroll ── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+        .fade-in { animation: fadeInUp 0.65s ease both; }
+        .delay-1 { animation-delay: .1s; }
+        .delay-2 { animation-delay: .2s; }
+        .delay-3 { animation-delay: .35s; }
+        .delay-4 { animation-delay: .5s; }
+
+        /* ── Nav blur ── */
+        .nav-blur {
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        /* ── Chat bubble in mockup ── */
+        .mock-user { background:#f97316; color:#fff; border-radius:1rem .25rem 1rem 1rem; }
+        .mock-bot  { background:#f9fafb; border:1px solid #f3f4f6; border-radius:.25rem 1rem 1rem 1rem; }
+
+        /* ── Feature card hover ── */
+        .feature-card {
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(249,115,22,.12);
+        }
+
+        /* ── Step connector line ── */
+        .step-line::after {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: calc(50% + 40px);
+            width: calc(100% - 80px);
+            height: 2px;
+            background: linear-gradient(90deg, #fed7aa, #fdba74);
+        }
+
+        /* ── Streaming cursor for mockup ── */
+        @keyframes blink { 50% { opacity: 0; } }
+        .cursor::after {
+            content: '▊';
+            animation: blink 1s step-end infinite;
+            color: #f97316;
+            font-size: .85em;
+        }
+
+        /* ── Gradient CTA background ── */
+        .cta-bg {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+        }
+
+        /* ── Scroll snap for mobile steps ── */
+        @media (max-width: 640px) {
+            .step-line::after { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased overflow-x-hidden">
+
+<!-- ══════════════════════════════════════════
+     NAV
+══════════════════════════════════════════ -->
+<header class="fixed top-0 inset-x-0 z-50 nav-blur bg-white/80 border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 shrink-0">
+            <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-sm leading-none shadow-sm">🍳</div>
+            <span class="font-bold text-sm tracking-tight text-gray-900">Recipe Chef</span>
+        </a>
+
+        <!-- Desktop nav links -->
+        <nav class="hidden md:flex items-center gap-6 text-sm text-gray-500">
+            <a href="#features"    class="hover:text-gray-900 transition-colors">Features</a>
+            <a href="#how-it-works" class="hover:text-gray-900 transition-colors">How it works</a>
+            <a href="#preview"     class="hover:text-gray-900 transition-colors">Preview</a>
+        </nav>
+
+        <!-- CTAs -->
+        <div class="flex items-center gap-2">
+            {% if user.is_authenticated %}
+            <a href="/chat/"
+               class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+                Open App
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            {% else %}
+            <a href="/chat/" class="hidden sm:inline text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-2">Sign in</a>
+            <a href="/chat/"
+               class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+                Start Cooking
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="relative dot-grid min-h-screen flex items-center pt-14 overflow-hidden">
+
+    <!-- Floating ingredients -->
+    <span class="floater text-3xl" style="top:12%;left:4%; animation-duration:4.2s;animation-delay:0s;">🍅</span>
+    <span class="floater text-2xl" style="top:18%;right:5%; animation-duration:5.5s;animation-delay:.8s;">🥕</span>
+    <span class="floater text-3xl" style="top:55%;left:2%; animation-duration:4.8s;animation-delay:1.4s;">🫑</span>
+    <span class="floater text-2xl" style="top:50%;right:3%; animation-duration:6.1s;animation-delay:.3s;">🧄</span>
+    <span class="floater text-2xl" style="bottom:20%;left:7%; animation-duration:5.7s;animation-delay:2s;">🌿</span>
+    <span class="floater text-2xl" style="bottom:15%;right:6%; animation-duration:4.5s;animation-delay:1.1s;">🌶️</span>
+    <span class="floater text-xl" style="top:30%;left:14%; animation-duration:6.5s;animation-delay:2.5s;">✨</span>
+    <span class="floater text-xl" style="top:35%;right:13%; animation-duration:5s;animation-delay:.9s;">🧅</span>
+    <span class="floater text-2xl" style="bottom:35%;left:18%; animation-duration:4.9s;animation-delay:1.7s;">🥦</span>
+    <span class="floater text-2xl" style="bottom:30%;right:17%; animation-duration:5.3s;animation-delay:.5s;">🍋</span>
+
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 py-20 text-center">
+
+        <!-- Badge -->
+        <div class="fade-in inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold mb-6 shadow-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Powered by Mistral AI — Large Model
+        </div>
+
+        <!-- Headline -->
+        <h1 class="fade-in delay-1 text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] mb-6">
+            Cook anything,<br>
+            <span class="gradient-text">instantly.</span>
+        </h1>
+
+        <!-- Sub-text -->
+        <p class="fade-in delay-2 text-lg sm:text-xl text-gray-500 leading-relaxed mb-10 max-w-xl mx-auto">
+            Type any dish name and get a detailed, step-by-step recipe in seconds — ingredients, method, tips and all. Powered by AI, streamed live to your screen.
+        </p>
+
+        <!-- CTA buttons -->
+        <div class="fade-in delay-3 flex flex-col sm:flex-row items-center justify-center gap-3 mb-14">
+            <a href="/chat/"
+               class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-orange-200 hover:-translate-y-0.5">
+                Start Cooking for Free
+                <svg class="group-hover:translate-x-0.5 transition-transform" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="#how-it-works"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-2xl transition-all">
+                See how it works
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </a>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="fade-in delay-4 grid grid-cols-3 gap-4 max-w-lg mx-auto">
+            <div class="bg-white/80 border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+                <p class="text-2xl font-black text-orange-500">100+</p>
+                <p class="text-xs text-gray-500 mt-0.5">Cuisines</p>
+            </div>
+            <div class="bg-white/80 border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+                <p class="text-2xl font-black text-orange-500">Live</p>
+                <p class="text-xs text-gray-500 mt-0.5">Streaming</p>
+            </div>
+            <div class="bg-white/80 border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+                <p class="text-2xl font-black text-orange-500">Free</p>
+                <p class="text-xs text-gray-500 mt-0.5">To Use</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FEATURES
+══════════════════════════════════════════ -->
+<section id="features" class="bg-gray-50 py-24 px-4 sm:px-6">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="text-center mb-14">
+            <span class="inline-block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-3">Features</span>
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight">Everything you need to cook smarter</h2>
+            <p class="text-gray-500 mt-3 max-w-lg mx-auto">From quick weeknight dinners to complex gourmet dishes — Recipe Chef has you covered.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            <!-- Card 1 -->
+            <div class="feature-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl mb-4">🤖</div>
+                <h3 class="font-bold text-base mb-2">Mistral Large AI</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Powered by Mistral's most capable model for accurate, creative, and detailed recipes every single time.</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="feature-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl mb-4">⚡</div>
+                <h3 class="font-bold text-base mb-2">Real-time Streaming</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Watch your recipe appear word by word with live token streaming — no waiting for the full response to load.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="feature-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl mb-4">📝</div>
+                <h3 class="font-bold text-base mb-2">Rich Markdown Output</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Recipes are beautifully formatted with headings, ingredient lists, numbered steps, and cooking tips.</p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="feature-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl mb-4">💬</div>
+                <h3 class="font-bold text-base mb-2">Chat History</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Every conversation is saved. Revisit any past recipe instantly — organised by Today, Yesterday, and older.</p>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="feature-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl mb-4">🌍</div>
+                <h3 class="font-bold text-base mb-2">Multi-language Support</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Get recipes in English, Hindi, Spanish, French, or Japanese. Cook in the language you're most comfortable with.</p>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="feature-card bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-6 shadow-sm text-white">
+                <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center text-xl mb-4">🎨</div>
+                <h3 class="font-bold text-base mb-2">Light & Dark Mode</h3>
+                <p class="text-sm text-white/80 leading-relaxed">Switch between light, dark, or system theme. Cook comfortably at any hour without straining your eyes.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════ -->
+<section id="how-it-works" class="py-24 px-4 sm:px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+
+        <div class="text-center mb-16">
+            <span class="inline-block text-xs font-semibold text-orange-500 uppercase tracking-widest mb-3">How it works</span>
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight">From craving to recipe in 3 steps</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+
+            <!-- Step 1 -->
+            <div class="relative flex flex-col items-center text-center">
+                <div class="relative w-16 h-16 mb-5">
+                    <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl">🍽️</div>
+                    <span class="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">1</span>
+                </div>
+                <h3 class="font-bold text-base mb-2">Type a dish name</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Enter any dish — "Butter Chicken", "Tiramisu", "Pad Thai" — or just describe a craving.</p>
+            </div>
+
+            <!-- Connector -->
+            <div class="hidden sm:flex items-center justify-center -mt-8">
+                <svg width="80" height="24" viewBox="0 0 80 24" fill="none" class="text-orange-200">
+                    <path d="M0 12 Q20 4 40 12 Q60 20 80 12" stroke="currentColor" stroke-width="2" stroke-dasharray="6 3" fill="none"/>
+                    <path d="M72 8 L80 12 L72 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative flex flex-col items-center text-center">
+                <div class="relative w-16 h-16 mb-5">
+                    <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl">🤖</div>
+                    <span class="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">2</span>
+                </div>
+                <h3 class="font-bold text-base mb-2">AI generates your recipe</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Mistral AI streams a complete recipe live — ingredients, steps, tips, serving suggestions.</p>
+            </div>
+
+            <!-- Connector -->
+            <div class="hidden sm:flex items-center justify-center -mt-8">
+                <svg width="80" height="24" viewBox="0 0 80 24" fill="none" class="text-orange-200">
+                    <path d="M0 12 Q20 4 40 12 Q60 20 80 12" stroke="currentColor" stroke-width="2" stroke-dasharray="6 3" fill="none"/>
+                    <path d="M72 8 L80 12 L72 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative flex flex-col items-center text-center">
+                <div class="relative w-16 h-16 mb-5">
+                    <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl">🍳</div>
+                    <span class="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">3</span>
+                </div>
+                <h3 class="font-bold text-base mb-2">Cook and enjoy!</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Follow the beautifully formatted recipe and impress everyone at the table. Save it to your history anytime.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CHAT PREVIEW MOCKUP
+══════════════════════════════════════════ -->
+<section id="preview" class="bg-gray-950 py-24 px-4 sm:px-6 overflow-hidden">
+    <div class="max-w-5xl mx-auto">
+
+        <div class="text-center mb-12">
+            <span class="inline-block text-xs font-semibold text-orange-400 uppercase tracking-widest mb-3">Live Preview</span>
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-white">See it in action</h2>
+            <p class="text-zinc-400 mt-3 max-w-md mx-auto text-sm">A real conversation with Recipe Chef — streaming recipe generation right in the browser.</p>
+        </div>
+
+        <!-- Browser chrome mockup -->
+        <div class="bg-zinc-900 rounded-3xl border border-zinc-800 shadow-2xl overflow-hidden max-w-3xl mx-auto">
+
+            <!-- Title bar -->
+            <div class="bg-zinc-800/60 px-4 py-3 flex items-center gap-3 border-b border-zinc-700/50">
+                <div class="flex gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-red-500/70"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500/70"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500/70"></span>
+                </div>
+                <div class="flex-1 bg-zinc-700/50 rounded-md px-3 py-1 text-zinc-400 text-xs text-center">recipechef.app/chat</div>
+            </div>
+
+            <!-- App layout -->
+            <div class="flex h-[420px] sm:h-[480px]">
+
+                <!-- Sidebar strip -->
+                <div class="hidden sm:flex w-48 bg-zinc-950 border-r border-zinc-800/60 flex-col p-3 gap-2 shrink-0">
+                    <div class="flex items-center gap-2 px-1 py-1 mb-1">
+                        <div class="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center text-xs">🍳</div>
+                        <span class="text-white text-xs font-semibold">Recipe Chef</span>
+                    </div>
+                    <div class="text-zinc-600 text-[9px] font-semibold uppercase tracking-widest px-2 pt-1">Today</div>
+                    <div class="bg-zinc-800/60 rounded-lg px-2.5 py-2">
+                        <p class="text-zinc-200 text-[11px] truncate">Chicken Tikka Masala</p>
+                    </div>
+                    <div class="rounded-lg px-2.5 py-2">
+                        <p class="text-zinc-500 text-[11px] truncate">Miso Ramen</p>
+                    </div>
+                    <div class="rounded-lg px-2.5 py-2">
+                        <p class="text-zinc-500 text-[11px] truncate">Tiramisu</p>
+                    </div>
+                </div>
+
+                <!-- Chat area -->
+                <div class="flex-1 flex flex-col bg-zinc-900/50 min-w-0">
+
+                    <!-- Top bar -->
+                    <div class="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800/60 shrink-0">
+                        <span class="text-zinc-200 text-xs font-semibold">Recipe Chef</span>
+                        <span class="text-[10px] bg-orange-900/40 text-orange-400 px-2 py-0.5 rounded-full font-medium">mistral-large</span>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="flex-1 overflow-hidden p-4 space-y-4">
+
+                        <!-- User message -->
+                        <div class="flex justify-end">
+                            <div class="mock-user text-xs px-3.5 py-2.5 max-w-[70%] leading-relaxed shadow-sm">
+                                Chicken Tikka Masala
+                            </div>
+                        </div>
+
+                        <!-- Bot response -->
+                        <div class="flex gap-2.5">
+                            <div class="w-7 h-7 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5">🍳</div>
+                            <div class="mock-bot text-[11px] leading-relaxed px-3.5 py-3 max-w-[85%] text-zinc-800 space-y-1.5">
+                                <p class="font-bold text-xs text-zinc-900">🍗 Chicken Tikka Masala</p>
+                                <p class="text-zinc-600 text-[10px]">Serves 4 · Prep 30 min · Cook 40 min</p>
+                                <div class="border-t border-gray-100 pt-1.5">
+                                    <p class="font-semibold text-[10px] text-zinc-700 mb-1">Ingredients</p>
+                                    <ul class="text-zinc-600 text-[10px] space-y-0.5 list-disc list-inside">
+                                        <li>500g chicken breast, cubed</li>
+                                        <li>200ml thick yoghurt</li>
+                                        <li>2 tbsp tikka masala paste</li>
+                                        <li>1 can (400g) crushed tomatoes</li>
+                                        <li>150ml heavy cream</li>
+                                    </ul>
+                                </div>
+                                <div class="border-t border-gray-100 pt-1.5">
+                                    <p class="font-semibold text-[10px] text-zinc-700 mb-1">Method</p>
+                                    <ol class="text-zinc-600 text-[10px] space-y-0.5 list-decimal list-inside">
+                                        <li>Marinate chicken in yoghurt and tikka paste for 2 hours...</li>
+                                        <li>Grill or pan-fry until lightly charred...</li>
+                                    </ol>
+                                </div>
+                                <p class="text-orange-500 text-[10px] font-medium cursor">Generating</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Input bar -->
+                    <div class="px-3 pb-3 shrink-0">
+                        <div class="flex items-center gap-2 bg-zinc-800 border border-zinc-700/80 rounded-xl px-3 py-2">
+                            <span class="text-zinc-600 text-xs flex-1">Ask for a recipe...</span>
+                            <div class="w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center shrink-0">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CUISINE STRIP
+══════════════════════════════════════════ -->
+<section class="py-20 px-4 sm:px-6 bg-white">
+    <div class="max-w-5xl mx-auto text-center">
+        <p class="text-sm text-gray-400 mb-8 font-medium">Works with cuisines from around the world</p>
+        <div class="flex flex-wrap justify-center gap-3">
+                    <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇮🇳 Indian</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇯🇵 Japanese</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇮🇹 Italian</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇲🇽 Mexican</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇹🇭 Thai</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇫🇷 French</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇨🇳 Chinese</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇬🇷 Greek</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇱🇧 Lebanese</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇪🇸 Spanish</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇺🇸 American</span>
+            <span class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600 font-medium hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default">🇰🇷 Korean</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CTA BANNER
+══════════════════════════════════════════ -->
+<section class="cta-bg py-20 px-4 sm:px-6">
+    <div class="max-w-3xl mx-auto text-center">
+        <div class="text-5xl mb-5">🍳</div>
+        <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
+            Ready to start cooking?
+        </h2>
+        <p class="text-orange-100 mb-8 max-w-md mx-auto leading-relaxed">
+            Join thousands of home cooks using Recipe Chef to discover new dishes every day. It's completely free.
+        </p>
+        <a href="/chat/"
+           class="inline-flex items-center gap-2 px-8 py-4 bg-white text-orange-600 font-bold rounded-2xl hover:bg-orange-50 transition-all shadow-lg hover:-translate-y-0.5 text-sm">
+            Open Recipe Chef
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="bg-gray-950 text-zinc-500 py-10 px-4 sm:px-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center text-xs">🍳</div>
+            <span class="text-zinc-300 font-semibold text-sm">Recipe Chef</span>
+        </div>
+        <p class="text-xs text-center">
+            Built with ❤️ using Django &amp; Mistral AI ·
+            <a href="/chat/" class="hover:text-orange-400 transition-colors">Open App</a>
+        </p>
+        <p class="text-xs">© 2026 Recipe Chef. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- Smooth scroll -->
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+});
+</script>
+
+</body>
+</html>
