@@ -45,12 +45,12 @@
     </div>
 
     <!-- History (hidden when collapsed) -->
-    <div class="sc-hide flex-1 overflow-y-auto px-2 py-2 space-y-3">
+    <div id="sidebar-history" class="sc-hide flex-1 overflow-y-auto px-2 py-2 space-y-3">
         {% with active_id=request.resolver_match.kwargs.chat_id %}
         {% if chats_today %}
-        <div>
+        <div id="sidebar-section-today">
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1">Today</p>
-            <div class="space-y-0.5">
+            <div id="sidebar-list-today" class="space-y-0.5">
                 {% for chat in chats_today %}
                 <a href="{% url 'chat-history' chat.id %}"
                    class="flex items-center px-3 py-2 text-xs
@@ -104,7 +104,7 @@
         </div>
         {% endif %}
         {% if not chats_today and not chats_yesterday and not chats_week and not chats_older %}
-        <div class="flex flex-col items-center gap-2 py-8 px-4">
+        <div id="sidebar-empty" class="flex flex-col items-center gap-2 py-8 px-4">
             <div class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-base">🍳</div>
             <p class="text-zinc-600 text-xs text-center">No conversations yet.<br>Start a new chat!</p>
         </div>

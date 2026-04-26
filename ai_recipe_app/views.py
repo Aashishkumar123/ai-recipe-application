@@ -78,6 +78,7 @@ def chat_message(request):
             done_payload = {"done": True}
             if chat_obj:
                 done_payload["chat_id"] = str(chat_obj.id)
+                done_payload["chat_title"] = chat_obj.title
             yield f"data: {json.dumps(done_payload)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"

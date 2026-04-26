@@ -53,6 +53,40 @@ function getCsrfToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
 
+function addChatToSidebar(chatId, title) {
+    const historyEl = document.getElementById("sidebar-history");
+    if (!historyEl) return;
+
+    // Hide empty state
+    const empty = document.getElementById("sidebar-empty");
+    if (empty) empty.style.display = "none";
+
+    // Deactivate any currently active sidebar link
+    historyEl.querySelectorAll("a").forEach((a) => {
+        a.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-200";
+    });
+
+    // Build the new active link
+    const link = document.createElement("a");
+    link.href = `/${chatId}/`;
+    link.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-200 bg-zinc-800/60 hover:bg-zinc-800/80";
+    link.textContent = title;
+
+    // Get or create the Today section
+    let todayList = document.getElementById("sidebar-list-today");
+    if (!todayList) {
+        const section = document.createElement("div");
+        section.id = "sidebar-section-today";
+        section.innerHTML =
+            '<p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1">Today</p>' +
+            '<div id="sidebar-list-today" class="space-y-0.5"></div>';
+        historyEl.prepend(section);
+        todayList = document.getElementById("sidebar-list-today");
+    }
+
+    todayList.prepend(link);
+}
+
 function showMessages() {
     if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; }
 }
@@ -120,10 +154,11 @@ async function streamResponse(userMessage) {
                         bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`;
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
-                        // Update URL and track chat ID after first exchange
+                        // Update URL, track chat ID, and add to sidebar after first exchange
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
-                            history.pushState(null, "", `/${currentChatId}/`);
+                            window.history.pushState(null, "", `/${currentChatId}/`);
+                            addChatToSidebar(currentChatId, data.chat_title || userMessage);
                         }
                         // Save rendered HTML to DB so history loads identically
                         if (data.chat_id) {
