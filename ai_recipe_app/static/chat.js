@@ -125,6 +125,14 @@ async function streamResponse(userMessage) {
                             currentChatId = data.chat_id;
                             history.pushState(null, "", `/${currentChatId}/`);
                         }
+                        // Save rendered HTML to DB so history loads identically
+                        if (data.chat_id) {
+                            fetch("/api/save-bot-message/", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+                                body: JSON.stringify({ chat_id: data.chat_id, content: bubble.innerHTML }),
+                            }).catch(console.error);
+                        }
                     }
                 } catch (e) { console.error("SSE parse error", e); }
             }

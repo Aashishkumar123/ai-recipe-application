@@ -71,19 +71,9 @@ def chat_message(request):
         ChatMessage.objects.create(chat=chat_obj, sender="user", content=dish_name)
 
     def event_stream():
-        tokens = []
         try:
             for token in stream_recipe(dish_name, language):
-                tokens.append(token)
                 yield f"data: {json.dumps({'token': token})}\n\n"
-
-            # Persist the full bot reply
-            if chat_obj:
-                ChatMessage.objects.create(
-                    chat=chat_obj,
-                    sender="bot",
-                    content="".join(tokens),
-                )
 
             done_payload = {"done": True}
             if chat_obj:
@@ -96,3 +86,28 @@ def chat_message(request):
     response["Cache-Control"] = "no-cache"
     response["X-Accel-Buffering"] = "no"
     return response
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def save_bot_message(request):
+    """Save the rendered HTML of a bot reply after streaming completes."""
+    try:
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id", "").strip()
+        html    = data.get("content", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not chat_id or not html:
+        return JsonResponse({"error": "chat_id and content are required"}, status=400)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+    if not chat_obj:
+        return JsonResponse({"error": "Chat not found"}, status=404)
+
+    ChatMessage.objects.create(chat=chat_obj, sender="bot", content=html)
+    return JsonResponse({"ok": True})
