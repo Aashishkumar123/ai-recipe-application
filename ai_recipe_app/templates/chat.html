@@ -55,8 +55,8 @@
     <!-- Messages area -->
     <div id="message-list" class="page-messages flex-1 overflow-y-auto scroll-smooth">
 
-        <!-- Welcome screen -->
-        <div id="welcome-screen" class="relative overflow-hidden flex flex-col items-center justify-center min-h-full py-12 md:py-24 px-4 text-center">
+        <!-- Welcome screen (hidden when history exists) -->
+        <div id="welcome-screen" class="relative overflow-hidden flex flex-col items-center justify-center min-h-full py-12 md:py-24 px-4 text-center"{% if chat_history %} style="display:none"{% endif %}>
 
             <!-- Floating food particles -->
             <span class="chat-floater" style="top:6%;  left:5%;  animation-duration:4.2s; animation-delay:0s;">🍅</span>
@@ -106,6 +106,21 @@
             </div>
         </div>
 
+        {% for msg in chat_history %}
+            {% if msg.sender == "user" %}
+            <div class="chat-msg flex justify-end px-4 md:px-6 py-3 max-w-4xl mx-auto w-full">
+                <div class="user-bubble">{{ msg.content }}</div>
+            </div>
+            {% else %}
+            <div class="chat-msg flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full">
+                <div class="bot-avatar shrink-0 mt-0.5">🍳</div>
+                <div class="flex-1 min-w-0">
+                    <div class="bot-bubble" data-raw="{{ msg.content }}"></div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
     </div>
 
     <!-- Input area -->
@@ -138,4 +153,16 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{% static 'chat.js' %}"></script>
+{% if chat_history %}
+<script>
+    // Parse server-rendered bot messages as markdown
+    document.querySelectorAll(".bot-bubble[data-raw]").forEach(function (el) {
+        el.innerHTML = marked.parse(el.getAttribute("data-raw"));
+        el.removeAttribute("data-raw");
+    });
+    // Scroll to bottom so latest message is visible
+    var ml = document.getElementById("message-list");
+    if (ml) ml.scrollTop = ml.scrollHeight;
+</script>
+{% endif %}
 {% endblock %}

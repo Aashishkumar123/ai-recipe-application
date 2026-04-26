@@ -15,7 +15,7 @@ def chat(request, chat_id=None):
             chat = Chat.objects.get(id=chat_id, user=request.user)
         except Exception:
             return render(request, "404.html")
-        chat_history = ChatMessage.objects.filter(chat=chat)
+        chat_history = ChatMessage.objects.filter(chat=chat).order_by("timestamp")
     else:
         chat_history = []
     print(chat_history)

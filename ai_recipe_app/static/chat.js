@@ -7,7 +7,8 @@ const welcomeScreen = document.getElementById("welcome-screen");
 const sendBtn     = document.getElementById("send-btn");
 const newChatBtn  = document.getElementById("new-chat-btn");
 
-let hasMessages = false;
+// True if server pre-rendered history or user already sent a message this session
+let hasMessages = document.querySelectorAll(".chat-msg").length > 0;
 
 // Track the active chat UUID (null = new chat not yet persisted)
 let currentChatId = (function () {
