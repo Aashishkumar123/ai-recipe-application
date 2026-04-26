@@ -9,6 +9,14 @@ const newChatBtn  = document.getElementById("new-chat-btn");
 
 let hasMessages = false;
 
+// Track the active chat UUID (null = new chat not yet persisted)
+let currentChatId = (function () {
+    const parts = window.location.pathname.replace(/\/$/, "").split("/");
+    const last = parts[parts.length - 1];
+    // A UUID is 36 chars with hyphens
+    return last.length === 36 ? last : null;
+}());
+
 // Auto-resize textarea
 input?.addEventListener("input", () => {
     input.style.height = "auto";
@@ -35,6 +43,8 @@ newChatBtn?.addEventListener("click", () => {
     messageList?.querySelectorAll(".chat-msg").forEach((el) => el.remove());
     if (welcomeScreen) welcomeScreen.style.display = "";
     hasMessages = false;
+    currentChatId = null;
+    history.pushState(null, "", "/");
     if (input) { input.value = ""; input.style.height = "auto"; input.focus(); }
 });
 
@@ -85,7 +95,7 @@ async function streamResponse(userMessage) {
         const response = await fetch("/api/message/", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-            body: JSON.stringify({ message: userMessage }),
+            body: JSON.stringify({ message: userMessage, chat_id: currentChatId }),
         });
         if (!response.ok) { bubble.textContent = "⚠️ Error generating recipe."; return; }
         const reader = response.body.getReader();
@@ -101,9 +111,20 @@ async function streamResponse(userMessage) {
                 if (!part.startsWith("data: ")) continue;
                 try {
                     const data = JSON.parse(part.slice(6));
-                    if (data.token) { fullText += data.token; bubble.innerHTML = marked.parse(fullText); messageList.scrollTop = messageList.scrollHeight; }
-                    else if (data.error) { bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`; }
-                    else if (data.done) { bubble.classList.remove("streaming"); }
+                    if (data.token) {
+                        fullText += data.token;
+                        bubble.innerHTML = marked.parse(fullText);
+                        messageList.scrollTop = messageList.scrollHeight;
+                    } else if (data.error) {
+                        bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`;
+                    } else if (data.done) {
+                        bubble.classList.remove("streaming");
+                        // Update URL and track chat ID after first exchange
+                        if (data.chat_id && !currentChatId) {
+                            currentChatId = data.chat_id;
+                            history.pushState(null, "", `/${currentChatId}/`);
+                        }
+                    }
                 } catch (e) { console.error("SSE parse error", e); }
             }
         }

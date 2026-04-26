@@ -13,7 +13,7 @@ def chat(request, chat_id=None):
     if chat_id:
         try:
             chat = Chat.objects.get(id=chat_id, user=request.user)
-        except Chat.DoesNotExist:
+        except Exception:
             return render(request, "404.html")
         chat_history = ChatMessage.objects.filter(chat=chat)
     else:
@@ -52,6 +52,7 @@ def chat_message(request):
     try:
         data = json.loads(request.body)
         dish_name = data.get("message", "").strip()
+        chat_id   = data.get("chat_id")
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
@@ -60,19 +61,38 @@ def chat_message(request):
 
     language = request.session.get("language", "English")
 
+    # Resolve or create the Chat row (authenticated users only)
+    chat_obj = None
+    if request.user.is_authenticated:
+        if chat_id:
+            chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+        if chat_obj is None:
+            chat_obj = Chat.objects.create(title=dish_name[:255], user=request.user)
+        ChatMessage.objects.create(chat=chat_obj, sender="user", content=dish_name)
+
     def event_stream():
+        tokens = []
         try:
             for token in stream_recipe(dish_name, language):
-                payload = json.dumps({"token": token})
-                yield f"data: {payload}\n\n"
-            yield f"data: {json.dumps({'done': True})}\n\n"
+                tokens.append(token)
+                yield f"data: {json.dumps({'token': token})}\n\n"
+
+            # Persist the full bot reply
+            if chat_obj:
+                ChatMessage.objects.create(
+                    chat=chat_obj,
+                    sender="bot",
+                    content="".join(tokens),
+                )
+
+            done_payload = {"done": True}
+            if chat_obj:
+                done_payload["chat_id"] = str(chat_obj.id)
+            yield f"data: {json.dumps(done_payload)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
-    response = StreamingHttpResponse(
-        event_stream(),
-        content_type="text/event-stream",
-    )
+    response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"
     response["X-Accel-Buffering"] = "no"
     return response
