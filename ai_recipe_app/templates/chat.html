@@ -4,6 +4,31 @@
 {% block title %}Recipe Chef — What are we cooking?{% endblock %}
 
 {% block content %}
+<style>
+    @keyframes chat-float {
+        0%,100% { transform: translateY(0)   rotate(0deg);  opacity: .5; }
+        50%      { transform: translateY(-14px) rotate(7deg); opacity: .75; }
+    }
+    .chat-floater {
+        position: absolute;
+        font-size: 1.6rem;
+        pointer-events: none;
+        user-select: none;
+        animation: chat-float linear infinite;
+    }
+    @keyframes pan-wobble {
+        0%,100% { transform: rotate(-6deg); }
+        50%      { transform: rotate(6deg);  }
+    }
+    .pan-wobble { animation: pan-wobble 2s ease-in-out infinite; }
+
+    @keyframes ring-out {
+        0%   { transform: scale(1);   opacity: .35; }
+        100% { transform: scale(1.75); opacity: 0;  }
+    }
+    .ring-pulse { animation: ring-out 2s ease-out infinite; }
+</style>
+
 <div class="flex flex-col flex-1 overflow-hidden page-chat">
 
     <!-- Top bar -->
@@ -31,8 +56,27 @@
     <div id="message-list" class="page-messages flex-1 overflow-y-auto scroll-smooth">
 
         <!-- Welcome screen -->
-        <div id="welcome-screen" class="flex flex-col items-center justify-center py-12 md:py-24 px-4 text-center">
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 md:mb-6 shadow-sm">🍳</div>
+        <div id="welcome-screen" class="relative overflow-hidden flex flex-col items-center justify-center min-h-full py-12 md:py-24 px-4 text-center">
+
+            <!-- Floating food particles -->
+            <span class="chat-floater" style="top:6%;  left:5%;  animation-duration:4.2s; animation-delay:0s;">🍅</span>
+            <span class="chat-floater" style="top:10%; right:6%; animation-duration:5.3s; animation-delay:0.7s; font-size:1.4rem;">🥕</span>
+            <span class="chat-floater" style="top:40%; left:3%; animation-duration:4.8s; animation-delay:1.4s; font-size:1.5rem;">🫑</span>
+            <span class="chat-floater" style="top:38%; right:4%; animation-duration:6.1s; animation-delay:0.3s; font-size:1.4rem;">🧄</span>
+            <span class="chat-floater" style="bottom:18%; left:6%; animation-duration:5.7s; animation-delay:2.0s; font-size:1.5rem;">🌿</span>
+            <span class="chat-floater" style="bottom:14%; right:5%; animation-duration:4.5s; animation-delay:1.1s;">🌶️</span>
+            <span class="chat-floater" style="top:22%; left:18%; animation-duration:6.5s; animation-delay:2.5s; font-size:1.2rem;">✨</span>
+            <span class="chat-floater" style="bottom:30%; right:14%; animation-duration:5.0s; animation-delay:0.9s; font-size:1.2rem;">🧅</span>
+
+            <!-- Animated icon -->
+            <div class="relative flex items-center justify-center mb-5 md:mb-7">
+                <span class="ring-pulse absolute w-20 h-20 rounded-full bg-orange-400 block"></span>
+                <span class="ring-pulse absolute w-20 h-20 rounded-full bg-orange-300 block" style="animation-delay:0.65s;"></span>
+                <div class="relative w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center text-2xl md:text-3xl shadow-md z-10">
+                    <span class="pan-wobble">🍳</span>
+                </div>
+            </div>
+
             <h1 class="text-xl md:text-2xl font-bold mb-2">What are we cooking today?</h1>
             <p class="page-text-muted text-sm mb-8 md:mb-10 max-w-sm leading-relaxed">
                 Tell me a dish name, a craving, or a cuisine — I'll generate a detailed step-by-step recipe.
