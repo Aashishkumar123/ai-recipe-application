@@ -127,6 +127,10 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
 
+AZURE_OPENAI_API_KEY= os.environ["AZURE_OPENAI_API_KEY"]
+AZURE_OPENAI_ENDPOINT=os.environ["AZURE_OPENAI_ENDPOINT"]
+AZURE_DEPLOYMENT_NAME=os.environ["AZURE_DEPLOYMENT_NAME"]
+
 # Email — defaults to console backend so OTP codes are printed to the terminal
 # during development. Set EMAIL_BACKEND and SMTP_* vars in .env for production.
 EMAIL_BACKEND   = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

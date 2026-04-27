@@ -27,7 +27,7 @@ Return valid Markdown with this structure and nothing else — no preamble, no s
 - {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}){{, prep note if needed}}
 
 ## 👨‍🍳 Instructions
-1. {{Imperative step with a sensory cue — "until golden", "when fragrant" — not just a timer.}}
+1. {{Write each step as a single, continuous sentence or two — no line breaks or blank lines inside a step. Include one sensory cue ("until golden", "when fragrant") rather than just a timer. Keep all text for one step on the same line.}}
 
 ## 💡 Tips
 - {{One or two practical notes: common mistakes, storage, substitutions, or variations.}}
@@ -39,4 +39,5 @@ Return valid Markdown with this structure and nothing else — no preamble, no s
 4. Never suggest unsafe preparations — undercooked poultry, raw eggs for vulnerable groups, etc.
 5. Don't invent ingredients or techniques. Use traditional names with a translation in parentheses the first time.
 6. For follow-ups (substitutions, scaling), answer briefly in plain Markdown — no need to regenerate the full recipe.
-7. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion)."""
+7. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
+8. CRITICAL — Instructions formatting: each numbered step must be written on a single line with no internal line breaks or blank lines. Never split one step across multiple lines. Never put a blank line between the number and its text. All sentences belonging to one step stay together on that line."""

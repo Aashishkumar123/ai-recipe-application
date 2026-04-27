@@ -1,22 +1,34 @@
 from collections.abc import Iterator
-from langchain_mistralai import ChatMistralAI
+# from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from django.conf import settings
 from loguru import logger
 from .prompt import RECIPE_SYSTEM_PROMPT
+from langchain_openai import AzureChatOpenAI
 
 
 logger.info(
-    "Initialising ChatMistralAI | model={} temperature=0 max_retries=2",
-    settings.MISTRAL_MODEL,
+    "Initialising AzureChatOpenAI | model={} temperature=0 max_retries=2",
+    settings.AZURE_DEPLOYMENT_NAME,
 )
-LLM = ChatMistralAI(
-    model=settings.MISTRAL_MODEL,
-    temperature=0,
+# LLM = ChatMistralAI(
+#     model=settings.MISTRAL_MODEL,
+#     temperature=0,
+#     max_retries=2,
+# )
+
+llm = AzureChatOpenAI(
+    api_key= settings.AZURE_OPENAI_API_KEY,
+    azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
+    azure_deployment=settings.AZURE_DEPLOYMENT_NAME,
+    api_version="2025-04-01-preview",
+    temperature=0.4,
+    max_tokens=None,
+    timeout=None,
     max_retries=2,
 )
-logger.success("ChatMistralAI ready | model={}", settings.MISTRAL_MODEL)
+logger.success("AzureChatOpenAI ready | model={}", settings.AZURE_DEPLOYMENT_NAME)
 
 _parser = StrOutputParser()
 
@@ -41,7 +53,7 @@ def stream_recipe(
 
     token_count = 0
     try:
-        for chunk in (LLM | _parser).stream(messages):
+        for chunk in (llm | _parser).stream(messages):
             token_count += 1
             yield chunk
         logger.success(
