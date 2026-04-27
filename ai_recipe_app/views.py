@@ -16,6 +16,7 @@ logger.debug("Importing ai_recipe_app.views")
 
 def chat(request, chat_id=None):
     logger.debug("chat view | user={} chat_id={}", request.user, chat_id)
+    chat_obj = None
     if chat_id:
         try:
             chat_obj = Chat.objects.get(id=chat_id, user=request.user)
@@ -26,7 +27,17 @@ def chat(request, chat_id=None):
         logger.debug("Loaded chat history | chat_id={} messages={}", chat_id, chat_history.count())
     else:
         chat_history = []
-    return render(request, "chat.html", {"chat_history": chat_history})
+    return render(request, "chat.html", {"chat_history": chat_history, "chat_obj": chat_obj})
+
+
+def public_chat(request, chat_id):
+    """Read-only public view — no authentication required."""
+    try:
+        chat_obj = Chat.objects.get(id=chat_id, is_public=True)
+    except Chat.DoesNotExist:
+        return render(request, "404.html", status=404)
+    chat_history = ChatMessage.objects.filter(chat=chat_obj).order_by("timestamp")
+    return render(request, "shared_chat.html", {"chat_obj": chat_obj, "chat_history": chat_history})
 
 @csrf_protect
 @require_http_methods(["POST"])
@@ -338,3 +349,32 @@ def download_pdf(request):
     response["Content-Disposition"] = f'attachment; filename="{safe_name}.pdf"'
     logger.info("PDF downloaded | user={} title={!r}", request.user, title)
     return response
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def share_chat(request):
+    """Set a chat public or private and return its public URL."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        chat_id   = data.get("chat_id", "").strip()
+        make_public = data.get("public")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not chat_id or make_public is None:
+        return JsonResponse({"error": "chat_id and public are required"}, status=400)
+
+    chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+    if not chat_obj:
+        return JsonResponse({"error": "Chat not found"}, status=404)
+
+    chat_obj.is_public = bool(make_public)
+    chat_obj.save(update_fields=["is_public"])
+    logger.info("Chat share toggled | chat_id={} public={} user={}", chat_id, chat_obj.is_public, request.user)
+
+    public_url = request.build_absolute_uri(f"/chat/public/{chat_obj.id}/") if chat_obj.is_public else None
+    return JsonResponse({"ok": True, "is_public": chat_obj.is_public, "public_url": public_url})
