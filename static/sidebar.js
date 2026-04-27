@@ -107,6 +107,115 @@ async function saveLanguage(lang) {
     }
 }
 
+// --- Chat item 3-dot menu ---
+const chatMenuDropdown = document.getElementById("chat-menu-dropdown");
+let menuChatId    = null;
+let menuChatTitle = null;
+
+function closeChatMenu() {
+    chatMenuDropdown?.classList.add("hidden");
+}
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chat-menu-btn");
+    if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        menuChatId    = btn.dataset.chatId;
+        menuChatTitle = btn.dataset.chatTitle;
+        const rect = btn.getBoundingClientRect();
+        // Position below the button, clamped to viewport
+        const top  = rect.bottom + 4;
+        const left = Math.min(rect.left, window.innerWidth - 168);
+        chatMenuDropdown.style.top  = top  + "px";
+        chatMenuDropdown.style.left = left + "px";
+        chatMenuDropdown.classList.toggle("hidden");
+    } else if (!e.target.closest("#chat-menu-dropdown")) {
+        closeChatMenu();
+    }
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeChatMenu();
+});
+
+document.getElementById("chat-menu-rename")?.addEventListener("click", () => {
+    closeChatMenu();
+    const menuBtn = document.querySelector(`.chat-menu-btn[data-chat-id="${menuChatId}"]`);
+    if (!menuBtn) return;
+    const item = menuBtn.closest(".chat-item");
+    const link = item?.querySelector("a");
+    if (!link) return;
+
+    const savedTitle = menuChatTitle;
+    const input = document.createElement("input");
+    input.type  = "text";
+    input.value = savedTitle;
+    input.className = "flex-1 min-w-0 px-3 py-1.5 text-xs bg-zinc-700 text-zinc-100 rounded-md outline-none border border-zinc-500 focus:border-orange-500";
+
+    link.replaceWith(input);
+    input.focus();
+    input.select();
+
+    async function commitRename() {
+        const newTitle = input.value.trim() || savedTitle;
+        const a = document.createElement("a");
+        a.href      = `/chat/${menuChatId}/`;
+        a.className = link.className;
+        a.textContent = newTitle;
+        input.replaceWith(a);
+        menuBtn.dataset.chatTitle = newTitle;
+        if (newTitle !== savedTitle) {
+            await fetch("/chat/api/rename-chat/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+                body: JSON.stringify({ chat_id: menuChatId, title: newTitle }),
+            }).catch(console.error);
+        }
+    }
+
+    input.addEventListener("blur",    commitRename);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter")  { e.preventDefault(); input.blur(); }
+        if (e.key === "Escape") { input.value = savedTitle; input.blur(); }
+    });
+});
+
+document.getElementById("chat-menu-delete")?.addEventListener("click", async () => {
+    closeChatMenu();
+    // Inline confirm banner instead of browser dialog
+    const menuBtn = document.querySelector(`.chat-menu-btn[data-chat-id="${menuChatId}"]`);
+    const item = menuBtn?.closest(".chat-item");
+    if (!item) return;
+
+    // Replace item content with a mini confirm row
+    const savedHTML = item.innerHTML;
+    item.innerHTML =
+        `<span class="flex-1 px-3 py-2 text-xs text-zinc-400 truncate">Delete this chat?</span>` +
+        `<button id="confirm-delete-yes" class="shrink-0 px-2 py-1 mr-0.5 text-[11px] font-medium bg-red-600 hover:bg-red-500 text-white rounded-md transition-colors">Delete</button>` +
+        `<button id="confirm-delete-no"  class="shrink-0 px-2 py-1 mr-1   text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors">Cancel</button>`;
+
+    const idToDelete = menuChatId;
+
+    document.getElementById("confirm-delete-no").addEventListener("click", () => {
+        item.innerHTML = savedHTML;
+    });
+
+    document.getElementById("confirm-delete-yes").addEventListener("click", async () => {
+        item.style.opacity = "0.4";
+        await fetch("/chat/api/delete-chat/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+            body: JSON.stringify({ chat_id: idToDelete }),
+        }).catch(console.error);
+        item.remove();
+        // Redirect if we're currently viewing the deleted chat
+        if (window.location.pathname.includes(idToDelete)) {
+            window.location.href = "/chat/";
+        }
+    });
+});
+
 document.querySelectorAll(".language-option").forEach((btn) => {
     btn.addEventListener("click", () => {
         const lang = btn.dataset.lang;

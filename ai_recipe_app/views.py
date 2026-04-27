@@ -96,6 +96,54 @@ def chat_message(request):
 
 @csrf_protect
 @require_http_methods(["POST"])
+def rename_chat(request):
+    try:
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id", "").strip()
+        title   = data.get("title", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if not chat_id or not title:
+        return JsonResponse({"error": "chat_id and title are required"}, status=400)
+
+    chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+    if not chat_obj:
+        return JsonResponse({"error": "Chat not found"}, status=404)
+
+    chat_obj.title = title[:255]
+    chat_obj.save(update_fields=["title"])
+    logger.info("Chat renamed | chat_id={} user={} title={!r}", chat_id, request.user, title)
+    return JsonResponse({"ok": True})
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def delete_chat(request):
+    try:
+        data    = json.loads(request.body)
+        chat_id = data.get("chat_id", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if not chat_id:
+        return JsonResponse({"error": "chat_id is required"}, status=400)
+
+    chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+    if not chat_obj:
+        return JsonResponse({"error": "Chat not found"}, status=404)
+
+    chat_obj.delete()
+    logger.info("Chat deleted | chat_id={} user={}", chat_id, request.user)
+    return JsonResponse({"ok": True})
+
+
+@csrf_protect
+@require_http_methods(["POST"])
 def save_bot_message(request):
     """Save the rendered HTML of a bot reply after streaming completes."""
     try:

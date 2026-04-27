@@ -65,16 +65,24 @@ function addChatToSidebar(chatId, title) {
     const empty = document.getElementById("sidebar-empty");
     if (empty) empty.style.display = "none";
 
-    // Deactivate any currently active sidebar link
-    historyEl.querySelectorAll("a").forEach((a) => {
-        a.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-200";
+    // Deactivate any currently active sidebar items
+    historyEl.querySelectorAll(".chat-item").forEach((item) => {
+        item.classList.remove("bg-zinc-800/60");
+        const a = item.querySelector("a");
+        if (a) a.className = "flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors text-zinc-500 group-hover:text-zinc-200";
     });
 
-    // Build the new active link
-    const link = document.createElement("a");
-    link.href = `/chat/${chatId}/`;
-    link.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-200 bg-zinc-800/60 hover:bg-zinc-800/80";
-    link.textContent = title;
+    // Build the new active chat-item group
+    const dotsSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+    </svg>`;
+
+    const item = document.createElement("div");
+    item.className = "chat-item group relative flex items-center rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 transition-colors";
+    item.innerHTML =
+        `<a href="/chat/${chatId}/" class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors text-zinc-200">${title}</a>` +
+        `<button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                 data-chat-id="${chatId}" data-chat-title="${title}" title="Options">${dotsSvg}</button>`;
 
     // Get or create the Today section
     let todayList = document.getElementById("sidebar-list-today");
@@ -88,7 +96,7 @@ function addChatToSidebar(chatId, title) {
         todayList = document.getElementById("sidebar-list-today");
     }
 
-    todayList.prepend(link);
+    todayList.prepend(item);
 }
 
 function applyRecipeStyles(bubble) {

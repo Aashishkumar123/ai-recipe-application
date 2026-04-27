@@ -52,11 +52,18 @@
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1">Today</p>
             <div id="sidebar-list-today" class="space-y-0.5">
                 {% for chat in chats_today %}
-                <a href="{% url 'chat-history' chat.id %}"
-                   class="flex items-center px-3 py-2 text-xs
-                          {% if chat.id == active_id %} text-zinc-200 text-xs rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 truncate transition-colors {% else %} text-zinc-500 text-xs rounded-md hover:bg-zinc-800/80 hover:text-zinc-200 truncate transition-colors {% endif %}">
-                    {{ chat.title }}
-                </a>
+                <div class="chat-item group relative flex items-center rounded-md {% if chat.id == active_id %}bg-zinc-800/60{% endif %} hover:bg-zinc-800/80 transition-colors">
+                    <a href="{% url 'chat-history' chat.id %}"
+                       class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors {% if chat.id == active_id %}text-zinc-200{% else %}text-zinc-500 group-hover:text-zinc-200{% endif %}">
+                        {{ chat.title }}
+                    </a>
+                    <button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -66,11 +73,18 @@
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Yesterday</p>
             <div class="space-y-0.5">
                 {% for chat in chats_yesterday %}
-                <a href="{% url 'chat-history' chat.id %}"
-                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
-                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
-                    {{ chat.title }}
-                </a>
+                <div class="chat-item group relative flex items-center rounded-md {% if chat.id == active_id %}bg-zinc-800/60{% endif %} hover:bg-zinc-800/80 transition-colors">
+                    <a href="{% url 'chat-history' chat.id %}"
+                       class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors {% if chat.id == active_id %}text-zinc-200{% else %}text-zinc-400 group-hover:text-zinc-200{% endif %}">
+                        {{ chat.title }}
+                    </a>
+                    <button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -80,11 +94,18 @@
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Last 7 days</p>
             <div class="space-y-0.5">
                 {% for chat in chats_week %}
-                <a href="{% url 'chat-history' chat.id %}"
-                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
-                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
-                    {{ chat.title }}
-                </a>
+                <div class="chat-item group relative flex items-center rounded-md {% if chat.id == active_id %}bg-zinc-800/60{% endif %} hover:bg-zinc-800/80 transition-colors">
+                    <a href="{% url 'chat-history' chat.id %}"
+                       class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors {% if chat.id == active_id %}text-zinc-200{% else %}text-zinc-400 group-hover:text-zinc-200{% endif %}">
+                        {{ chat.title }}
+                    </a>
+                    <button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -94,11 +115,18 @@
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1.5">Older</p>
             <div class="space-y-0.5">
                 {% for chat in chats_older %}
-                <a href="{% url 'chat-history' chat.id %}"
-                   class="flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors
-                          {% if chat.id == active_id %}bg-zinc-800 text-zinc-100{% else %}text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200{% endif %}">
-                    {{ chat.title }}
-                </a>
+                <div class="chat-item group relative flex items-center rounded-md {% if chat.id == active_id %}bg-zinc-800/60{% endif %} hover:bg-zinc-800/80 transition-colors">
+                    <a href="{% url 'chat-history' chat.id %}"
+                       class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors {% if chat.id == active_id %}text-zinc-200{% else %}text-zinc-400 group-hover:text-zinc-200{% endif %}">
+                        {{ chat.title }}
+                    </a>
+                    <button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -110,6 +138,23 @@
         </div>
         {% endif %}
         {% endwith %}
+    </div>
+
+    <!-- Shared chat options dropdown (positioned by JS) -->
+    <div id="chat-menu-dropdown" class="hidden fixed z-[100] w-40 bg-zinc-800 border border-zinc-700/80 rounded-xl shadow-2xl py-1 overflow-hidden">
+        <button id="chat-menu-rename" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+            </svg>
+            Rename
+        </button>
+        <div class="h-px bg-zinc-700/60 mx-2 my-0.5"></div>
+        <button id="chat-menu-delete" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Delete
+        </button>
     </div>
 
     <!-- Collapsed icon rail (shown only when collapsed) -->
