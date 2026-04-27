@@ -155,3 +155,6 @@ TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBacken
 LOGIN_URL = "/chat/"
 LOGIN_REDIRECT_URL = "/chat/"
 LOGOUT_REDIRECT_URL = "/chat/"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

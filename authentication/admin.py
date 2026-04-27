@@ -11,7 +11,7 @@ class UserAdmin(DjangoUserAdmin):
 	add_form = UserCreationForm
 	form = UserChangeForm
 	model = User
-	list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_active')
+	list_display = ('email', 'first_name', 'last_name', 'profile_picture', 'is_staff', 'is_active')
 	list_filter = ('is_staff', 'is_active')
 	ordering = ('email',)
 	search_fields = ('email', 'first_name', 'last_name')
