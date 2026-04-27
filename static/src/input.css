@@ -155,6 +155,7 @@ body {
     color: #f97316;
 }
 @keyframes blink { 50% { opacity: 0; } }
+@keyframes spin  { to   { transform: rotate(360deg); } }
 
 /* ── Recipe title (h1) ── */
 .bot-bubble h1 {

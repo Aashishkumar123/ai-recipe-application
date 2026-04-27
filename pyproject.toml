@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "django>=6.0.4",
+    "fpdf2>=2.8.7",
     "langchain>=1.2.15",
     "langchain-mistralai>=1.1.2",
     "loguru>=0.7.3",

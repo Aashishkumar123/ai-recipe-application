@@ -1,5 +1,7 @@
+import re
 import json
-from django.http import JsonResponse, StreamingHttpResponse
+from io import BytesIO
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
@@ -170,3 +172,165 @@ def save_bot_message(request):
     ChatMessage.objects.create(chat=chat_obj, sender="bot", content=html)
     logger.success("Bot message saved | chat_id={} user={}", chat_id, request.user)
     return JsonResponse({"ok": True})
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def download_pdf(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    try:
+        data         = json.loads(request.body)
+        html_content = data.get("html", "").strip()
+        title        = data.get("title", "Recipe").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not html_content:
+        return JsonResponse({"error": "No content"}, status=400)
+
+    from fpdf import FPDF
+
+    # Helvetica only covers Latin-1 (U+0000–U+00FF) — strip everything outside that range
+    clean = re.sub(r"[^\x00-\xFF]", "", html_content)
+    # Remove toolbar divs injected by chat UI
+    clean = re.sub(r'<div[^>]*class="[^"]*mt-1[^"]*"[^>]*>.*?</div>', "", clean, flags=re.DOTALL)
+    # Strip links/formatting tags, keep their text
+    for tag in ("a", "strong", "b", "em", "i", "code", "span"):
+        clean = re.sub(rf'<{tag}[^>]*>(.*?)</{tag}>', r'\1', clean, flags=re.DOTALL)
+
+    def _text(s):
+        """Strip remaining HTML tags and normalise whitespace."""
+        return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', s)).strip()
+
+    # Parse HTML into a flat list of (type, content) pairs
+    elements = []
+    for m in re.finditer(
+        r'<(h1|h2|h3|p|ul|ol|blockquote)(?:\s[^>]*)?>(.+?)</\1>',
+        clean, re.DOTALL | re.IGNORECASE,
+    ):
+        tag, body = m.group(1).lower(), m.group(2)
+        if tag in ("h1", "h2", "h3"):
+            t = _text(body)
+            if t:
+                elements.append((tag, t))
+        elif tag == "p":
+            t = _text(body)
+            if t:
+                elements.append(("p", t))
+        elif tag == "ul":
+            for li in re.findall(r'<li[^>]*>(.*?)</li>', body, re.DOTALL):
+                t = _text(li)
+                if t:
+                    elements.append(("li", t))
+        elif tag == "ol":
+            for idx, li in enumerate(re.findall(r'<li[^>]*>(.*?)</li>', body, re.DOTALL), 1):
+                t = _text(li)
+                if t:
+                    elements.append(("oli", (idx, t)))
+        elif tag == "blockquote":
+            t = _text(body)
+            if t:
+                elements.append(("blockquote", t))
+
+    try:
+        pdf = FPDF()
+        pdf.set_margins(20, 22, 20)
+        pdf.set_auto_page_break(auto=True, margin=22)
+        pdf.add_page()
+        W = pdf.w - pdf.l_margin - pdf.r_margin
+
+        # ── Brand header ──────────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_text_color(249, 115, 22)
+        pdf.cell(0, 6, "Recipe Chef", new_x="LMARGIN", new_y="NEXT")
+        pdf.set_draw_color(253, 186, 116)
+        pdf.set_line_width(0.5)
+        pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+        pdf.ln(7)
+
+        # ── Content ───────────────────────────────────────────────────
+        for etype, content in elements:
+
+            if etype == "h1":
+                pdf.set_font("Helvetica", "B", 22)
+                pdf.set_text_color(194, 65, 12)
+                pdf.multi_cell(W, 12, content, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(2)
+
+            elif etype == "h2":
+                pdf.ln(5)
+                pdf.set_font("Helvetica", "B", 12)
+                pdf.set_text_color(17, 24, 39)
+                pdf.multi_cell(W, 7, content, new_x="LMARGIN", new_y="NEXT")
+                pdf.set_draw_color(229, 231, 235)
+                pdf.set_line_width(0.3)
+                pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+                pdf.ln(3)
+
+            elif etype == "h3":
+                pdf.ln(3)
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(107, 114, 128)
+                pdf.multi_cell(W, 6, content, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(1)
+
+            elif etype == "p":
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(107, 114, 128)
+                pdf.multi_cell(W, 6, content, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(2)
+
+            elif etype == "li":
+                pdf.set_x(pdf.l_margin)
+                pdf.set_font("Helvetica", "B", 14)
+                pdf.set_text_color(249, 115, 22)
+                pdf.cell(6, 6, "\xb7")          # middle dot bullet
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(55, 65, 81)
+                pdf.multi_cell(W - 6, 6, content, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(0.5)
+
+            elif etype == "oli":
+                num, text = content
+                pdf.set_x(pdf.l_margin)
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(249, 115, 22)
+                num_w = 9
+                pdf.cell(num_w, 6.5, f"{num}.")
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(55, 65, 81)
+                pdf.multi_cell(W - num_w, 6.5, text, new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(1.5)
+
+            elif etype == "blockquote":
+                pdf.ln(3)
+                y0 = pdf.get_y()
+                pdf.set_x(pdf.l_margin + 8)
+                pdf.set_font("Helvetica", "I", 10)
+                pdf.set_text_color(146, 64, 14)
+                pdf.multi_cell(W - 8, 6, content, new_x="LMARGIN", new_y="NEXT")
+                y1 = pdf.get_y()
+                pdf.set_draw_color(249, 115, 22)
+                pdf.set_line_width(2)
+                pdf.line(pdf.l_margin + 2, y0, pdf.l_margin + 2, y1)
+                pdf.ln(3)
+
+        # ── Footer ────────────────────────────────────────────────────
+        pdf.set_y(-14)
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_text_color(156, 163, 175)
+        pdf.cell(0, 6, "Generated by Recipe Chef", align="C")
+
+        buffer = BytesIO()
+        pdf.output(buffer)
+    except Exception:
+        logger.exception("download_pdf | fpdf2 error user={}", request.user)
+        return JsonResponse({"error": "PDF generation failed"}, status=500)
+
+    safe_name = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "recipe"
+    response = HttpResponse(buffer.getvalue(), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{safe_name}.pdf"'
+    logger.info("PDF downloaded | user={} title={!r}", request.user, title)
+    return response
