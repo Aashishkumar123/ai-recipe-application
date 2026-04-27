@@ -14,9 +14,41 @@ let hasMessages = document.querySelectorAll(".chat-msg").length > 0;
 let currentChatId = (function () {
     const parts = window.location.pathname.replace(/\/$/, "").split("/");
     const last = parts[parts.length - 1];
-    // A UUID is 36 chars with hyphens
     return last.length === 36 ? last : null;
 }());
+
+// AbortController for the active stream (null when idle)
+let abortController = null;
+
+// SVG icons
+const sendIconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></svg>`;
+const stopIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2.5"/></svg>`;
+
+// Switch the send button between send-mode and stop-mode
+function setStopMode(on) {
+    if (!sendBtn) return;
+    if (on) {
+        sendBtn.type = "button";
+        sendBtn.innerHTML = stopIconSvg;
+        sendBtn.title = "Stop generating";
+        sendBtn.classList.remove("bg-orange-500", "hover:bg-orange-600");
+        sendBtn.classList.add("bg-red-500", "hover:bg-red-600");
+        sendBtn.disabled = false;
+    } else {
+        sendBtn.type = "submit";
+        sendBtn.innerHTML = sendIconSvg;
+        sendBtn.title = "";
+        sendBtn.classList.remove("bg-red-500", "hover:bg-red-600");
+        sendBtn.classList.add("bg-orange-500", "hover:bg-orange-600");
+        sendBtn.disabled = false;
+        abortController = null;
+    }
+}
+
+// Stop button click (only active while streaming)
+sendBtn?.addEventListener("click", () => {
+    if (abortController) abortController.abort();
+});
 
 // Auto-resize textarea
 input?.addEventListener("input", () => {
@@ -61,18 +93,15 @@ function addChatToSidebar(chatId, title) {
     const historyEl = document.getElementById("sidebar-history");
     if (!historyEl) return;
 
-    // Hide empty state
     const empty = document.getElementById("sidebar-empty");
     if (empty) empty.style.display = "none";
 
-    // Deactivate any currently active sidebar items
     historyEl.querySelectorAll(".chat-item").forEach((item) => {
         item.classList.remove("bg-zinc-800/60");
         const a = item.querySelector("a");
         if (a) a.className = "flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors text-zinc-500 group-hover:text-zinc-200";
     });
 
-    // Build the new active chat-item group
     const dotsSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
         <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
     </svg>`;
@@ -84,7 +113,6 @@ function addChatToSidebar(chatId, title) {
         `<button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
                  data-chat-id="${chatId}" data-chat-title="${title}" title="Options">${dotsSvg}</button>`;
 
-    // Get or create the Today section
     let todayList = document.getElementById("sidebar-list-today");
     if (!todayList) {
         const section = document.createElement("div");
@@ -117,10 +145,9 @@ document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
 const copyIconSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
 const checkIconSvg    = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 const downloadIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const spinnerSvg      = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
 
-// PDF direct download via server-side WeasyPrint
-const spinnerSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
-
+// PDF download
 messageList?.addEventListener("click", async (e) => {
     const btn = e.target.closest(".bot-download-btn");
     if (!btn) return;
@@ -129,7 +156,6 @@ messageList?.addEventListener("click", async (e) => {
 
     const title = bubble.querySelector("h1")?.innerText?.trim() || "Recipe";
 
-    // Clone and strip toolbar so buttons don't appear in the PDF
     const clone = bubble.cloneNode(true);
     clone.querySelectorAll("[class*='mt-1']").forEach((el) => el.remove());
 
@@ -181,7 +207,7 @@ function appendUserMessage(content) {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
-// Copy handler — delegated so it works for both history and new messages
+// User message copy — delegated
 messageList?.addEventListener("click", (e) => {
     const btn = e.target.closest(".user-copy-btn");
     if (!btn) return;
@@ -218,7 +244,7 @@ function appendBotMessage() {
     return bubble;
 }
 
-// Bot copy handler — delegated
+// Bot message copy — delegated
 messageList?.addEventListener("click", (e) => {
     const btn = e.target.closest(".bot-copy-btn");
     if (!btn) return;
@@ -231,19 +257,26 @@ messageList?.addEventListener("click", (e) => {
 });
 
 async function streamResponse(userMessage) {
+    abortController = new AbortController();
+    setStopMode(true);
+
     const bubble = appendBotMessage();
     bubble.classList.add("streaming");
     let fullText = "";
+
     try {
         const response = await fetch("/chat/api/message/", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
             body: JSON.stringify({ message: userMessage, chat_id: currentChatId }),
+            signal: abortController.signal,
         });
         if (!response.ok) { bubble.textContent = "⚠️ Error generating recipe."; return; }
+
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
+
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
@@ -263,13 +296,11 @@ async function streamResponse(userMessage) {
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
                         applyRecipeStyles(bubble);
-                        // Update URL, track chat ID, and add to sidebar after first exchange
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
                             window.history.pushState(null, "", `/chat/${currentChatId}/`);
                             addChatToSidebar(currentChatId, data.chat_title || userMessage);
                         }
-                        // Save rendered HTML to DB so history loads identically
                         if (data.chat_id) {
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
@@ -282,21 +313,27 @@ async function streamResponse(userMessage) {
             }
         }
     } catch (error) {
-        bubble.textContent = `⚠️ Network error: ${error.message}`;
+        if (error.name === "AbortError") {
+            // User stopped — keep whatever was streamed, render final markdown
+            if (fullText) bubble.innerHTML = marked.parse(fullText);
+            applyRecipeStyles(bubble);
+        } else {
+            bubble.textContent = `⚠️ Network error: ${error.message}`;
+        }
     } finally {
         bubble.classList.remove("streaming");
+        setStopMode(false);
     }
 }
 
 form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const userMessage = input.value.trim();
-    if (!userMessage) return;
+    if (!userMessage || abortController) return; // ignore submit while streaming
     if (window.innerWidth < 768) closeSidebar();
     appendUserMessage(userMessage);
     input.value = "";
     input.style.height = "auto";
-    sendBtn.disabled = true;
     try { await streamResponse(userMessage); }
-    finally { sendBtn.disabled = false; input.focus(); }
+    finally { input.focus(); }
 });
