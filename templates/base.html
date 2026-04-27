@@ -27,6 +27,23 @@
     {% include "partials/sidebar.html" %}
     {% include "partials/profile_dropdown.html" %}
 
+    <!-- Chat item context menu — lives outside <aside> so sidebar overflow can't clip it -->
+    <div id="chat-menu-dropdown" class="hidden fixed z-[200] w-40 bg-zinc-800 border border-zinc-700/80 rounded-xl shadow-2xl py-1 overflow-hidden">
+        <button id="chat-menu-rename" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+            </svg>
+            Rename
+        </button>
+        <div class="h-px bg-zinc-700/60 mx-2 my-0.5"></div>
+        <button id="chat-menu-delete" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Delete
+        </button>
+    </div>
+
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         {% block content %}{% endblock %}
     </main>
