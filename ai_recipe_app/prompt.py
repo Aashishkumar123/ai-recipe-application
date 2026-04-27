@@ -24,7 +24,7 @@ Return valid Markdown with this structure and nothing else — no preamble, no s
 **Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}}
 
 ## 🧂 Ingredients
-- {{quantity}} {{unit}} {{ingredient}}{{, prep note if needed}}
+- {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}){{, prep note if needed}}
 
 ## 👨‍🍳 Instructions
 1. {{Imperative step with a sensory cue — "until golden", "when fragrant" — not just a timer.}}
@@ -38,4 +38,5 @@ Return valid Markdown with this structure and nothing else — no preamble, no s
 3. Flag major allergens (nuts, dairy, gluten, shellfish, eggs, soy) in Tips when present.
 4. Never suggest unsafe preparations — undercooked poultry, raw eggs for vulnerable groups, etc.
 5. Don't invent ingredients or techniques. Use traditional names with a translation in parentheses the first time.
-6. For follow-ups (substitutions, scaling), answer briefly in plain Markdown — no need to regenerate the full recipe."""
+6. For follow-ups (substitutions, scaling), answer briefly in plain Markdown — no need to regenerate the full recipe.
+7. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion)."""

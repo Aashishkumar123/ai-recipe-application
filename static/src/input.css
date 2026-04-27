@@ -258,6 +258,28 @@ body {
     background: #fb923c;
 }
 
+/* ── Ingredient links ── */
+.bot-bubble ul li a {
+    color: #c2410c;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: #fed7aa;
+    text-underline-offset: 2px;
+    transition: color 0.15s, text-decoration-color 0.15s;
+}
+.bot-bubble ul li a:hover {
+    color: #ea580c;
+    text-decoration-color: #f97316;
+}
+[data-theme="dark"] .bot-bubble ul li a {
+    color: #fb923c;
+    text-decoration-color: #7c2d12;
+}
+[data-theme="dark"] .bot-bubble ul li a:hover {
+    color: #fdba74;
+    text-decoration-color: #ea580c;
+}
+
 /* ── Instruction steps (ol) ── */
 .bot-bubble ol {
     list-style: none;
