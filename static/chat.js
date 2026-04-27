@@ -261,6 +261,7 @@ async function streamResponse(userMessage) {
     const bubble = appendBotMessage();
     bubble.classList.add("streaming");
     let fullText = "";
+    let streamChatId = null; // received from server before first token
 
     try {
         const response = await fetch("/chat/api/message/", {
@@ -285,7 +286,10 @@ async function streamResponse(userMessage) {
                 if (!part.startsWith("data: ")) continue;
                 try {
                     const data = JSON.parse(part.slice(6));
-                    if (data.token) {
+                    if (data.chat_id && !data.done && !data.token) {
+                        // Early chat_id event — store so we can save on abort
+                        streamChatId = data.chat_id;
+                    } else if (data.token) {
                         fullText += data.token;
                         bubble.innerHTML = marked.parse(fullText);
                         messageList.scrollTop = messageList.scrollHeight;
@@ -294,16 +298,17 @@ async function streamResponse(userMessage) {
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
                         applyRecipeStyles(bubble);
+                        streamChatId = data.chat_id || streamChatId;
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
                             window.history.pushState(null, "", `/chat/${currentChatId}/`);
                             addChatToSidebar(currentChatId, data.chat_title || userMessage);
                         }
-                        if (data.chat_id) {
+                        if (streamChatId) {
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-                                body: JSON.stringify({ chat_id: data.chat_id, content: bubble.innerHTML }),
+                                body: JSON.stringify({ chat_id: streamChatId, content: bubble.innerHTML }),
                             }).catch(console.error);
                         }
                     }
@@ -312,9 +317,23 @@ async function streamResponse(userMessage) {
         }
     } catch (error) {
         if (error.name === "AbortError") {
-            // User stopped — keep whatever was streamed, render final markdown
+            // User stopped — render whatever was streamed and save it to DB
             if (fullText) bubble.innerHTML = marked.parse(fullText);
             applyRecipeStyles(bubble);
+            const saveId = streamChatId || currentChatId;
+            if (saveId && bubble.innerHTML) {
+                // Update URL + sidebar for new chats that were aborted before done
+                if (!currentChatId && streamChatId) {
+                    currentChatId = streamChatId;
+                    window.history.pushState(null, "", `/chat/${currentChatId}/`);
+                    addChatToSidebar(currentChatId, userMessage);
+                }
+                fetch("/chat/api/save-bot-message/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+                    body: JSON.stringify({ chat_id: saveId, content: bubble.innerHTML }),
+                }).catch(console.error);
+            }
         } else {
             bubble.textContent = `⚠️ Network error: ${error.message}`;
         }

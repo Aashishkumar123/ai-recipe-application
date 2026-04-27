@@ -78,6 +78,10 @@ def chat_message(request):
 
     def event_stream():
         try:
+            # Emit chat_id first so the client can save partial content on abort
+            if chat_obj:
+                yield f"data: {json.dumps({'chat_id': str(chat_obj.id), 'chat_title': chat_obj.title})}\n\n"
+
             for token in stream_recipe(dish_name, language, lc_history):
                 yield f"data: {json.dumps({'token': token})}\n\n"
 
