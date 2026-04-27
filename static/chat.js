@@ -31,15 +31,13 @@ function setStopMode(on) {
         sendBtn.type = "button";
         sendBtn.innerHTML = stopIconSvg;
         sendBtn.title = "Stop generating";
-        sendBtn.classList.remove("bg-orange-500", "hover:bg-orange-600");
-        sendBtn.classList.add("bg-red-500", "hover:bg-red-600");
+        sendBtn.classList.add("is-stop");
         sendBtn.disabled = false;
     } else {
         sendBtn.type = "submit";
         sendBtn.innerHTML = sendIconSvg;
         sendBtn.title = "";
-        sendBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-        sendBtn.classList.add("bg-orange-500", "hover:bg-orange-600");
+        sendBtn.classList.remove("is-stop");
         sendBtn.disabled = false;
         abortController = null;
     }

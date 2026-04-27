@@ -8,6 +8,15 @@ button, a, [role="button"], label[for] {
     cursor: pointer;
 }
 
+/* Stop-streaming state for the send button */
+#send-btn.is-stop {
+    background-color: #ef4444 !important;
+    color: #ffffff;
+}
+#send-btn.is-stop:hover {
+    background-color: #dc2626 !important;
+}
+
 /* ── Base ── */
 body {
     @apply bg-white text-gray-900;
