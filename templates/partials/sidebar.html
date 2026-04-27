@@ -37,10 +37,17 @@
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input
+                id="sidebar-search"
                 type="text"
                 placeholder="Search conversations..."
                 class="bg-transparent text-zinc-300 text-xs placeholder-zinc-600 outline-none w-full"
+                autocomplete="off"
             >
+            <button id="sidebar-search-clear" class="hidden text-zinc-600 hover:text-zinc-300 transition-colors shrink-0" title="Clear search">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
         </div>
     </div>
 

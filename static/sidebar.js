@@ -1,6 +1,74 @@
 // Shared UI: sidebar toggle, profile dropdown, sign-in modal
 // Included in base.html so it runs on every page.
 
+// --- Sidebar search ---
+const sidebarSearch      = document.getElementById("sidebar-search");
+const sidebarSearchClear = document.getElementById("sidebar-search-clear");
+
+function filterSidebarChats(q) {
+    const history = document.getElementById("sidebar-history");
+    if (!history) return;
+
+    const allItems = history.querySelectorAll(".chat-item");
+    let visibleCount = 0;
+
+    allItems.forEach((item) => {
+        const title = item.querySelector("a")?.textContent?.trim().toLowerCase() ?? "";
+        const match = !q || title.includes(q);
+        item.style.display = match ? "" : "none";
+        if (match) visibleCount++;
+    });
+
+    // Show/hide section containers when all their items are filtered out
+    Array.from(history.children).forEach((child) => {
+        if (child.tagName !== "DIV") return;
+        if (child.id === "sidebar-empty" || child.id === "sidebar-no-results") return;
+        const items = child.querySelectorAll(".chat-item");
+        if (!items.length) return;
+        const anyVisible = Array.from(items).some((it) => it.style.display !== "none");
+        child.style.display = anyVisible ? "" : "none";
+    });
+
+    // No-results message
+    let noResults = document.getElementById("sidebar-no-results");
+    if (!q) {
+        noResults?.remove();
+        return;
+    }
+    if (visibleCount === 0) {
+        if (!noResults) {
+            noResults = document.createElement("div");
+            noResults.id = "sidebar-no-results";
+            noResults.className = "flex flex-col items-center gap-1.5 py-6 px-4";
+            history.appendChild(noResults);
+        }
+        noResults.innerHTML =
+            `<span class="text-lg">🔍</span>` +
+            `<p class="text-zinc-500 text-xs text-center leading-relaxed">No conversations match<br>` +
+            `<span class="text-zinc-400 font-medium">"${q}"</span></p>`;
+    } else {
+        noResults?.remove();
+    }
+}
+
+sidebarSearch?.addEventListener("input", () => {
+    const q = sidebarSearch.value.trim().toLowerCase();
+    sidebarSearchClear?.classList.toggle("hidden", !q);
+    filterSidebarChats(q);
+});
+
+sidebarSearchClear?.addEventListener("click", () => {
+    if (sidebarSearch) { sidebarSearch.value = ""; sidebarSearch.focus(); }
+    sidebarSearchClear.classList.add("hidden");
+    filterSidebarChats("");
+});
+
+// Clear search when starting a new chat
+document.getElementById("new-chat-btn")?.addEventListener("click", () => {
+    if (sidebarSearch) { sidebarSearch.value = ""; sidebarSearchClear?.classList.add("hidden"); }
+    filterSidebarChats("");
+});
+
 // --- Sidebar toggle (mobile) ---
 const sidebar        = document.getElementById("sidebar");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
