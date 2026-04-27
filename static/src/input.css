@@ -89,6 +89,17 @@ body {
     @apply bg-zinc-900 border-zinc-700/80 text-zinc-300 hover:border-orange-800/50 hover:bg-zinc-800;
 }
 
+/* ── User message copy button ── */
+.user-copy-btn {
+    @apply text-gray-400 hover:text-gray-600 hover:bg-gray-200/70;
+}
+[data-theme="dark"] .user-copy-btn {
+    @apply text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700/60;
+}
+.user-copy-btn.copied {
+    @apply text-green-500;
+}
+
 /* ── User message bubble (JS-created) ── */
 .user-bubble {
     @apply max-w-[75%] bg-orange-500 text-white px-4 py-3 rounded-2xl rounded-br-sm text-sm leading-relaxed shadow-sm;

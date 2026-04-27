@@ -114,17 +114,37 @@ function showMessages() {
 // Apply to any history bubbles already in the DOM
 document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
 
+const copyIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+const checkIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
 function appendUserMessage(content) {
     showMessages();
     const wrapper = document.createElement("div");
-    wrapper.className = "chat-msg flex justify-end px-4 md:px-6 py-3 max-w-4xl mx-auto w-full";
+    wrapper.className = "chat-msg group flex justify-end items-end gap-2 px-4 md:px-6 py-3 max-w-4xl mx-auto w-full";
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "user-copy-btn opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0 p-1.5 rounded-lg transition-all";
+    copyBtn.title = "Copy message";
+    copyBtn.innerHTML = copyIconSvg;
     const bubble = document.createElement("div");
     bubble.className = "user-bubble";
     bubble.textContent = content;
+    wrapper.appendChild(copyBtn);
     wrapper.appendChild(bubble);
     messageList.appendChild(wrapper);
     messageList.scrollTop = messageList.scrollHeight;
 }
+
+// Copy handler — delegated so it works for both history and new messages
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".user-copy-btn");
+    if (!btn) return;
+    const text = btn.closest(".chat-msg")?.querySelector(".user-bubble")?.textContent ?? "";
+    navigator.clipboard.writeText(text).then(() => {
+        btn.innerHTML = checkIconSvg;
+        btn.classList.add("copied");
+        setTimeout(() => { btn.innerHTML = copyIconSvg; btn.classList.remove("copied"); }, 1500);
+    }).catch(console.error);
+});
 
 function appendBotMessage() {
     showMessages();
