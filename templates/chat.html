@@ -117,10 +117,17 @@
                 <div class="user-bubble">{{ msg.content }}</div>
             </div>
             {% else %}
-            <div class="chat-msg flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full">
+            <div class="chat-msg group flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full">
                 <div class="bot-avatar shrink-0 mt-0.5">🍳</div>
                 <div class="flex-1 min-w-0">
                     <div class="bot-bubble">{{ msg.content|safe }}</div>
+                    <div class="mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="bot-copy-btn p-1.5 rounded-lg transition-all" title="Copy response">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             {% endif %}

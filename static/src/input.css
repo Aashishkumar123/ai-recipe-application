@@ -89,6 +89,17 @@ body {
     @apply bg-zinc-900 border-zinc-700/80 text-zinc-300 hover:border-orange-800/50 hover:bg-zinc-800;
 }
 
+/* ── Bot message copy button ── */
+.bot-copy-btn {
+    @apply text-gray-400 hover:text-gray-600 hover:bg-gray-100;
+}
+[data-theme="dark"] .bot-copy-btn {
+    @apply text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700/60;
+}
+.bot-copy-btn.copied {
+    @apply text-green-500;
+}
+
 /* ── User message copy button ── */
 .user-copy-btn {
     @apply text-gray-400 hover:text-gray-600 hover:bg-gray-200/70;

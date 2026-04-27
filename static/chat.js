@@ -149,7 +149,7 @@ messageList?.addEventListener("click", (e) => {
 function appendBotMessage() {
     showMessages();
     const wrapper = document.createElement("div");
-    wrapper.className = "chat-msg flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full";
+    wrapper.className = "chat-msg group flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full";
     const avatar = document.createElement("div");
     avatar.className = "bot-avatar shrink-0 mt-0.5";
     avatar.textContent = "🍳";
@@ -157,13 +157,31 @@ function appendBotMessage() {
     contentWrap.className = "flex-1 min-w-0";
     const bubble = document.createElement("div");
     bubble.className = "bot-bubble";
+    const toolbar = document.createElement("div");
+    toolbar.className = "mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity";
+    toolbar.innerHTML =
+        `<button class="bot-copy-btn p-1.5 rounded-lg transition-all" title="Copy response">` +
+        copyIconSvg + `</button>`;
     contentWrap.appendChild(bubble);
+    contentWrap.appendChild(toolbar);
     wrapper.appendChild(avatar);
     wrapper.appendChild(contentWrap);
     messageList.appendChild(wrapper);
     messageList.scrollTop = messageList.scrollHeight;
     return bubble;
 }
+
+// Bot copy handler — delegated
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".bot-copy-btn");
+    if (!btn) return;
+    const text = btn.closest(".chat-msg")?.querySelector(".bot-bubble")?.innerText ?? "";
+    navigator.clipboard.writeText(text).then(() => {
+        btn.innerHTML = checkIconSvg;
+        btn.classList.add("copied");
+        setTimeout(() => { btn.innerHTML = copyIconSvg; btn.classList.remove("copied"); }, 1500);
+    }).catch(console.error);
+});
 
 async function streamResponse(userMessage) {
     const bubble = appendBotMessage();
