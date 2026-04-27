@@ -6,50 +6,45 @@
     <title>{{ chat_obj.title }} — Recipe Chef</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'output.css' %}?v=9">
-    <style>
-        body { background: #f9fafb; }
-    </style>
 </head>
-<body class="min-h-screen antialiased">
+<body class="min-h-screen antialiased" style="background:#f9fafb;">
 
     <!-- Top bar -->
     <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/chat/" class="flex items-center gap-2 no-underline">
+            <a href="/chat/" class="flex items-center gap-2" style="text-decoration:none">
                 <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-sm leading-none">🍳</div>
                 <span class="font-semibold text-sm text-gray-800">Recipe Chef</span>
             </a>
-            <a href="/chat/" class="text-xs font-medium bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors">
+            <a href="/chat/" class="text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors" style="text-decoration:none">
                 Try it yourself →
             </a>
         </div>
     </header>
 
-    <!-- Shared-by banner -->
-    <div class="max-w-3xl mx-auto px-4 pt-5 pb-1">
-        <div class="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Shared banner -->
+    <div class="max-w-3xl mx-auto px-4 pt-5 pb-2">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm text-xs text-gray-500">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
             </svg>
             <span>Shared conversation</span>
-            <span class="text-gray-300">·</span>
-            <span class="text-gray-500 font-medium truncate">{{ chat_obj.title }}</span>
+            <span class="text-gray-300 mx-0.5">·</span>
+            <span class="font-medium text-gray-700 truncate max-w-[200px]">{{ chat_obj.title }}</span>
         </div>
     </div>
 
     <!-- Messages -->
-    <main class="max-w-3xl mx-auto px-4 py-4 space-y-1 pb-16">
+    <main class="max-w-3xl mx-auto px-4 py-3 pb-24">
         {% for msg in chat_history %}
             {% if msg.sender == "user" %}
             <div class="flex justify-end items-end gap-2 py-3">
-                <div class="max-w-[75%] bg-orange-500 text-white px-4 py-3 rounded-2xl rounded-br-sm text-sm leading-relaxed shadow-sm">
-                    {{ msg.content }}
-                </div>
+                <div class="user-bubble">{{ msg.content }}</div>
             </div>
             {% else %}
             <div class="flex gap-3 md:gap-4 py-4">
-                <div class="w-8 h-8 bg-orange-50 border border-orange-100 rounded-full flex items-center justify-center text-base leading-none shrink-0 mt-0.5">🍳</div>
+                <div class="bot-avatar shrink-0 mt-0.5">🍳</div>
                 <div class="flex-1 min-w-0">
                     <div class="bot-bubble">{{ msg.content|safe }}</div>
                 </div>
@@ -58,11 +53,13 @@
         {% endfor %}
     </main>
 
-    <!-- CTA footer -->
-    <div class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 shadow-lg">
+    <!-- Sticky CTA -->
+    <div class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 shadow-lg z-10">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <p class="text-xs text-gray-500 hidden sm:block">Want to generate your own recipes with AI?</p>
-            <a href="/chat/" class="shrink-0 flex items-center gap-1.5 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl transition-colors shadow-sm">
+            <p class="text-xs text-gray-500 hidden sm:block leading-tight">
+                Want to generate your own AI-powered recipes?
+            </p>
+            <a href="/chat/" class="shrink-0 flex items-center gap-1.5 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl transition-colors shadow-sm" style="text-decoration:none">
                 <span>🍳</span> Start cooking with Recipe Chef
             </a>
         </div>
@@ -70,8 +67,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // Apply recipe-meta class to the Prep/Cook/Serves line
-        document.querySelectorAll(".bot-bubble p").forEach((p) => {
+        document.querySelectorAll(".bot-bubble p").forEach(function(p) {
             if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
                 p.classList.add("recipe-meta");
             }

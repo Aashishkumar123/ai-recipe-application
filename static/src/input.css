@@ -591,3 +591,69 @@ body {
 aside ::-webkit-scrollbar { width: 4px; }
 aside ::-webkit-scrollbar-track { background: transparent; }
 aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
+
+/* ── Share modal ── */
+.share-modal-card {
+    background: #ffffff;
+    border: 1px solid #f0f0f2;
+}
+.share-modal-title { color: #111827; }
+.share-close-btn {
+    color: #9ca3af;
+}
+.share-close-btn:hover { color: #374151; background: #f3f4f6; }
+
+.share-status-card {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+}
+.share-status-title { color: #111827; }
+.share-status-desc  { color: #6b7280; }
+
+.share-status-public {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.share-link-box  { background: #f9fafb; border-color: #e5e7eb; }
+.share-link-text { color: #374151; }
+
+.share-btn-secondary {
+    color: #374151;
+    background: #f3f4f6;
+}
+.share-btn-secondary:hover { background: #e5e7eb; }
+
+.share-loading-overlay { background: rgba(255,255,255,0.85); }
+
+/* dark */
+[data-theme="dark"] .share-modal-card {
+    background: #18181b;
+    border-color: #27272a;
+}
+[data-theme="dark"] .share-modal-title { color: #f4f4f5; }
+[data-theme="dark"] .share-close-btn   { color: #71717a; }
+[data-theme="dark"] .share-close-btn:hover { color: #d4d4d8; background: #27272a; }
+
+[data-theme="dark"] .share-status-card {
+    background: #27272a;
+    border-color: #3f3f46;
+}
+[data-theme="dark"] .share-status-title { color: #f4f4f5; }
+[data-theme="dark"] .share-status-desc  { color: #a1a1aa; }
+
+[data-theme="dark"] .share-status-public {
+    background: rgba(20,83,45,0.25);
+    border-color: rgba(74,222,128,0.2);
+}
+
+[data-theme="dark"] .share-link-box  { background: #27272a; border-color: #3f3f46; }
+[data-theme="dark"] .share-link-text { color: #a1a1aa; }
+
+[data-theme="dark"] .share-btn-secondary {
+    color: #d4d4d8;
+    background: #27272a;
+}
+[data-theme="dark"] .share-btn-secondary:hover { background: #3f3f46; }
+
+[data-theme="dark"] .share-loading-overlay { background: rgba(24,24,27,0.85); }
