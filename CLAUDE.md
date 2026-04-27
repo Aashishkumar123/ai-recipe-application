@@ -26,13 +26,14 @@ Tailwind is set up via the standalone CLI binary (`./tailwindcss`) — no Node.j
 
 ```bash
 # One-off build (minified)
-./tailwindcss -i ai_recipe_app/static/src/input.css -o ai_recipe_app/static/output.css --minify
+./tailwindcss -i static/src/input.css -o static/output.css --minify
 
 # Watch mode during development
-./tailwindcss -i ai_recipe_app/static/src/input.css -o ai_recipe_app/static/output.css --watch
+./tailwindcss -i static/src/input.css -o static/output.css --watch
 ```
 
-- Edit styles in `ai_recipe_app/static/src/input.css` (uses `@apply` directives)
+- Edit styles in `static/src/input.css` (uses `@apply` directives)
+- Output goes to `static/output.css` — this is the file Django serves (via `STATICFILES_DIRS = [BASE_DIR / 'static']`)
 - The compiled `output.css` is committed; the `tailwindcss` binary is gitignored (re-download for macOS arm64 from the latest GitHub release)
 
 ## Environment
