@@ -114,8 +114,67 @@ function showMessages() {
 // Apply to any history bubbles already in the DOM
 document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
 
-const copyIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
-const checkIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const copyIconSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+const checkIconSvg    = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const downloadIconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+
+// PDF via native browser print — no external library, no main-thread hang
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".bot-download-btn");
+    if (!btn) return;
+    const bubble = btn.closest(".chat-msg")?.querySelector(".bot-bubble");
+    if (!bubble) return;
+
+    const title = bubble.querySelector("h1")?.innerText?.trim() || "Recipe";
+
+    const clone = bubble.cloneNode(true);
+    // Remove action toolbar (copy/download buttons) from the clone
+    clone.querySelectorAll(".mt-1\\.5").forEach((el) => el.remove());
+
+    const win = window.open("", "_blank", "width=820,height=700");
+    if (!win) { alert("Please allow pop-ups to download the recipe as PDF."); return; }
+
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${title} — Recipe Chef</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;line-height:1.55;color:#374151;background:#fff;padding:32px 40px;max-width:720px;margin:0 auto}
+.rc-header{display:flex;align-items:center;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #fff7ed}
+.rc-logo{font-size:22px}
+.rc-name{font-weight:700;color:#f97316;font-size:16px;letter-spacing:-0.01em}
+h1{color:#c2410c;font-size:22px;font-weight:800;letter-spacing:-0.015em;padding-bottom:10px;border-bottom:2px solid #fed7aa;margin-bottom:4px}
+h2{font-size:14px;font-weight:700;color:#111827;margin:20px 0 10px;padding:7px 12px;background:#fff7ed;border-left:3px solid #f97316;border-radius:0 8px 8px 0}
+h3{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+p{color:#374151;margin-bottom:8px}
+p em{color:#6b7280;font-style:italic}
+.recipe-meta{display:flex;flex-wrap:wrap;gap:6px 12px;padding:8px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:12px;font-weight:500;color:#9a3412;margin-bottom:16px}
+ul{list-style:none;padding:0;margin:6px 0 12px;display:flex;flex-direction:column;gap:5px}
+ul li{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:#f9fafb;border:1px solid #f3f4f6;border-radius:8px}
+ul li::before{content:"";display:block;width:6px;height:6px;min-width:6px;background:#f97316;border-radius:50%;margin-top:5px}
+ul li a{color:#c2410c;text-decoration:underline}
+ol{list-style:none;padding:0;margin:6px 0 12px;counter-reset:step;display:flex;flex-direction:column;gap:8px}
+ol li{counter-increment:step;display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px}
+ol li::before{content:counter(step);display:flex;align-items:center;justify-content:center;min-width:24px;height:24px;background:#f97316;color:#fff;font-weight:700;font-size:11px;border-radius:50%;flex-shrink:0;margin-top:1px}
+blockquote{background:#fffbeb;border-left:3px solid #fbbf24;border-radius:0 12px 12px 0;padding:10px 14px;margin:12px 0;color:#92400e}
+strong{font-weight:600;color:#111827}
+hr{border:none;border-top:1px solid #f3f4f6;margin:16px 0}
+code{background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-size:11px;font-family:monospace}
+.rc-footer{margin-top:24px;padding-top:12px;border-top:1px solid #f3f4f6;color:#9ca3af;font-size:11px;text-align:center}
+@media print{body{padding:0}@page{margin:15mm}}
+</style>
+</head>
+<body>
+<div class="rc-header"><span class="rc-logo">🍳</span><span class="rc-name">Recipe Chef</span></div>
+${clone.innerHTML}
+<div class="rc-footer">Generated by Recipe Chef</div>
+<script>window.addEventListener("load",function(){window.print()});<\/script>
+</body>
+</html>`);
+    win.document.close();
+});
 
 function appendUserMessage(content) {
     showMessages();
@@ -158,10 +217,10 @@ function appendBotMessage() {
     const bubble = document.createElement("div");
     bubble.className = "bot-bubble";
     const toolbar = document.createElement("div");
-    toolbar.className = "mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity";
+    toolbar.className = "mt-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity";
     toolbar.innerHTML =
-        `<button class="bot-copy-btn p-1.5 rounded-lg transition-all" title="Copy response">` +
-        copyIconSvg + `</button>`;
+        `<button class="bot-copy-btn p-1.5 rounded-lg transition-all" title="Copy response">${copyIconSvg}</button>` +
+        `<button class="bot-download-btn p-1.5 rounded-lg transition-all" title="Download as PDF">${downloadIconSvg}</button>`;
     contentWrap.appendChild(bubble);
     contentWrap.appendChild(toolbar);
     wrapper.appendChild(avatar);
