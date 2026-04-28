@@ -297,6 +297,18 @@ body {
     background: #fb923c;
 }
 
+/* ── Ingredient list — horizontal scroll on mobile ── */
+@media (max-width: 640px) {
+    .bot-bubble ul li {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        align-items: center;
+    }
+    .bot-bubble ul li::-webkit-scrollbar { display: none; }
+}
+
 /* ── Ingredient links ── */
 .bot-bubble ul li a {
     color: #c2410c;
