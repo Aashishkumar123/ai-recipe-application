@@ -7,10 +7,12 @@ def context_processors(request):
     ctx = {
         "theme": request.session.get("theme", "light"),
         "language": request.session.get("language", "English"),
+        "name": request.user.name if request.user.is_authenticated else "Guest",
         "chats_today": [],
         "chats_yesterday": [],
         "chats_week": [],
         "chats_older": [],
+        "unread_notifications_count": 0,
     }
     if request.user.is_authenticated:
         now = timezone.now()
@@ -28,4 +30,9 @@ def context_processors(request):
                 ctx["chats_week"].append(chat)
             else:
                 ctx["chats_older"].append(chat)
+
+        from authentication.models import Notification
+        ctx["unread_notifications_count"] = Notification.objects.filter(
+            user=request.user, is_read=False
+        ).count()
     return ctx

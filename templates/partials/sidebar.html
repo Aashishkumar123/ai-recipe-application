@@ -17,6 +17,23 @@
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
             </button>
+            {% if user.is_authenticated %}
+            <!-- Bell icon with unread badge -->
+            <div class="sc-hide">
+                <button
+                    id="notif-btn"
+                    class="relative text-zinc-500 hover:text-white hover:bg-zinc-800 p-1.5 rounded-md transition-colors"
+                    title="Notifications"
+                >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span id="notif-badge" class="{% if unread_notifications_count > 0 %}flex{% else %}hidden{% endif %} absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-0.5 bg-orange-500 rounded-full text-[9px] font-bold text-white items-center justify-center leading-none">
+                        {% if unread_notifications_count > 0 %}{{ unread_notifications_count }}{% endif %}
+                    </span>
+                </button>
+            </div>
+            {% endif %}
             <!-- Collapse toggle (desktop only) -->
             <button
                 id="sidebar-collapse-btn"

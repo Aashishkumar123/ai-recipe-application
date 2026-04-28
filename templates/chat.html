@@ -265,7 +265,7 @@
 
 <script>
 // Initial share state from server (populated when viewing an existing chat)
-var _chatIsPublic = {% if chat_obj and chat_obj.is_public %}true{% else %}false{% endif %};
+// var _chatIsPublic = "{% if chat_obj and chat_obj.is_public %}true{% else %}false{% endif %};"
 </script>
 <script src="{% static 'share.js' %}?v=1"></script>
 {% endblock %}

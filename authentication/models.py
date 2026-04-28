@@ -50,8 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	SKILL_CHOICES = [('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')]
 
 	email = models.EmailField('email address', unique=True)
-	first_name = models.CharField('first name', max_length=150, blank=True)
-	last_name = models.CharField('last name', max_length=150, blank=True)
+	name = models.CharField('name', max_length=150, blank=True)
 	profile_picture = models.ImageField(upload_to='avatars/', blank=True, null=True, default="avatars/default.png")
 	dietary_restrictions = models.JSONField(default=list, blank=True)
 	cuisine_preferences  = models.JSONField(default=list, blank=True)
@@ -80,12 +79,29 @@ class User(AbstractBaseUser, PermissionsMixin):
 		verbose_name = 'user'
 		verbose_name_plural = 'users'
 
-	def get_full_name(self):
-		full = f"{self.first_name} {self.last_name}".strip()
-		return full or self.email
 
-	def get_short_name(self):
-		return self.first_name or self.email
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('welcome',            'Welcome'),
+        ('shared_chat_viewed', 'Shared Chat Viewed'),
+        ('recipe_tip',         'Recipe Tip'),
+        ('system',             'System'),
+    ]
+
+    user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    type       = models.CharField(max_length=30, choices=TYPE_CHOICES, default='system')
+    title      = models.CharField(max_length=255)
+    body       = models.TextField(blank=True)
+    link       = models.CharField(max_length=500, blank=True)
+    is_read    = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes  = [models.Index(fields=['user', 'is_read', '-created_at'])]
+
+    def __str__(self):
+        return f"[{self.type}] {self.title} → {self.user.email}"
 
 
 class EmailOTP(models.Model):

@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 
 from context_processors import VALID_LANGUAGES
-from .models import EmailOTP
+from .models import EmailOTP, Notification
 from .utils import email_users
 from django.shortcuts import render
 
@@ -56,8 +56,17 @@ def verify_otp(request):
     if user is None:
         return JsonResponse({"error": "Invalid or expired code. Please try again."}, status=400)
 
+    is_new = user.last_login is None
     login(request, user)
-    return JsonResponse({"ok": True, "name": user.get_full_name(), "email": user.email})
+    if is_new:
+        Notification.objects.create(
+            user=user,
+            type="welcome",
+            title="Welcome to Recipe Chef! 🍳",
+            body="Your personalised recipe assistant is ready. Ask me anything — from quick weeknight dinners to weekend showstoppers.",
+            link="/chat/",
+        )
+    return JsonResponse({"ok": True, "name": user.name, "email": user.email})
 
 
 @csrf_protect
@@ -171,4 +180,46 @@ def save_preferences(request):
     user.default_servings     = servings
     user.save(update_fields=["dietary_restrictions", "cuisine_preferences", "cooking_skill", "default_servings"])
 
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_notifications(request):
+    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")[:20]
+    unread_count  = Notification.objects.filter(user=request.user, is_read=False).count()
+    data = [
+        {
+            "id":         n.id,
+            "type":       n.type,
+            "title":      n.title,
+            "body":       n.body,
+            "link":       n.link,
+            "is_read":    n.is_read,
+            "created_at": n.created_at.isoformat(),
+        }
+        for n in notifications
+    ]
+    return JsonResponse({"notifications": data, "unread_count": unread_count})
+
+
+@login_required
+@csrf_protect
+@require_http_methods(["POST"])
+def mark_notification_read(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    notif_id = data.get("id")
+    if notif_id:
+        Notification.objects.filter(id=notif_id, user=request.user).update(is_read=True)
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@csrf_protect
+@require_http_methods(["POST"])
+def mark_all_notifications_read(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return JsonResponse({"ok": True})

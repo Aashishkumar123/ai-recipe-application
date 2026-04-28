@@ -36,6 +36,23 @@ def public_chat(request, chat_id):
         chat_obj = Chat.objects.get(id=chat_id, is_public=True)
     except Chat.DoesNotExist:
         return render(request, "404.html", status=404)
+
+    # Notify the owner when someone (not themselves) views their shared chat
+    viewer = request.user
+    if viewer.is_authenticated and viewer != chat_obj.user:
+        from authentication.models import Notification
+        already_notified = Notification.objects.filter(
+            user=chat_obj.user, type="shared_chat_viewed", link=f"/chat/{chat_id}/"
+        ).exists()
+        if not already_notified:
+            Notification.objects.create(
+                user=chat_obj.user,
+                type="shared_chat_viewed",
+                title="Someone viewed your shared recipe",
+                body=f'Your chat "{chat_obj.title}" was viewed by another user.',
+                link=f"/chat/{chat_id}/",
+            )
+
     chat_history = ChatMessage.objects.filter(chat=chat_obj).order_by("timestamp")
     return render(request, "shared_chat.html", {"chat_obj": chat_obj, "chat_history": chat_history})
 

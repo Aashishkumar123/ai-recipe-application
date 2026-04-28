@@ -497,3 +497,138 @@ otpInputs.forEach((inp, idx) => {
         otpInputs[Math.min(idx + digits.length, otpInputs.length - 1)]?.focus();
     });
 });
+
+// --- Notification dropdown ---
+const notifBtn      = document.getElementById("notif-btn");
+const notifDropdown = document.getElementById("notif-dropdown");
+const notifBadge    = document.getElementById("notif-badge");
+const notifList     = document.getElementById("notif-list");
+const notifEmpty    = document.getElementById("notif-empty");
+const notifMarkAll  = document.getElementById("notif-mark-all");
+
+let notifOpen = false;
+
+const NOTIF_ICONS = {
+    welcome:            "🍳",
+    shared_chat_viewed: "👁️",
+    recipe_tip:         "💡",
+    system:             "🔔",
+};
+
+function timeAgo(isoString) {
+    const diff = Math.floor((Date.now() - new Date(isoString)) / 1000);
+    if (diff < 60)   return "just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function renderNotifications(notifications) {
+    if (!notifList) return;
+    // Remove all items (leave empty state element in place)
+    notifList.querySelectorAll(".notif-item").forEach((el) => el.remove());
+
+    if (notifications.length === 0) {
+        notifEmpty?.classList.remove("hidden");
+        return;
+    }
+    notifEmpty?.classList.add("hidden");
+
+    notifications.forEach((n) => {
+        const el = document.createElement("div");
+        el.className = "notif-item" + (n.is_read ? "" : " unread");
+        el.dataset.id = n.id;
+        el.innerHTML =
+            `<div class="notif-icon">${NOTIF_ICONS[n.type] || "🔔"}</div>` +
+            `<div class="flex-1 min-w-0">` +
+            `  <div class="notif-item-title">${escapeHtml(n.title)}</div>` +
+            (n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : "") +
+            `  <div class="notif-item-time">${timeAgo(n.created_at)}</div>` +
+            `</div>` +
+            (!n.is_read ? `<div class="notif-dot mt-1 shrink-0"></div>` : "");
+        el.addEventListener("click", () => markRead(n.id, el, n.link));
+        notifList.appendChild(el);
+    });
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function updateBadge(count) {
+    if (!notifBadge) return;
+    if (count > 0) {
+        notifBadge.textContent = count > 9 ? "9+" : String(count);
+        notifBadge.classList.remove("hidden");
+        notifBadge.classList.add("flex");
+    } else {
+        notifBadge.classList.add("hidden");
+        notifBadge.classList.remove("flex");
+    }
+}
+
+async function fetchNotifications() {
+    try {
+        const res  = await fetch("/auth/api/notifications/");
+        const data = await res.json();
+        renderNotifications(data.notifications || []);
+        updateBadge(data.unread_count || 0);
+    } catch (e) {
+        console.error("Failed to fetch notifications:", e);
+    }
+}
+
+async function markRead(id, el, link) {
+    if (el && el.classList.contains("unread")) {
+        el.classList.remove("unread");
+        el.querySelector(".notif-dot")?.remove();
+        await fetch("/auth/api/notifications/mark-read/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+            body: JSON.stringify({ id }),
+        }).catch(console.error);
+        const currentBadge = parseInt(notifBadge?.textContent || "0", 10);
+        updateBadge(Math.max(0, currentBadge - 1));
+    }
+    if (link) window.location.href = link;
+}
+
+function openNotifDropdown() {
+    if (!notifBtn || !notifDropdown) return;
+    const rect = notifBtn.getBoundingClientRect();
+    notifDropdown.style.top  = (rect.bottom + 6) + "px";
+    notifDropdown.style.left = Math.max(8, rect.right - 320) + "px";
+    notifDropdown.classList.remove("hidden");
+    notifOpen = true;
+    fetchNotifications();
+}
+
+function closeNotifDropdown() {
+    notifDropdown?.classList.add("hidden");
+    notifOpen = false;
+}
+
+notifBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    notifOpen ? closeNotifDropdown() : openNotifDropdown();
+});
+
+notifDropdown?.addEventListener("click", (e) => e.stopPropagation());
+
+document.addEventListener("click", (e) => {
+    if (notifOpen && !e.target.closest("#notif-dropdown") && !e.target.closest("#notif-btn")) {
+        closeNotifDropdown();
+    }
+});
+
+notifMarkAll?.addEventListener("click", async () => {
+    await fetch("/auth/api/notifications/mark-all-read/", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRF() },
+    }).catch(console.error);
+    notifList?.querySelectorAll(".notif-item.unread").forEach((el) => {
+        el.classList.remove("unread");
+        el.querySelector(".notif-dot")?.remove();
+    });
+    updateBadge(0);
+});
