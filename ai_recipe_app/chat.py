@@ -4,7 +4,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from django.conf import settings
 from loguru import logger
-from .prompt import RECIPE_SYSTEM_PROMPT
+from .prompt import RECIPE_SYSTEM_PROMPT, USER_PROFILE_BLOCK
 from langchain_openai import AzureChatOpenAI
 
 
@@ -12,11 +12,6 @@ logger.info(
     "Initialising AzureChatOpenAI | model={} temperature=0 max_retries=2",
     settings.AZURE_DEPLOYMENT_NAME,
 )
-# LLM = ChatMistralAI(
-#     model=settings.MISTRAL_MODEL,
-#     temperature=0,
-#     max_retries=2,
-# )
 
 llm = AzureChatOpenAI(
     api_key= settings.AZURE_OPENAI_API_KEY,
@@ -33,20 +28,47 @@ logger.success("AzureChatOpenAI ready | model={}", settings.AZURE_DEPLOYMENT_NAM
 _parser = StrOutputParser()
 
 
+def _build_system_prompt(language: str, user=None) -> str:
+    base = RECIPE_SYSTEM_PROMPT.format(language=language)
+
+    if user is None or not user.is_authenticated:
+        return base
+
+    lines = []
+    if user.cooking_skill:
+        lines.append(f"- Cooking skill: {user.cooking_skill.capitalize()}")
+    if user.default_servings:
+        lines.append(f"- Default serving size: {user.default_servings}")
+    if user.dietary_restrictions:
+        restrictions = ", ".join(r.title() for r in user.dietary_restrictions)
+        lines.append(f"- Dietary restrictions: {restrictions}")
+    if user.cuisine_preferences:
+        cuisines = ", ".join(c.title() for c in user.cuisine_preferences)
+        lines.append(f"- Preferred cuisines: {cuisines}")
+
+    if not lines:
+        return base
+
+    profile_block = "\n".join(lines)
+    return base + USER_PROFILE_BLOCK.format(profile_block=profile_block)
+
+
 def stream_recipe(
     dish_name: str,
     language: str = "English",
     history: list[BaseMessage] | None = None,
+    user=None,
 ) -> Iterator[str]:
     """Yield recipe tokens, including prior conversation turns for context."""
     history = history or []
     logger.info(
-        "stream_recipe START | dish={!r} language={} history_turns={}",
-        dish_name, language, len(history),
+        "stream_recipe START | dish={!r} language={} history_turns={} user={}",
+        dish_name, language, len(history), user,
     )
 
+    system_prompt = _build_system_prompt(language, user)
     messages: list[BaseMessage] = [
-        SystemMessage(content=RECIPE_SYSTEM_PROMPT.format(language=language)),
+        SystemMessage(content=system_prompt),
         *history,
         HumanMessage(content=dish_name),
     ]

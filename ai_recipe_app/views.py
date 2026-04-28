@@ -93,7 +93,7 @@ def chat_message(request):
             if chat_obj:
                 yield f"data: {json.dumps({'chat_id': str(chat_obj.id), 'chat_title': chat_obj.title})}\n\n"
 
-            for token in stream_recipe(dish_name, language, lc_history):
+            for token in stream_recipe(dish_name, language, lc_history, user=request.user):
                 yield f"data: {json.dumps({'token': token})}\n\n"
 
             done_payload = {"done": True}

@@ -169,6 +169,82 @@
                         </div>
                     </section>
 
+                    <!-- Recipe Preferences -->
+                    <section>
+                        <div class="mb-5">
+                            <h2 class="text-base font-semibold mb-0.5">Recipe Preferences</h2>
+                            <p class="page-text-muted text-xs">The AI uses these to personalise every recipe — no need to repeat yourself.</p>
+                        </div>
+                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
+
+                            <!-- Cooking skill -->
+                            <div class="px-5 py-4">
+                                <p class="text-sm font-medium mb-1">Cooking Skill Level</p>
+                                <p class="page-text-muted text-xs mb-3">Controls technique complexity and assumed kitchen knowledge.</p>
+                                <div class="flex gap-2" id="skill-btns">
+                                    {% for val, label in user.SKILL_CHOICES %}
+                                    <button data-skill="{{ val }}"
+                                        class="skill-btn flex-1 py-2 text-xs font-medium rounded-xl border transition-colors {% if user.cooking_skill == val %}skill-btn-active{% endif %}">
+                                        {{ label }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Default servings -->
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">Default Serving Size</p>
+                                    <p class="page-text-muted text-xs mt-0.5">Used unless you specify otherwise in the chat.</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="servings-dec" class="w-8 h-8 rounded-lg border settings-input flex items-center justify-center text-lg font-medium transition-colors hover:bg-gray-50">−</button>
+                                    <span id="servings-val" class="w-8 text-center text-sm font-semibold">{{ user.default_servings }}</span>
+                                    <button id="servings-inc" class="w-8 h-8 rounded-lg border settings-input flex items-center justify-center text-lg font-medium transition-colors hover:bg-gray-50">+</button>
+                                    <span class="page-text-muted text-xs ml-1">people</span>
+                                </div>
+                            </div>
+
+                            <!-- Dietary restrictions -->
+                            <div class="px-5 py-4">
+                                <p class="text-sm font-medium mb-1">Dietary Restrictions</p>
+                                <p class="page-text-muted text-xs mb-3">The AI will never include these ingredients, even as optional.</p>
+                                <div class="flex flex-wrap gap-2" id="dietary-chips">
+                                    {% for val, label in dietary_options %}
+                                    <button data-dietary="{{ val }}"
+                                        class="pref-chip py-1.5 px-3 text-xs font-medium rounded-full border transition-colors {% if val in user.dietary_restrictions %}pref-chip-active{% endif %}">
+                                        {{ label }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Cuisine preferences -->
+                            <div class="px-5 py-4">
+                                <p class="text-sm font-medium mb-1">Cuisine Preferences</p>
+                                <p class="page-text-muted text-xs mb-3">Leans toward these when your request is open-ended.</p>
+                                <div class="flex flex-wrap gap-2" id="cuisine-chips">
+                                    {% for val, label in cuisine_options %}
+                                    <button data-cuisine="{{ val }}"
+                                        class="pref-chip py-1.5 px-3 text-xs font-medium rounded-full border transition-colors {% if val in user.cuisine_preferences %}pref-chip-active{% endif %}">
+                                        {{ label }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Save row -->
+                            <div class="flex items-center justify-between px-5 py-3 bg-gray-50">
+                                <p id="prefs-saved-msg" class="text-xs text-green-600 font-medium hidden">✓ Preferences saved</p>
+                                <span></span>
+                                <button id="save-prefs-btn"
+                                    class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-xl transition-colors">
+                                    Save Preferences
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- Appearance -->
                     <section>
                         <div class="mb-5">
@@ -377,6 +453,51 @@ document.getElementById("save-name-btn")?.addEventListener("click", () => {
     const toast = document.getElementById("save-name-toast");
     toast.classList.remove("hidden");
     setTimeout(() => toast.classList.add("hidden"), 3000);
+});
+
+// ── Recipe Preferences ──────────────────────────────────────────
+let currentServings = parseInt(document.getElementById("servings-val")?.textContent || "2");
+
+document.getElementById("servings-dec")?.addEventListener("click", () => {
+    if (currentServings > 1) { currentServings--; document.getElementById("servings-val").textContent = currentServings; }
+});
+document.getElementById("servings-inc")?.addEventListener("click", () => {
+    if (currentServings < 20) { currentServings++; document.getElementById("servings-val").textContent = currentServings; }
+});
+
+document.querySelectorAll(".skill-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".skill-btn").forEach((b) => b.classList.remove("skill-btn-active"));
+        btn.classList.add("skill-btn-active");
+    });
+});
+
+document.querySelectorAll(".pref-chip").forEach((chip) => {
+    chip.addEventListener("click", () => chip.classList.toggle("pref-chip-active"));
+});
+
+document.getElementById("save-prefs-btn")?.addEventListener("click", async () => {
+    const skill    = document.querySelector(".skill-btn.skill-btn-active")?.dataset.skill || "intermediate";
+    const dietary  = [...document.querySelectorAll("#dietary-chips .pref-chip-active")].map((c) => c.dataset.dietary);
+    const cuisines = [...document.querySelectorAll("#cuisine-chips .pref-chip-active")].map((c) => c.dataset.cuisine);
+
+    const btn = document.getElementById("save-prefs-btn");
+    btn.disabled = true; btn.textContent = "Saving…";
+
+    try {
+        await fetch("{% url 'save_preferences' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+            body: JSON.stringify({ cooking_skill: skill, default_servings: currentServings, dietary_restrictions: dietary, cuisine_preferences: cuisines }),
+        });
+        const msg = document.getElementById("prefs-saved-msg");
+        msg.classList.remove("hidden");
+        setTimeout(() => msg.classList.add("hidden"), 3000);
+    } catch (e) {
+        console.error("Failed to save preferences", e);
+    } finally {
+        btn.disabled = false; btn.textContent = "Save Preferences";
+    }
 });
 
 // Theme selection — saves to Django session

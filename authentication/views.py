@@ -90,9 +90,35 @@ def upload_avatar(request):
     return JsonResponse({"ok": True, "url": request.build_absolute_uri(user.profile_picture.url)})
 
 
+DIETARY_OPTIONS  = [
+    ("vegan",        "Vegan"),
+    ("vegetarian",   "Vegetarian"),
+    ("gluten-free",  "Gluten-Free"),
+    ("dairy-free",   "Dairy-Free"),
+    ("nut-free",     "Nut-Free"),
+    ("halal",        "Halal"),
+    ("kosher",       "Kosher"),
+    ("low-carb",     "Low-Carb"),
+]
+CUISINE_OPTIONS = [
+    ("italian",       "Italian"),
+    ("indian",        "Indian"),
+    ("japanese",      "Japanese"),
+    ("mexican",       "Mexican"),
+    ("thai",          "Thai"),
+    ("mediterranean", "Mediterranean"),
+    ("chinese",       "Chinese"),
+    ("american",      "American"),
+    ("french",        "French"),
+    ("korean",        "Korean"),
+]
+
 @login_required()
 def settings_page(request):
-    return render(request, "settings.html")
+    return render(request, "settings.html", {
+        "dietary_options": DIETARY_OPTIONS,
+        "cuisine_options":  CUISINE_OPTIONS,
+    })
 
 @csrf_protect
 @require_http_methods(["POST"])
@@ -112,4 +138,37 @@ def set_language(request):
     if language not in VALID_LANGUAGES:
         return JsonResponse({"error": "Invalid language"}, status=400)
     request.session["language"] = language
+    return JsonResponse({"ok": True})
+
+
+VALID_DIETARY  = {"vegan", "vegetarian", "gluten-free", "dairy-free", "nut-free", "halal", "kosher", "low-carb"}
+VALID_CUISINES = {"italian", "indian", "japanese", "mexican", "thai", "mediterranean", "chinese", "american", "french", "korean"}
+VALID_SKILLS   = {"beginner", "intermediate", "advanced"}
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required
+def save_preferences(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    user     = request.user
+    dietary  = [d for d in data.get("dietary_restrictions", []) if d in VALID_DIETARY]
+    cuisines = [c for c in data.get("cuisine_preferences",  []) if c in VALID_CUISINES]
+    skill    = data.get("cooking_skill", "intermediate")
+    servings = int(data.get("default_servings", 2))
+
+    if skill not in VALID_SKILLS:
+        skill = "intermediate"
+    servings = max(1, min(servings, 20))
+
+    user.dietary_restrictions = dietary
+    user.cuisine_preferences  = cuisines
+    user.cooking_skill        = skill
+    user.default_servings     = servings
+    user.save(update_fields=["dietary_restrictions", "cuisine_preferences", "cooking_skill", "default_servings"])
+
     return JsonResponse({"ok": True})

@@ -47,10 +47,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 	"""Custom User model that uses email as the unique identifier and
 	does not include a username field."""
 
+	SKILL_CHOICES = [('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')]
+
 	email = models.EmailField('email address', unique=True)
 	first_name = models.CharField('first name', max_length=150, blank=True)
 	last_name = models.CharField('last name', max_length=150, blank=True)
 	profile_picture = models.ImageField(upload_to='avatars/', blank=True, null=True, default="avatars/default.png")
+	dietary_restrictions = models.JSONField(default=list, blank=True)
+	cuisine_preferences  = models.JSONField(default=list, blank=True)
+	cooking_skill        = models.CharField(max_length=20, choices=SKILL_CHOICES, default='intermediate')
+	default_servings     = models.PositiveSmallIntegerField(default=2)
 	is_staff = models.BooleanField(
 		'staff status',
 		default=False,

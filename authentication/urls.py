@@ -9,4 +9,5 @@ urlpatterns = [
     path("settings/", views.settings_page, name="settings"),
     path("api/set-theme/", views.set_theme, name="set_theme"),
     path("api/set-language/", views.set_language, name="set_language"),
+    path("api/save-preferences/", views.save_preferences, name="save_preferences"),
 ]
