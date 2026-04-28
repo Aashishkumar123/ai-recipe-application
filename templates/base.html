@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ theme }}">
+<html lang="en" data-theme="{{ theme }}" data-font="{{ font }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Recipe Chef{% endblock %}</title>
     {% load static %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'output.css' %}?v=19">
+    <style>
+        [data-font="inter"]   { font-family: 'Inter',   ui-sans-serif, system-ui, sans-serif; }
+        [data-font="lora"]    { font-family: 'Lora',    ui-serif, Georgia, serif; }
+        [data-font="nunito"]  { font-family: 'Nunito',  ui-sans-serif, system-ui, sans-serif; }
+        [data-font="poppins"] { font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif; }
+    </style>
     <!-- Resolve "system" theme before paint to prevent flash -->
     <script>
         (function () {
@@ -85,7 +94,7 @@
         </div>
     </div>
 
-    <script src="{% static 'sidebar.js' %}"></script>
+    <script src="{% static 'sidebar.js' %}?v=2"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

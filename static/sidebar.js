@@ -127,12 +127,17 @@ const profileChevron    = document.getElementById("profile-chevron");
 const languageToggleBtn = document.getElementById("language-toggle");
 const languageSubmenu   = document.getElementById("language-submenu");
 const languageArrow     = document.getElementById("language-arrow");
+const fontToggleBtn     = document.getElementById("font-toggle");
+const fontSubmenu       = document.getElementById("font-submenu");
+const fontArrow         = document.getElementById("font-arrow");
 
 function closeProfileDropdown() {
     profileDropdown?.classList.add("hidden");
     profileChevron?.classList.remove("rotate-180");
     languageSubmenu?.classList.add("hidden");
     languageArrow?.classList.remove("rotate-90");
+    fontSubmenu?.classList.add("hidden");
+    fontArrow?.classList.remove("rotate-90");
 }
 
 profileBtn?.addEventListener("click", (e) => {
@@ -172,6 +177,24 @@ async function saveLanguage(lang) {
         });
     } catch (e) {
         console.error("Failed to save language:", e);
+    }
+}
+
+fontToggleBtn?.addEventListener("click", () => {
+    fontSubmenu?.classList.toggle("hidden");
+    fontArrow?.classList.toggle("rotate-90");
+});
+
+async function saveFont(font) {
+    try {
+        const csrf = document.querySelector("[name=csrfmiddlewaretoken]")?.value;
+        await fetch("/auth/api/set-font/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+            body: JSON.stringify({ font }),
+        });
+    } catch (e) {
+        console.error("Failed to save font:", e);
     }
 }
 
@@ -292,6 +315,19 @@ document.querySelectorAll(".language-option").forEach((btn) => {
         const label = document.getElementById("active-language-label");
         if (label) label.textContent = lang;
         saveLanguage(lang);
+        closeProfileDropdown();
+    });
+});
+
+document.querySelectorAll(".font-option").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const font = btn.dataset.font;
+        document.querySelectorAll(".font-option .font-check").forEach((c) => c.classList.add("hidden"));
+        btn.querySelector(".font-check")?.classList.remove("hidden");
+        const label = document.getElementById("active-font-label");
+        if (label) label.textContent = font === "system" ? "System" : font.charAt(0).toUpperCase() + font.slice(1);
+        document.documentElement.setAttribute("data-font", font);
+        saveFont(font);
         closeProfileDropdown();
     });
 });

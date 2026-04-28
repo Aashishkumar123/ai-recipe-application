@@ -7,6 +7,7 @@ def context_processors(request):
     ctx = {
         "theme": request.session.get("theme", "light"),
         "language": request.session.get("language", "English"),
+        "font": request.session.get("font", "system"),
         "name": request.user.name if request.user.is_authenticated else "Guest",
         "chats_today": [],
         "chats_yesterday": [],

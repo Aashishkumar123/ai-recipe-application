@@ -28,6 +28,25 @@
             <button data-lang="Japanese" class="language-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs">Japanese<svg class="lang-check {% if language != 'Japanese' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
         </div>
     </div>
+    <div>
+        <button id="font-toggle" class="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-xs">
+            <svg class="shrink-0 text-zinc-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+            </svg>
+            <span>Font</span>
+            <span id="active-font-label" class="ml-auto mr-1 text-zinc-500 text-[11px] capitalize">{{ font }}</span>
+            <svg id="font-arrow" class="text-zinc-600 transition-transform duration-200 shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+            </svg>
+        </button>
+        <div id="font-submenu" class="hidden border-t border-zinc-800/60 bg-zinc-950/40">
+            <button data-font="system"  class="font-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs" style="font-family:ui-sans-serif,system-ui,sans-serif">System default<svg class="font-check {% if font != 'system' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button data-font="inter"   class="font-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs" style="font-family:'Inter',sans-serif">Inter<svg class="font-check {% if font != 'inter' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button data-font="lora"    class="font-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs" style="font-family:'Lora',serif">Lora<svg class="font-check {% if font != 'lora' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button data-font="nunito"  class="font-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs" style="font-family:'Nunito',sans-serif">Nunito<svg class="font-check {% if font != 'nunito' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button data-font="poppins" class="font-option w-full flex items-center justify-between px-5 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-xs" style="font-family:'Poppins',sans-serif">Poppins<svg class="font-check {% if font != 'poppins' %}hidden{% endif %} text-orange-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+        </div>
+    </div>
     <div class="border-t border-zinc-800/60 my-1"></div>
     <button id="logout-btn" class="w-full flex items-center gap-3 px-3 py-2.5 text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors text-xs">
         <svg class="shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

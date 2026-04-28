@@ -149,6 +149,18 @@ def set_language(request):
     request.session["language"] = language
     return JsonResponse({"ok": True})
 
+VALID_FONTS = {"system", "inter", "lora", "nunito", "poppins"}
+
+@csrf_protect
+@require_http_methods(["POST"])
+def set_font(request):
+    data = json.loads(request.body)
+    font = data.get("font", "system")
+    if font not in VALID_FONTS:
+        return JsonResponse({"error": "Invalid font"}, status=400)
+    request.session["font"] = font
+    return JsonResponse({"ok": True})
+
 
 VALID_DIETARY  = {"vegan", "vegetarian", "gluten-free", "dairy-free", "nut-free", "halal", "kosher", "low-carb"}
 VALID_CUISINES = {"italian", "indian", "japanese", "mexican", "thai", "mediterranean", "chinese", "american", "french", "korean"}
