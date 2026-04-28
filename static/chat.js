@@ -612,6 +612,7 @@ let pantryActive = false;
 
 function enterPantryMode() {
     pantryActive = true;
+    exitMealPlanMode();
     pantryBtn?.classList.add("is-active");
     pantryPrefix?.classList.remove("hidden");
     input.placeholder = "potatoes, garlic, chicken...";
