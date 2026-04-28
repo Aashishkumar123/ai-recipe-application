@@ -678,6 +678,8 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 .skill-btn { color: #374151; background: #ffffff; border-color: #e5e7eb; }
 .skill-btn:hover { border-color: #f97316; color: #f97316; }
 .skill-btn-active { background: #f97316; border-color: #f97316; color: #ffffff; }
+.skill-btn-active:hover { background: #ea580c; border-color: #ea580c; color: #ffffff; }
 [data-theme="dark"] .skill-btn { color: #a1a1aa; background: #27272a; border-color: #3f3f46; }
 [data-theme="dark"] .skill-btn:hover { border-color: #f97316; color: #fb923c; }
 [data-theme="dark"] .skill-btn-active { background: #f97316; border-color: #f97316; color: #ffffff; }
+[data-theme="dark"] .skill-btn-active:hover { background: #ea580c; border-color: #ea580c; color: #ffffff; }
