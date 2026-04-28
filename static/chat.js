@@ -144,6 +144,7 @@ function styleRecipeMeta(p) {
         const val = seg.slice(colon + 1).trim();
         const icon = META_ICONS[key];
         if (!icon) return;
+        if (key === "Pantry match") chips.push(`<span class="recipe-meta-divider"></span>`);
         chips.push(`<span class="recipe-meta-chip">${icon}<b>${key}</b>${val}</span>`);
     });
     if (chips.length) p.innerHTML = chips.join("");

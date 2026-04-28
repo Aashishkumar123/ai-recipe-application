@@ -232,6 +232,16 @@ body {
     flex-shrink: 0;
 }
 .recipe-meta-chip svg { flex-shrink: 0; opacity: 0.85; }
+.recipe-meta-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(154,52,18,0.25);
+    flex-shrink: 0;
+    margin: 0 0.625rem;
+}
+[data-theme="dark"] .recipe-meta-divider {
+    background: rgba(251,146,60,0.25);
+}
 .recipe-meta-chip b { font-weight: 600; margin-right: 0.15rem; }
 [data-theme="dark"] .recipe-meta-chip {
     background: rgba(251,146,60,0.12);
