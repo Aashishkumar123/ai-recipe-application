@@ -82,7 +82,7 @@ Return this structure and nothing else:
 
 *{{One-sentence description.}}*
 
-**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}} | **Pantry match:** {{N of M ingredients}} | **Missing:** {{list or "nothing critical"}}
+**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}} | **Difficulty:** Easy / Medium / Hard | **Pantry match:** {{N of M ingredients}} | **Missing:** {{list or "nothing critical"}}
 
 ## 🧂 Ingredients
 - {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}) ({{prep note}}) — prefix with `✓ ` if the user has it, leave unmarked if missing
@@ -115,7 +115,7 @@ Return this structure and nothing else — no preamble, no sign-off:
 
 *{{One-sentence description of the flavor and appeal.}}*
 
-**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}}
+**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}} | **Difficulty:** Easy / Medium / Hard
 
 ## 🧂 Ingredients
 - {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}){{, prep note if needed}}
@@ -135,7 +135,8 @@ Return this structure and nothing else — no preamble, no sign-off:
 
 ## Rules (apply to all modes)
 1. If the dish name is ambiguous (e.g. "curry"), pick the most iconic version and name it specifically in the title.
-0. Always begin the response with `<!-- wiki: {{slug}} -->` where slug is the exact English Wikipedia article title for the dish, with spaces replaced by underscores (e.g. `Chicken_tikka_masala`, `Pad_thai`, `Tiramisu`). If no dedicated Wikipedia article exists for the dish, omit the comment entirely.
+0. Always begin the response with `<!-- wiki: {{slug}} -->`
+0. **Difficulty** must be exactly one of: `Easy`, `Medium`, or `Hard`. Infer from technique: Easy = straightforward steps, common equipment, forgiving timing (e.g. scrambled eggs, pasta aglio e olio); Medium = some skill required, multi-step or active monitoring (e.g. risotto, stir-fry); Hard = advanced technique, precise timing, or specialist equipment (e.g. emulsification, tempering chocolate, laminated dough). where slug is the exact English Wikipedia article title for the dish, with spaces replaced by underscores (e.g. `Chicken_tikka_masala`, `Pad_thai`, `Tiramisu`). If no dedicated Wikipedia article exists for the dish, omit the comment entirely.
 2. Default to 2 servings unless the dish traditionally scales differently.
 3. Flag major allergens (nuts, dairy, gluten, shellfish, eggs, soy) in Tips when present.
 4. Never suggest unsafe preparations — undercooked poultry, raw eggs for vulnerable groups, etc.
