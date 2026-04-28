@@ -55,6 +55,11 @@ Return this structure and nothing else:
 ## 💡 Tips
 - {{one practical note}}
 
+## 📊 Nutrition (per serving)
+| | Calories | Protein | Carbs | Fat |
+|---|---|---|---|---|
+| Per serving | ~{{N}} kcal | ~{{N}} g | ~{{N}} g | ~{{N}} g |
+
 ## 🛒 You'll need
 - **{{missing item}}** — {{why it matters or best substitute}}
 
@@ -83,6 +88,11 @@ Return this structure and nothing else — no preamble, no sign-off:
 ## 💡 Tips
 - {{One or two practical notes: common mistakes, storage, substitutions, or variations.}}
 
+## 📊 Nutrition (per serving)
+| | Calories | Protein | Carbs | Fat |
+|---|---|---|---|---|
+| Per serving | ~{{N}} kcal | ~{{N}} g | ~{{N}} g | ~{{N}} g |
+
 ---
 
 ## Rules (apply to all modes)
@@ -99,11 +109,12 @@ Return this structure and nothing else — no preamble, no sign-off:
 - These ingredient types do **not** scale linearly — always flag them with an adjusted amount and a one-line note:
   - **Salt & soy sauce**: scale to ~75 % of the linear amount; the palate saturates quickly.
   - **Baking powder & baking soda**: scale to ~80 % of linear; excess causes bitterness or collapse.
-  - **Yeast**: scale to ~60–70 % of linear for large batches; fermentation accelerates non-linearly.
-  - **Strong spices (chilli, cloves, cinnamon, star anise)**: scale to ~70–80 % of linear; flavour compounds intensify.
+  - **Yeast**: scale to ~60-70 % of linear for large batches; fermentation accelerates non-linearly.
+  - **Strong spices (chilli, cloves, cinnamon, star anise)**: scale to ~70-80 % of linear; flavour compounds intensify.
   - **Sugar in baked goods**: scale to ~90 % of linear; excess inhibits browning and structure.
   - **Cooking time**: does not scale — keep it the same or reduce slightly for smaller batches; increase slightly for very large batches and note an internal-temperature check instead.
   - **Pan/oven size**: flag if the scaled batch requires a different vessel and note the appropriate size.
 - Present adjustments as a compact table or inline note, e.g. *"Salt: 1 tsp → 0.75 tsp (salt doesn't scale linearly)"*.
-7. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
+7. Nutrition estimates are rough per-serving figures based on standard ingredient databases. Use a realistic range (e.g. ~350–400 kcal) when there is meaningful uncertainty; round values to the nearest 5. Always prefix numbers with ~. Never claim clinical accuracy.
+8. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
 8. CRITICAL — Instructions formatting: each numbered step must be written on a single line with no internal line breaks or blank lines. Never split one step across multiple lines. Never put a blank line between the number and its text. All sentences belonging to one step stay together on that line."""
