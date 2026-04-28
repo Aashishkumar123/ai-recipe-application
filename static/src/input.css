@@ -684,6 +684,34 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 [data-theme="dark"] .skill-btn-active { background: #f97316; border-color: #f97316; color: #ffffff; }
 [data-theme="dark"] .skill-btn-active:hover { background: #ea580c; border-color: #ea580c; color: #ffffff; }
 
+/* ── Recipe hero image ── */
+.recipe-hero-img {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    display: block;
+}
+.recipe-hero-placeholder {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+[data-theme="dark"] .recipe-hero-placeholder {
+    background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+
 /* ── Pantry mode ── */
 .pantry-pill {
     background: rgba(249,115,22,0.08);

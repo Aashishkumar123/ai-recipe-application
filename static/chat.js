@@ -131,6 +131,39 @@ function applyRecipeStyles(bubble) {
             p.classList.add("recipe-meta");
         }
     });
+    injectRecipeImage(bubble);
+}
+
+async function injectRecipeImage(bubble) {
+    // Already has an image — skip
+    if (bubble.querySelector(".recipe-hero-img")) return;
+
+    // Extract the Wikipedia slug from the HTML comment left by the LLM
+    const html  = bubble.innerHTML;
+    const match = html.match(/<!--\s*wiki:\s*([^\s>]+)\s*-->/);
+    if (!match) return;
+    const slug = match[1].trim();
+
+    // Placeholder while loading
+    const placeholder = document.createElement("div");
+    placeholder.className = "recipe-hero-placeholder";
+    bubble.insertBefore(placeholder, bubble.firstChild);
+
+    try {
+        const res  = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
+        if (!res.ok) { placeholder.remove(); return; }
+        const data = await res.json();
+        const src  = data.thumbnail?.source;
+        if (!src) { placeholder.remove(); return; }
+
+        const img = document.createElement("img");
+        img.src       = src;
+        img.alt       = data.title || slug.replace(/_/g, " ");
+        img.className = "recipe-hero-img";
+        placeholder.replaceWith(img);
+    } catch {
+        placeholder.remove();
+    }
 }
 
 function showMessages() {
