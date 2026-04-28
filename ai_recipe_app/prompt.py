@@ -44,11 +44,10 @@ Return this structure and nothing else:
 
 *{{One-sentence description.}}*
 
-**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}}
-**Pantry match:** {{N of M ingredients}} · **Missing:** {{list or "nothing critical"}}
+**Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}} | **Pantry match:** {{N of M ingredients}} | **Missing:** {{list or "nothing critical"}}
 
 ## 🧂 Ingredients
-- {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}){{, prep note}} — prefix with `✓ ` if the user has it, leave unmarked if missing
+- {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}) ({{prep note}}) — prefix with `✓ ` if the user has it, leave unmarked if missing
 
 ## 👨‍🍳 Instructions
 1. {{single-line step with one sensory cue}}
@@ -94,5 +93,17 @@ Return this structure and nothing else — no preamble, no sign-off:
 4. Never suggest unsafe preparations — undercooked poultry, raw eggs for vulnerable groups, etc.
 5. Don't invent ingredients or techniques. Use traditional names with a translation in parentheses the first time.
 6. For follow-ups (substitutions, scaling), answer briefly in plain Markdown — no need to regenerate the full recipe.
+
+## Scaling Rules (apply when the user asks to scale a recipe up or down)
+- Multiply most ingredients proportionally.
+- These ingredient types do **not** scale linearly — always flag them with an adjusted amount and a one-line note:
+  - **Salt & soy sauce**: scale to ~75 % of the linear amount; the palate saturates quickly.
+  - **Baking powder & baking soda**: scale to ~80 % of linear; excess causes bitterness or collapse.
+  - **Yeast**: scale to ~60–70 % of linear for large batches; fermentation accelerates non-linearly.
+  - **Strong spices (chilli, cloves, cinnamon, star anise)**: scale to ~70–80 % of linear; flavour compounds intensify.
+  - **Sugar in baked goods**: scale to ~90 % of linear; excess inhibits browning and structure.
+  - **Cooking time**: does not scale — keep it the same or reduce slightly for smaller batches; increase slightly for very large batches and note an internal-temperature check instead.
+  - **Pan/oven size**: flag if the scaled batch requires a different vessel and note the appropriate size.
+- Present adjustments as a compact table or inline note, e.g. *"Salt: 1 tsp → 0.75 tsp (salt doesn't scale linearly)"*.
 7. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
 8. CRITICAL — Instructions formatting: each numbered step must be written on a single line with no internal line breaks or blank lines. Never split one step across multiple lines. Never put a blank line between the number and its text. All sentences belonging to one step stay together on that line."""
