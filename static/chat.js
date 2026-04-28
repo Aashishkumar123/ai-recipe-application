@@ -167,11 +167,12 @@ function applyRecipeStyles(bubble) {
 }
 
 function styleMealPlanTable(bubble) {
-    if (bubble.querySelector(".meal-plan-scroll")) return;
     const h1 = bubble.querySelector("h1");
     const txt = h1 ? h1.textContent.toLowerCase() : "";
     const isMealPlan = txt.includes("🗓") || txt.includes("meal plan") || txt.includes("-day meal");
     if (!isMealPlan) return;
+    bubble.classList.add("meal-plan-bubble");
+    if (bubble.querySelector(".meal-plan-scroll")) return;
     const table = bubble.querySelector("table");
     if (!table) return;
     table.classList.add("meal-plan-table");

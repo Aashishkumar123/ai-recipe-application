@@ -974,6 +974,54 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 .notif-item-time  { font-size: 10px; color: #71717a; margin-top: 3px; }
 .notif-dot { width: 6px; height: 6px; border-radius: 50%; background: #f97316; flex-shrink: 0; margin-top: 4px; }
 
+/* ── Meal plan bubble — unified purple theme ── */
+.bot-bubble.meal-plan-bubble h1 {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.bot-bubble.meal-plan-bubble > p:first-of-type {
+    color: #7c3aed;
+    font-style: italic;
+    opacity: 0.85;
+}
+.bot-bubble.meal-plan-bubble h2 {
+    color: #6d28d9;
+    border-left: 3px solid #a78bfa;
+    padding-left: 0.6rem;
+    background: linear-gradient(to right, #f5f3ff, transparent);
+    border-radius: 0 6px 6px 0;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    margin-top: 1.25rem;
+    border-bottom: none;
+}
+.bot-bubble.meal-plan-bubble ul li::before {
+    background: #a78bfa;
+}
+.bot-bubble.meal-plan-bubble ul li {
+    color: #4c1d95;
+}
+.bot-bubble.meal-plan-bubble ul li a { color: #6d28d9; }
+
+[data-theme="dark"] .bot-bubble.meal-plan-bubble h1 {
+    background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="dark"] .bot-bubble.meal-plan-bubble > p:first-of-type { color: #a78bfa; }
+[data-theme="dark"] .bot-bubble.meal-plan-bubble h2 {
+    color: #a78bfa;
+    border-left-color: #7c3aed;
+    background: linear-gradient(to right, rgba(124,58,237,0.1), transparent);
+    border-bottom: none;
+}
+[data-theme="dark"] .bot-bubble.meal-plan-bubble ul li { color: #e9d5ff; }
+[data-theme="dark"] .bot-bubble.meal-plan-bubble ul li::before { background: #7c3aed; }
+[data-theme="dark"] .bot-bubble.meal-plan-bubble ul li a { color: #a78bfa; }
+
 /* ── Meal plan pill button ── */
 .meal-plan-pill {
     background: #f5f3ff;
