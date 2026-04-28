@@ -131,38 +131,144 @@ function applyRecipeStyles(bubble) {
             p.classList.add("recipe-meta");
         }
     });
+    stylePantryIngredients(bubble);
     injectRecipeImage(bubble);
 }
 
+function stylePantryIngredients(bubble) {
+    // Already processed
+    if (bubble.querySelector(".pantry-check")) return;
+
+    // Find the Ingredients <ul> — it follows the h2 containing 🧂
+    let ingredientsUl = null;
+    bubble.querySelectorAll("h2").forEach((h2) => {
+        if (h2.textContent.includes("🧂")) {
+            let el = h2.nextElementSibling;
+            while (el && el.tagName !== "UL") el = el.nextElementSibling;
+            if (el?.tagName === "UL") ingredientsUl = el;
+        }
+    });
+    if (!ingredientsUl) return;
+
+    const CHECK_SVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    ingredientsUl.querySelectorAll("li").forEach((li) => {
+        // marked.js may wrap li content in a <p>
+        const target = li.querySelector("p") || li;
+        const first  = target.firstChild;
+        if (!first || first.nodeType !== Node.TEXT_NODE) return;
+        if (!first.textContent.trimStart().startsWith("✓")) return;
+
+        // Strip the ✓ and any trailing space from the text node
+        first.textContent = first.textContent.replace(/^\s*✓\s*/, "");
+
+        const icon = document.createElement("span");
+        icon.className   = "pantry-check";
+        icon.innerHTML   = CHECK_SVG;
+        icon.title       = "You have this";
+        target.insertBefore(icon, target.firstChild);
+    });
+}
+
+function bubbleHtmlForSave(bubble) {
+    // Return bubble HTML with ephemeral image elements stripped so they're
+    // not persisted — images are always re-fetched fresh on load.
+    const clone = bubble.cloneNode(true);
+    clone.querySelectorAll(
+        ".recipe-hero-placeholder, .recipe-hero-single, .recipe-image-grid"
+    ).forEach(el => el.remove());
+    return clone.innerHTML;
+}
+
 async function injectRecipeImage(bubble) {
-    // Already has an image — skip
-    if (bubble.querySelector(".recipe-hero-img")) return;
+    // Guard: already has images, OR a load is already in-flight (data attr, not DOM)
+    if (bubble.dataset.imgState || bubble.querySelector(".recipe-hero-img, .recipe-image-grid")) return;
+    bubble.dataset.imgState = "loading";
 
-    // Extract the Wikipedia slug from the HTML comment left by the LLM
-    const html  = bubble.innerHTML;
-    const match = html.match(/<!--\s*wiki:\s*([^\s>]+)\s*-->/);
-    if (!match) return;
-    const slug = match[1].trim();
+    // Derive slug: prefer <!-- wiki: ... --> comment, fall back to <h1> text
+    const commentMatch = bubble.innerHTML.match(/<!--\s*wiki:\s*([A-Za-z0-9_%()\-]+)\s*-->/);
+    let slug = commentMatch?.[1]?.trim();
 
-    // Placeholder while loading
+    if (!slug) {
+        const h1text = bubble.querySelector("h1")?.textContent?.trim();
+        if (!h1text) return;
+        slug = h1text
+            .replace(/\p{Emoji}/gu, "")
+            .replace(/[^a-zA-Z0-9\s\-'()]/g, "")
+            .trim()
+            .replace(/\s+/g, "_");
+    }
+    if (!slug) return;
+
+    const label = slug.replace(/_/g, " ");
+
     const placeholder = document.createElement("div");
     placeholder.className = "recipe-hero-placeholder";
     bubble.insertBefore(placeholder, bubble.firstChild);
 
     try {
-        const res  = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
-        if (!res.ok) { placeholder.remove(); return; }
-        const data = await res.json();
-        const src  = data.thumbnail?.source;
-        if (!src) { placeholder.remove(); return; }
+        const SKIP  = /\.svg$/i;
+        const NOISE = /flag|map|icon|logo|symbol|seal|emblem|coat|crest|locator/i;
 
-        const img = document.createElement("img");
-        img.src       = src;
-        img.alt       = data.title || slug.replace(/_/g, " ");
-        img.className = "recipe-hero-img";
-        placeholder.replaceWith(img);
+        let srcs = [];
+
+        // Try media-list for up to 3 images
+        const mediaRes = await fetch(
+            `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(slug)}`
+        );
+        if (mediaRes.ok) {
+            const media = await mediaRes.json();
+            srcs = (media.items || [])
+                .filter(it =>
+                    it.type === "image" &&
+                    !SKIP.test(it.title || "") &&
+                    !NOISE.test(it.title || "")
+                )
+                .map(it => {
+                    const srcset = it.srcset || [];
+                    const rel    = srcset[srcset.length - 1]?.src || "";
+                    return rel.startsWith("//") ? "https:" + rel : rel;
+                })
+                .filter(src => src.startsWith("https://"))
+                .slice(0, 3);
+        }
+
+        // Fall back to summary thumbnail
+        if (srcs.length === 0) {
+            const summaryRes = await fetch(
+                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`
+            );
+            if (summaryRes.ok) {
+                const data = await summaryRes.json();
+                if (data.thumbnail?.source) srcs = [data.thumbnail.source];
+            }
+        }
+
+        if (!placeholder.isConnected || srcs.length === 0) {
+            placeholder.remove();
+            return;
+        }
+
+        const container = document.createElement("div");
+        container.className = srcs.length === 1
+            ? "recipe-hero-single"
+            : `recipe-image-grid recipe-image-grid--${srcs.length}`;
+
+        srcs.forEach((src, i) => {
+            const img     = document.createElement("img");
+            img.src       = src;
+            img.alt       = `${label} — photo ${i + 1}`;
+            img.className = "recipe-hero-img";
+            img.loading   = "lazy";
+            img.onerror   = () => img.remove();
+            container.appendChild(img);
+        });
+
+        placeholder.replaceWith(container);
     } catch {
         placeholder.remove();
+    } finally {
+        delete bubble.dataset.imgState;
     }
 }
 
@@ -170,7 +276,9 @@ function showMessages() {
     if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; }
 }
 
-// Apply to any history bubbles already in the DOM
+// Apply to any history bubbles already in the DOM.
+// First strip any stale placeholders that were accidentally persisted before this fix.
+document.querySelectorAll(".bot-bubble .recipe-hero-placeholder").forEach(el => el.remove());
 document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
 
 const copyIconSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
@@ -341,7 +449,7 @@ async function streamResponse(userMessage) {
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-                                body: JSON.stringify({ chat_id: streamChatId, content: bubble.innerHTML }),
+                                body: JSON.stringify({ chat_id: streamChatId, content: bubbleHtmlForSave(bubble) }),
                             }).catch(console.error);
                         }
                     }
@@ -364,7 +472,7 @@ async function streamResponse(userMessage) {
                 fetch("/chat/api/save-bot-message/", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-                    body: JSON.stringify({ chat_id: saveId, content: bubble.innerHTML }),
+                    body: JSON.stringify({ chat_id: saveId, content: bubbleHtmlForSave(bubble) }),
                 }).catch(console.error);
             }
         } else {

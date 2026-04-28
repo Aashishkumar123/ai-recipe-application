@@ -123,7 +123,7 @@
                                     <p class="page-text-muted text-xs mt-0.5">Shown in chat history</p>
                                 </div>
                                 <div class="flex flex-1 gap-2">
-                                    <input id="display-name" type="text" value="Aashish Kumar"
+                                    <input id="display-name" type="text" value={{user.name}}
                                         class="settings-input flex-1 px-3 py-2 border rounded-xl text-sm outline-none transition-all">
                                     <button id="save-name-btn"
                                         class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-colors shrink-0">
@@ -234,7 +234,7 @@
                             </div>
 
                             <!-- Save row -->
-                            <div class="flex items-center justify-between px-5 py-3 bg-gray-50">
+                            <div class="flex items-center justify-between px-5 py-3">
                                 <p id="prefs-saved-msg" class="text-xs text-green-600 font-medium hidden">✓ Preferences saved</p>
                                 <span></span>
                                 <button id="save-prefs-btn"
