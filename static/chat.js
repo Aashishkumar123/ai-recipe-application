@@ -345,8 +345,9 @@ async function streamResponse(userMessage) {
 
 form?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const userMessage = input.value.trim();
-    if (!userMessage || abortController) return; // ignore submit while streaming
+    const raw = input.value.trim();
+    if (!raw || abortController) return; // ignore submit while streaming
+    const userMessage = pantryActive ? `I have: ${raw}` : raw;
     if (window.innerWidth < 768) closeSidebar();
     appendUserMessage(userMessage);
     input.value = "";
@@ -359,32 +360,30 @@ form?.addEventListener("submit", async (e) => {
 // --- Pantry mode ---
 const pantryBtn        = document.getElementById("pantry-btn");
 const pantryWelcomeBtn = document.getElementById("pantry-welcome-btn");
-const PANTRY_PREFIX    = "I have: ";
+const pantryPrefix     = document.getElementById("pantry-prefix");
 
 let pantryActive = false;
 
 function enterPantryMode() {
     pantryActive = true;
     pantryBtn?.classList.add("is-active");
-    if (!input.value.startsWith(PANTRY_PREFIX)) {
-        input.value = PANTRY_PREFIX;
-        input.dispatchEvent(new Event("input"));
-    }
+    pantryPrefix?.classList.remove("hidden");
+    input.placeholder = "potatoes, garlic, chicken...";
+    input.value = "";
+    input.dispatchEvent(new Event("input"));
     input.focus();
-    // Move cursor to end
-    const len = input.value.length;
-    input.setSelectionRange(len, len);
 }
 
 function exitPantryMode() {
     pantryActive = false;
     pantryBtn?.classList.remove("is-active");
+    pantryPrefix?.classList.add("hidden");
+    input.placeholder = "Ask for a recipe...";
 }
 
 pantryBtn?.addEventListener("click", () => {
     if (pantryActive) {
         exitPantryMode();
-        if (input.value === PANTRY_PREFIX) { input.value = ""; input.dispatchEvent(new Event("input")); }
         input.focus();
     } else {
         enterPantryMode();
@@ -393,13 +392,5 @@ pantryBtn?.addEventListener("click", () => {
 
 pantryWelcomeBtn?.addEventListener("click", () => {
     enterPantryMode();
-    // Scroll so the input is in view (welcome screen may be tall)
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
-});
-
-// Deactivate pantry pill if user clears the prefix manually
-input?.addEventListener("input", () => {
-    if (pantryActive && !input.value.startsWith(PANTRY_PREFIX)) {
-        exitPantryMode();
-    }
 });
