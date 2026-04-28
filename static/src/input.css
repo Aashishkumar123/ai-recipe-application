@@ -684,6 +684,47 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 [data-theme="dark"] .skill-btn-active { background: #f97316; border-color: #f97316; color: #ffffff; }
 [data-theme="dark"] .skill-btn-active:hover { background: #ea580c; border-color: #ea580c; color: #ffffff; }
 
+/* ── Pantry mode ── */
+.pantry-pill {
+    background: rgba(249,115,22,0.08);
+    border: 1px solid rgba(249,115,22,0.25);
+    color: #ea580c;
+}
+.pantry-pill:hover {
+    background: rgba(249,115,22,0.15);
+    border-color: rgba(249,115,22,0.45);
+}
+.pantry-pill.is-active {
+    background: #f97316;
+    border-color: #f97316;
+    color: #ffffff;
+}
+[data-theme="dark"] .pantry-pill {
+    background: rgba(249,115,22,0.1);
+    border-color: rgba(249,115,22,0.2);
+    color: #fb923c;
+}
+[data-theme="dark"] .pantry-pill:hover {
+    background: rgba(249,115,22,0.18);
+    border-color: rgba(249,115,22,0.4);
+}
+[data-theme="dark"] .pantry-pill.is-active {
+    background: #f97316;
+    border-color: #f97316;
+    color: #ffffff;
+}
+
+/* 🛒 You'll need section inside bot bubble */
+.bot-bubble .shopping-list-section h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
 /* ── Notification dropdown items (dropdown shell uses Tailwind classes) ── */
 .notif-item {
     display: flex;

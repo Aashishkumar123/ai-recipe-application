@@ -104,6 +104,13 @@
                     <span class="text-xs page-text-muted">Thai street food</span>
                 </button>
             </div>
+
+            <!-- Pantry mode CTA -->
+            <button id="pantry-welcome-btn" class="pantry-pill mt-6 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
+                <span>🧺</span>
+                <span>Use what's in my pantry</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
         </div>
 
         {% for msg in chat_history %}
@@ -144,6 +151,13 @@
     <div class="chat-input-area px-3 md:px-4 pb-4 md:pb-5 pt-2 md:pt-3 shrink-0">
         <form id="chat-form" class="max-w-3xl mx-auto">
             {% csrf_token %}
+            <!-- Pantry mode quick-action -->
+            <div class="flex items-center gap-2 mb-2 px-1">
+                <button type="button" id="pantry-btn" class="pantry-pill flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all">
+                    <span>🧺</span>
+                    <span>Pantry mode</span>
+                </button>
+            </div>
             <div class="chat-input-box flex items-end gap-2 md:gap-3 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 shadow-sm transition-all">
                 <textarea
                     id="message-input"

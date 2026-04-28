@@ -351,6 +351,55 @@ form?.addEventListener("submit", async (e) => {
     appendUserMessage(userMessage);
     input.value = "";
     input.style.height = "auto";
+    exitPantryMode();
     try { await streamResponse(userMessage); }
     finally { input.focus(); }
+});
+
+// --- Pantry mode ---
+const pantryBtn        = document.getElementById("pantry-btn");
+const pantryWelcomeBtn = document.getElementById("pantry-welcome-btn");
+const PANTRY_PREFIX    = "I have: ";
+
+let pantryActive = false;
+
+function enterPantryMode() {
+    pantryActive = true;
+    pantryBtn?.classList.add("is-active");
+    if (!input.value.startsWith(PANTRY_PREFIX)) {
+        input.value = PANTRY_PREFIX;
+        input.dispatchEvent(new Event("input"));
+    }
+    input.focus();
+    // Move cursor to end
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+}
+
+function exitPantryMode() {
+    pantryActive = false;
+    pantryBtn?.classList.remove("is-active");
+}
+
+pantryBtn?.addEventListener("click", () => {
+    if (pantryActive) {
+        exitPantryMode();
+        if (input.value === PANTRY_PREFIX) { input.value = ""; input.dispatchEvent(new Event("input")); }
+        input.focus();
+    } else {
+        enterPantryMode();
+    }
+});
+
+pantryWelcomeBtn?.addEventListener("click", () => {
+    enterPantryMode();
+    // Scroll so the input is in view (welcome screen may be tall)
+    document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
+});
+
+// Deactivate pantry pill if user clears the prefix manually
+input?.addEventListener("input", () => {
+    if (pantryActive && !input.value.startsWith(PANTRY_PREFIX)) {
+        exitPantryMode();
+    }
 });
