@@ -802,6 +802,67 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     animation: shimmer 1.4s infinite;
 }
 
+/* ── Nutrition grid ── */
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem;
+}
+@media (max-width: 480px) {
+    .nutrition-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.nutrition-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem 0.625rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border: 1px solid transparent;
+    cursor: default;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.nutrition-card:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+.nutrition-card:hover .nutrition-icon {
+    animation: nutrition-bounce 0.4s ease;
+}
+@keyframes nutrition-bounce {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+.nutrition-icon { font-size: 1.25rem; line-height: 1; display: inline-block; }
+
+.nutrition-card--cal     { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.15); }
+.nutrition-card--protein { background: rgba(59,130,246,0.08);  border-color: rgba(59,130,246,0.15); }
+.nutrition-card--carbs   { background: rgba(234,179,8,0.08);   border-color: rgba(234,179,8,0.18); }
+.nutrition-card--fat     { background: rgba(34,197,94,0.08);   border-color: rgba(34,197,94,0.15); }
+
+.nutrition-card--cal:hover     { background: rgba(249,115,22,0.15); border-color: rgba(249,115,22,0.35); box-shadow: 0 6px 18px rgba(249,115,22,0.15); }
+.nutrition-card--protein:hover { background: rgba(59,130,246,0.15);  border-color: rgba(59,130,246,0.35); box-shadow: 0 6px 18px rgba(59,130,246,0.15); }
+.nutrition-card--carbs:hover   { background: rgba(234,179,8,0.15);   border-color: rgba(234,179,8,0.38);  box-shadow: 0 6px 18px rgba(234,179,8,0.15); }
+.nutrition-card--fat:hover     { background: rgba(34,197,94,0.15);   border-color: rgba(34,197,94,0.35);  box-shadow: 0 6px 18px rgba(34,197,94,0.15); }
+
+.nutrition-value { font-size: 0.8125rem; font-weight: 700; color: #111827; line-height: 1.2; margin-top: 0.125rem; }
+.nutrition-label { font-size: 0.625rem; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+[data-theme="dark"] .nutrition-card--cal     { background: rgba(249,115,22,0.12);  border-color: rgba(249,115,22,0.2); }
+[data-theme="dark"] .nutrition-card--protein { background: rgba(59,130,246,0.12);  border-color: rgba(59,130,246,0.2); }
+[data-theme="dark"] .nutrition-card--carbs   { background: rgba(234,179,8,0.12);   border-color: rgba(234,179,8,0.22); }
+[data-theme="dark"] .nutrition-card--fat     { background: rgba(34,197,94,0.12);   border-color: rgba(34,197,94,0.2); }
+[data-theme="dark"] .nutrition-card--cal:hover     { background: rgba(249,115,22,0.22); border-color: rgba(249,115,22,0.4); }
+[data-theme="dark"] .nutrition-card--protein:hover { background: rgba(59,130,246,0.22);  border-color: rgba(59,130,246,0.4); }
+[data-theme="dark"] .nutrition-card--carbs:hover   { background: rgba(234,179,8,0.22);   border-color: rgba(234,179,8,0.42); }
+[data-theme="dark"] .nutrition-card--fat:hover     { background: rgba(34,197,94,0.22);   border-color: rgba(34,197,94,0.4); }
+[data-theme="dark"] .nutrition-value { color: #f3f4f6; }
+[data-theme="dark"] .nutrition-label { color: #9ca3af; }
+
 /* ── Pantry ingredient check icon ── */
 .pantry-check {
     display: inline-flex;

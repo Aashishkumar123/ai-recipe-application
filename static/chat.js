@@ -158,7 +158,52 @@ function applyRecipeStyles(bubble) {
         }
     });
     stylePantryIngredients(bubble);
+    styleNutritionTable(bubble);
     injectRecipeImage(bubble);
+}
+
+function styleNutritionTable(bubble) {
+    if (bubble.querySelector(".nutrition-grid")) return;
+
+    let nutritionH2 = null;
+    bubble.querySelectorAll("h2").forEach(h2 => {
+        if (h2.textContent.includes("📊") || h2.textContent.toLowerCase().includes("nutrition")) {
+            nutritionH2 = h2;
+        }
+    });
+    if (!nutritionH2) return;
+
+    let table = nutritionH2.nextElementSibling;
+    while (table && table.tagName !== "TABLE") table = table.nextElementSibling;
+    if (!table) return;
+
+    const headers = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim());
+    const values  = [...table.querySelectorAll("tbody td")].map(td => td.textContent.trim());
+
+    const MACROS = [
+        { key: "Calories", icon: "🔥", cls: "nutrition-card--cal"     },
+        { key: "Protein",  icon: "💪", cls: "nutrition-card--protein"  },
+        { key: "Carbs",    icon: "🌾", cls: "nutrition-card--carbs"    },
+        { key: "Fat",      icon: "🥑", cls: "nutrition-card--fat"      },
+    ];
+
+    const grid = document.createElement("div");
+    grid.className = "nutrition-grid";
+
+    MACROS.forEach(({ key, icon, cls }) => {
+        const idx = headers.indexOf(key);
+        if (idx === -1) return;
+        const val = values[idx] || "—";
+        const card = document.createElement("div");
+        card.className = `nutrition-card ${cls}`;
+        card.innerHTML =
+            `<span class="nutrition-icon">${icon}</span>` +
+            `<span class="nutrition-value">${val}</span>` +
+            `<span class="nutrition-label">${key}</span>`;
+        grid.appendChild(card);
+    });
+
+    if (grid.children.length) table.replaceWith(grid);
 }
 
 function stylePantryIngredients(bubble) {
