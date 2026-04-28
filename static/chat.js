@@ -159,8 +159,24 @@ function applyRecipeStyles(bubble) {
     });
     stylePantryIngredients(bubble);
     styleNutritionTable(bubble);
+    styleMealPlanTable(bubble);
     animateInstructions(bubble);
     injectRecipeImage(bubble);
+}
+
+function styleMealPlanTable(bubble) {
+    if (bubble.querySelector(".meal-plan-scroll")) return;
+    const h1 = bubble.querySelector("h1");
+    const txt = h1 ? h1.textContent.toLowerCase() : "";
+    const isMealPlan = txt.includes("🗓") || txt.includes("meal plan") || txt.includes("-day meal");
+    if (!isMealPlan) return;
+    const table = bubble.querySelector("table");
+    if (!table) return;
+    table.classList.add("meal-plan-table");
+    const wrapper = document.createElement("div");
+    wrapper.className = "meal-plan-scroll";
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
 }
 
 function animateInstructions(bubble) {
@@ -576,12 +592,13 @@ form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const raw = input.value.trim();
     if (!raw || abortController) return; // ignore submit while streaming
-    const userMessage = pantryActive ? `I have: ${raw}` : raw;
+    const userMessage = pantryActive ? `I have: ${raw}` : mealPlanActive ? `Meal plan: ${raw}` : raw;
     if (window.innerWidth < 768) closeSidebar();
     appendUserMessage(userMessage);
     input.value = "";
     input.style.height = "auto";
     exitPantryMode();
+    exitMealPlanMode();
     try { await streamResponse(userMessage); }
     finally { input.focus(); }
 });
@@ -621,5 +638,40 @@ pantryBtn?.addEventListener("click", () => {
 
 pantryWelcomeBtn?.addEventListener("click", () => {
     enterPantryMode();
+    document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
+});
+
+// --- Meal plan mode ---
+const mealPlanBtn        = document.getElementById("meal-plan-btn");
+const mealPlanWelcomeBtn = document.getElementById("meal-plan-welcome-btn");
+const mealPlanPrefix     = document.getElementById("meal-plan-prefix");
+
+let mealPlanActive = false;
+
+function enterMealPlanMode() {
+    mealPlanActive = true;
+    exitPantryMode();
+    mealPlanBtn?.classList.add("is-active");
+    mealPlanPrefix?.classList.remove("hidden");
+    input.placeholder = "7 days, vegetarian, low-carb…";
+    input.value = "";
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+}
+
+function exitMealPlanMode() {
+    mealPlanActive = false;
+    mealPlanBtn?.classList.remove("is-active");
+    mealPlanPrefix?.classList.add("hidden");
+    input.placeholder = "Ask for a recipe...";
+}
+
+mealPlanBtn?.addEventListener("click", () => {
+    if (mealPlanActive) { exitMealPlanMode(); input.focus(); }
+    else { enterMealPlanMode(); }
+});
+
+mealPlanWelcomeBtn?.addEventListener("click", () => {
+    enterMealPlanMode();
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });

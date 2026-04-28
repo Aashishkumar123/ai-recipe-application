@@ -105,12 +105,19 @@
                 </button>
             </div>
 
-            <!-- Pantry mode CTA -->
-            <button id="pantry-welcome-btn" class="pantry-pill mt-6 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
-                <span>🧺</span>
-                <span>Use what's in my pantry</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
+            <!-- Mode CTAs -->
+            <div class="mt-6 flex items-center gap-3 flex-wrap justify-center">
+                <button id="pantry-welcome-btn" class="pantry-pill flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
+                    <span>🧺</span>
+                    <span>Use what's in my pantry</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <button id="meal-plan-welcome-btn" class="meal-plan-pill flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
+                    <span>🗓️</span>
+                    <span>Plan my week</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
         </div>
 
         {% for msg in chat_history %}
@@ -151,15 +158,20 @@
     <div class="chat-input-area px-3 md:px-4 pb-4 md:pb-5 pt-2 md:pt-3 shrink-0">
         <form id="chat-form" class="max-w-3xl mx-auto">
             {% csrf_token %}
-            <!-- Pantry mode quick-action -->
+            <!-- Mode quick-actions -->
             <div class="flex items-center gap-2 mb-2 px-1">
                 <button type="button" id="pantry-btn" class="pantry-pill flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all">
                     <span>🧺</span>
                     <span>Pantry mode</span>
                 </button>
+                <button type="button" id="meal-plan-btn" class="meal-plan-pill flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all">
+                    <span>🗓️</span>
+                    <span>Meal plan</span>
+                </button>
             </div>
             <div class="chat-input-box flex items-end gap-2 md:gap-3 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 shadow-sm transition-all">
                 <span id="pantry-prefix" class="hidden shrink-0 text-sm font-medium text-orange-500 whitespace-nowrap py-0.5 select-none">🧺 I have:</span>
+                <span id="meal-plan-prefix" class="hidden shrink-0 text-sm font-medium text-violet-500 whitespace-nowrap py-0.5 select-none">🗓️ Meal plan:</span>
                 <textarea
                     id="message-input"
                     name="message"
@@ -269,7 +281,7 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="{% static 'chat.js' %}?v=10"></script>
+<script src="{% static 'chat.js' %}?v=11"></script>
 {% if chat_history %}
 <script>
     // Scroll to bottom so latest message is visible
