@@ -118,7 +118,7 @@ Return this structure and nothing else — no preamble, no sign-off:
 **Prep:** {{X}} min | **Cook:** {{Y}} min | **Serves:** {{N}} | **Difficulty:** Easy / Medium / Hard
 
 ## 🧂 Ingredients
-- {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}){{, prep note if needed}}
+- {{quantity}} {{unit}} [{{ingredient}}](https://en.wikipedia.org/wiki/{{Ingredient_name_underscored}}) ({{prep note if needed}})
 
 ## 👨‍🍳 Instructions
 1. {{single-line step with one sensory cue}}

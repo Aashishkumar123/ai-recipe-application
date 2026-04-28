@@ -243,7 +243,7 @@ function styleNutritionTable(bubble) {
 }
 
 function stylePantryIngredients(bubble) {
-    // Already processed
+    if (bubble.textContent.includes("Pantry match")) bubble.classList.add("pantry-bubble");
     if (bubble.querySelector(".pantry-check")) return;
 
     // Find the Ingredients <ul> — it follows the h2 containing 🧂

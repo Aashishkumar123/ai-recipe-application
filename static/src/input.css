@@ -912,31 +912,31 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 
 /* ── Pantry mode ── */
 .pantry-pill {
-    background: rgba(249,115,22,0.08);
-    border: 1px solid rgba(249,115,22,0.25);
-    color: #ea580c;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #16a34a;
 }
 .pantry-pill:hover {
-    background: rgba(249,115,22,0.15);
-    border-color: rgba(249,115,22,0.45);
+    background: #dcfce7;
+    border-color: #4ade80;
 }
 .pantry-pill.is-active {
-    background: #f97316;
-    border-color: #f97316;
+    background: #16a34a;
+    border-color: #16a34a;
     color: #ffffff;
 }
 [data-theme="dark"] .pantry-pill {
-    background: rgba(249,115,22,0.1);
-    border-color: rgba(249,115,22,0.2);
-    color: #fb923c;
+    background: rgba(22,163,74,0.12);
+    border-color: rgba(22,163,74,0.3);
+    color: #4ade80;
 }
 [data-theme="dark"] .pantry-pill:hover {
-    background: rgba(249,115,22,0.18);
-    border-color: rgba(249,115,22,0.4);
+    background: rgba(22,163,74,0.2);
+    border-color: rgba(74,222,128,0.5);
 }
 [data-theme="dark"] .pantry-pill.is-active {
-    background: #f97316;
-    border-color: #f97316;
+    background: #16a34a;
+    border-color: #16a34a;
     color: #ffffff;
 }
 
@@ -1021,6 +1021,112 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li { color: #e9d5ff; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li::before { background: #7c3aed; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li a { color: #a78bfa; }
+
+/* ── Pantry bubble — unified green theme ── */
+.bot-bubble.pantry-bubble h1 {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #84cc16 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-bottom-color: #bbf7d0;
+}
+.bot-bubble.pantry-bubble p:has(> em:only-child) {
+    color: #15803d;
+}
+.bot-bubble.pantry-bubble .recipe-meta {
+    background: linear-gradient(to right, #f0fdf4, #f7fef9);
+    border-color: #86efac;
+    color: #166534;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .recipe-meta {
+    background: linear-gradient(to right, #052e16, #0a1f0f);
+    border-color: #166534;
+    color: #86efac;
+}
+.bot-bubble.pantry-bubble h2 {
+    color: #166534;
+    background: #f0fdf4;
+    border-left-color: #4ade80;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble h2 {
+    color: #86efac;
+    background: rgba(22,163,74,0.08);
+    border-left-color: #16a34a;
+}
+/* ul bullets + links */
+.bot-bubble.pantry-bubble ul li { color: #14532d; }
+.bot-bubble.pantry-bubble ul li::before { background: #4ade80; }
+.bot-bubble.pantry-bubble ul li a {
+    color: #15803d;
+    text-decoration-color: #86efac;
+}
+.bot-bubble.pantry-bubble ul li a:hover {
+    color: #166534;
+    text-decoration-color: #4ade80;
+}
+
+/* Meta chips */
+.bot-bubble.pantry-bubble .recipe-meta-chip {
+    background: rgba(22,163,74,0.1);
+    border-color: rgba(22,163,74,0.22);
+    color: #166534;
+}
+.bot-bubble.pantry-bubble .recipe-meta-divider { background: rgba(22,163,74,0.3); }
+
+/* Instruction steps */
+.bot-bubble.pantry-bubble ol li {
+    border-color: #d1fae5;
+}
+.bot-bubble.pantry-bubble ol li:hover {
+    border-color: #4ade80;
+    box-shadow: 0 6px 18px rgba(22,163,74,0.12);
+}
+.bot-bubble.pantry-bubble ol li::before {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 2px 6px rgba(22,163,74,0.4);
+}
+.bot-bubble.pantry-bubble ol li:hover::before {
+    box-shadow: 0 4px 12px rgba(22,163,74,0.6);
+}
+.bot-bubble.pantry-bubble ol li:not(:last-child)::after { background: #16a34a; }
+
+/* Dark mode */
+[data-theme="dark"] .bot-bubble.pantry-bubble h1 {
+    background: linear-gradient(135deg, #4ade80 0%, #86efac 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-bottom-color: #14532d;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble p:has(> em:only-child) { color: #4ade80; }
+[data-theme="dark"] .bot-bubble.pantry-bubble ul li { color: #dcfce7; }
+[data-theme="dark"] .bot-bubble.pantry-bubble ul li::before { background: #16a34a; }
+[data-theme="dark"] .bot-bubble.pantry-bubble ul li a {
+    color: #4ade80;
+    text-decoration-color: #14532d;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble ul li a:hover {
+    color: #86efac;
+    text-decoration-color: #16a34a;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .recipe-meta-chip {
+    background: rgba(22,163,74,0.12);
+    border-color: rgba(22,163,74,0.25);
+    color: #86efac;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .recipe-meta-divider { background: rgba(22,163,74,0.3); }
+[data-theme="dark"] .bot-bubble.pantry-bubble ol li {
+    border-color: #14532d;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble ol li:hover {
+    border-color: #16a34a;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble ol li::before {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 2px 6px rgba(22,163,74,0.4);
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble ol li:not(:last-child)::after { background: #16a34a; }
 
 /* ── Meal plan pill button ── */
 .meal-plan-pill {
