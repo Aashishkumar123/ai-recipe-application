@@ -1,17 +1,95 @@
 import json
+import secrets
+from urllib.parse import urlencode
+import httpx
+from django.core.files.base import ContentFile
+from django.conf import settings as django_settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 
 from context_processors import VALID_LANGUAGES
 from .models import EmailOTP, Notification
 from .utils import email_users
-from django.shortcuts import render
 
 User = get_user_model()
+
+# ── Google OAuth ──────────────────────────────────────────────
+_GOOGLE_AUTH_URL     = "https://accounts.google.com/o/oauth2/auth"
+_GOOGLE_TOKEN_URL    = "https://oauth2.googleapis.com/token"
+_GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
+
+def google_login(request):
+    state = secrets.token_urlsafe(16)
+    request.session["google_oauth_state"] = state
+    params = {
+        "client_id":     django_settings.GOOGLE_CLIENT_ID,
+        "redirect_uri":  django_settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope":         "openid email profile",
+        "state":         state,
+        "access_type":   "online",
+    }
+    return redirect(f"{_GOOGLE_AUTH_URL}?{urlencode(params)}")
+
+def google_callback(request):
+    if request.GET.get("error"):
+        return redirect("/chat/")
+    code  = request.GET.get("code")
+    state = request.GET.get("state")
+    if not code or state != request.session.pop("google_oauth_state", None):
+        return redirect("/chat/")
+    try:
+        token_res = httpx.post(_GOOGLE_TOKEN_URL, data={
+            "code":          code,
+            "client_id":     django_settings.GOOGLE_CLIENT_ID,
+            "client_secret": django_settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri":  django_settings.GOOGLE_REDIRECT_URI,
+            "grant_type":    "authorization_code",
+        }, timeout=10)
+        access_token = token_res.json().get("access_token")
+        if not access_token:
+            return redirect("/chat/")
+        userinfo = httpx.get(_GOOGLE_USERINFO_URL,
+                             headers={"Authorization": f"Bearer {access_token}"},
+                             timeout=10).json()
+        email = userinfo.get("email")
+        if not email:
+            return redirect("/chat/")
+        name        = userinfo.get("name", "")
+        picture_url = userinfo.get("picture", "")
+
+        user, created = User.objects.get_or_create(email=email, defaults={"name": name})
+
+        update_fields = []
+        if not user.name and name:
+            user.name = name
+            update_fields.append("name")
+
+        # Save profile picture if user has no custom one (default or blank)
+        is_default = not user.profile_picture or "default.png" in str(user.profile_picture)
+        if picture_url and (created or is_default):
+            try:
+                img_res = httpx.get(picture_url, timeout=10, follow_redirects=True)
+                if img_res.status_code == 200:
+                    ext = "jpg"
+                    fname = f"google_{user.pk}.{ext}"
+                    user.profile_picture.save(fname, ContentFile(img_res.content), save=False)
+                    update_fields.append("profile_picture")
+            except Exception:
+                pass
+
+        if update_fields:
+            user.save(update_fields=update_fields)
+
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    except Exception:
+        pass
+    return redirect("/chat/")
 
 
 @csrf_protect

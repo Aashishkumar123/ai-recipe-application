@@ -125,6 +125,10 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
+
+GOOGLE_CLIENT_ID     = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI  = os.environ.get("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback/")
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
 
 AZURE_OPENAI_API_KEY= os.environ["AZURE_OPENAI_API_KEY"]
