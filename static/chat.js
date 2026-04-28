@@ -125,10 +125,35 @@ function addChatToSidebar(chatId, title) {
     todayList.prepend(item);
 }
 
+const META_ICONS = {
+    "Prep":         `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    "Cook":         `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    "Serves":       `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>`,
+    "Pantry match": `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 11 4-7"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="m9 11 1 9"/><path d="M4.5 15.5h15"/><path d="m15 11-1 9"/></svg>`,
+    "Missing":      `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
+};
+
+function styleRecipeMeta(p) {
+    if (p.querySelector(".recipe-meta-chip")) return;
+    const segments = p.textContent.trim().split(/[|·\n]/).map(s => s.trim()).filter(Boolean);
+    const chips = [];
+    segments.forEach(seg => {
+        const colon = seg.indexOf(":");
+        if (colon === -1) return;
+        const key = seg.slice(0, colon).trim();
+        const val = seg.slice(colon + 1).trim();
+        const icon = META_ICONS[key];
+        if (!icon) return;
+        chips.push(`<span class="recipe-meta-chip">${icon}<b>${key}</b>${val}</span>`);
+    });
+    if (chips.length) p.innerHTML = chips.join("");
+}
+
 function applyRecipeStyles(bubble) {
     bubble.querySelectorAll("p").forEach((p) => {
         if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
             p.classList.add("recipe-meta");
+            styleRecipeMeta(p);
         }
     });
     stylePantryIngredients(bubble);

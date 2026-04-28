@@ -220,6 +220,23 @@ body {
     scrollbar-width: none;
 }
 .bot-bubble .recipe-meta::-webkit-scrollbar { display: none; }
+.recipe-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+    background: rgba(249,115,22,0.1);
+    border: 1px solid rgba(249,115,22,0.2);
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.recipe-meta-chip svg { flex-shrink: 0; opacity: 0.85; }
+.recipe-meta-chip b { font-weight: 600; margin-right: 0.15rem; }
+[data-theme="dark"] .recipe-meta-chip {
+    background: rgba(251,146,60,0.12);
+    border-color: rgba(251,146,60,0.2);
+}
 [data-theme="dark"] .bot-bubble .recipe-meta {
     background: linear-gradient(to right, #1c0a00, #1f1005);
     border-color: #7c2d12;
