@@ -159,7 +159,24 @@ function applyRecipeStyles(bubble) {
     });
     stylePantryIngredients(bubble);
     styleNutritionTable(bubble);
+    animateInstructions(bubble);
     injectRecipeImage(bubble);
+}
+
+function animateInstructions(bubble) {
+    if (bubble.dataset.instructionsAnimated) return;
+    bubble.querySelectorAll("h2").forEach(h2 => {
+        if (h2.textContent.includes("👨") || h2.textContent.toLowerCase().includes("instruction")) {
+            let el = h2.nextElementSibling;
+            while (el && el.tagName !== "OL") el = el.nextElementSibling;
+            if (!el) return;
+            el.querySelectorAll("li").forEach((li, i) => {
+                li.style.animationDelay = `${i * 0.09}s`;
+                li.classList.add("instruction-step-animated");
+            });
+        }
+    });
+    bubble.dataset.instructionsAnimated = "1";
 }
 
 function styleNutritionTable(bubble) {
