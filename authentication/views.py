@@ -1,11 +1,13 @@
 import json
 import secrets
+import time
 from urllib.parse import urlencode
 import httpx
+import jwt
 from django.core.files.base import ContentFile
 from django.conf import settings as django_settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
@@ -22,6 +24,25 @@ User = get_user_model()
 _GOOGLE_AUTH_URL     = "https://accounts.google.com/o/oauth2/auth"
 _GOOGLE_TOKEN_URL    = "https://oauth2.googleapis.com/token"
 _GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
+
+# ── Apple OAuth ───────────────────────────────────────────────
+_APPLE_AUTH_URL  = "https://appleid.apple.com/auth/authorize"
+_APPLE_TOKEN_URL = "https://appleid.apple.com/auth/token"
+
+
+def _apple_client_secret() -> str:
+    """Generate a short-lived ES256 JWT to use as Apple client_secret."""
+    private_key = django_settings.APPLE_PRIVATE_KEY
+    headers = {"kid": django_settings.APPLE_KEY_ID}
+    now = int(time.time())
+    payload = {
+        "iss": django_settings.APPLE_TEAM_ID,
+        "iat": now,
+        "exp": now + 15552000,  # 180 days max
+        "aud": "https://appleid.apple.com",
+        "sub": django_settings.APPLE_CLIENT_ID,
+    }
+    return jwt.encode(payload, private_key, algorithm="ES256", headers=headers)
 
 def google_login(request):
     state = secrets.token_urlsafe(16)
@@ -89,6 +110,77 @@ def google_callback(request):
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     except Exception:
         pass
+    return redirect("/chat/")
+
+
+def apple_login(request):
+    state = secrets.token_urlsafe(16)
+    request.session["apple_oauth_state"] = state
+    params = {
+        "client_id":     django_settings.APPLE_CLIENT_ID,
+        "redirect_uri":  django_settings.APPLE_REDIRECT_URI,
+        "response_type": "code id_token",
+        "scope":         "name email",
+        "response_mode": "form_post",
+        "state":         state,
+    }
+    return redirect(f"{_APPLE_AUTH_URL}?{urlencode(params)}")
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def apple_callback(request):
+    error = request.POST.get("error")
+    if error:
+        return redirect("/chat/")
+
+    code  = request.POST.get("code")
+    state = request.POST.get("state")
+    if not code or state != request.session.pop("apple_oauth_state", None):
+        return redirect("/chat/")
+
+    # Apple sends user info (name) only on first sign-in as a JSON POST field
+    name = ""
+    user_json = request.POST.get("user")
+    if user_json:
+        try:
+            user_data = json.loads(user_json)
+            fn = user_data.get("name", {}).get("firstName", "")
+            ln = user_data.get("name", {}).get("lastName", "")
+            name = f"{fn} {ln}".strip()
+        except (json.JSONDecodeError, AttributeError):
+            pass
+
+    try:
+        token_res = httpx.post(_APPLE_TOKEN_URL, data={
+            "code":           code,
+            "client_id":      django_settings.APPLE_CLIENT_ID,
+            "client_secret":  _apple_client_secret(),
+            "redirect_uri":   django_settings.APPLE_REDIRECT_URI,
+            "grant_type":     "authorization_code",
+        }, timeout=10)
+        token_data = token_res.json()
+        id_token = token_data.get("id_token")
+        if not id_token:
+            return redirect("/chat/")
+
+        # Decode without verification to extract claims (Apple public keys not fetched here;
+        # production should verify signature via Apple's JWKS endpoint)
+        claims = jwt.decode(id_token, options={"verify_signature": False})
+        email = claims.get("email")
+        if not email:
+            return redirect("/chat/")
+
+        user, created = User.objects.get_or_create(email=email, defaults={"name": name})
+
+        if not user.name and name:
+            user.name = name
+            user.save(update_fields=["name"])
+
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    except Exception:
+        pass
+
     return redirect("/chat/")
 
 

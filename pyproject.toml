@@ -5,6 +5,7 @@ description = "A Django web app that streams AI-generated recipes using Mistral 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "cryptography>=47.0.0",
     "django>=6.0.4",
     "fpdf2>=2.8.7",
     "langchain>=1.2.15",
@@ -12,6 +13,7 @@ dependencies = [
     "langchain-openai>=1.2.1",
     "loguru>=0.7.3",
     "pillow>=12.2.0",
+    "pyjwt>=2.12.1",
     "python-dotenv>=1.2.2",
 ]
 

@@ -129,6 +129,14 @@ MISTRAL_API_KEY = os.environ["MISTRAL_API_KEY"]
 GOOGLE_CLIENT_ID     = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI  = os.environ.get("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback/")
+
+# Apple Sign In — set these in .env
+# APPLE_PRIVATE_KEY is the full contents of the .p8 file (multi-line, with -----BEGIN PRIVATE KEY-----)
+APPLE_CLIENT_ID   = os.environ.get("APPLE_CLIENT_ID", "")    # Service ID (e.g. com.example.app.signin)
+APPLE_TEAM_ID     = os.environ.get("APPLE_TEAM_ID", "")      # 10-char Team ID from Apple Developer
+APPLE_KEY_ID      = os.environ.get("APPLE_KEY_ID", "")       # Key ID from the .p8 key
+APPLE_PRIVATE_KEY = os.environ.get("APPLE_PRIVATE_KEY", "")  # .p8 file contents (newlines as \n in .env)
+APPLE_REDIRECT_URI = os.environ.get("APPLE_REDIRECT_URI", "http://localhost:8000/auth/apple/callback/")
 MISTRAL_MODEL = os.environ["MISTRAL_MODEL"]
 
 AZURE_OPENAI_API_KEY= os.environ["AZURE_OPENAI_API_KEY"]
