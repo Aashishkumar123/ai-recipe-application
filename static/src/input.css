@@ -1042,6 +1042,59 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li::before { background: #7c3aed; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li a { color: #a78bfa; }
 
+/* ── Follow-up question suggestions ── */
+.followup-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 1.1rem 0 0.45rem;
+    border: none;
+    background: none;
+    -webkit-text-fill-color: #9ca3af;
+    padding: 0;
+}
+.followup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+.followup-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 0.28rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.followup-chip:hover {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #c2410c;
+}
+[data-theme="dark"] .followup-label {
+    color: #6b7280;
+    -webkit-text-fill-color: #6b7280;
+}
+[data-theme="dark"] .followup-chip {
+    color: #d1d5db;
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .followup-chip:hover {
+    background: rgba(249,115,22,0.15);
+    border-color: rgba(249,115,22,0.4);
+    color: #fb923c;
+}
+
 /* ── Pantry bubble — unified green theme ── */
 .bot-bubble.pantry-bubble h1 {
     background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #84cc16 100%);

@@ -164,7 +164,40 @@ function applyRecipeStyles(bubble) {
     styleNutritionTable(bubble);
     styleMealPlanTable(bubble);
     animateInstructions(bubble);
+    styleFollowUpSuggestions(bubble);
     injectRecipeImage(bubble);
+}
+
+function styleFollowUpSuggestions(bubble) {
+    if (bubble.querySelector(".followup-chips")) return;
+
+    let h2 = null;
+    bubble.querySelectorAll("h2").forEach(el => {
+        if (el.textContent.includes("💬")) h2 = el;
+    });
+    if (!h2) return;
+
+    let ul = h2.nextElementSibling;
+    while (ul && ul.tagName !== "UL") ul = ul.nextElementSibling;
+    if (!ul) return;
+
+    const questions = [...ul.querySelectorAll("li")]
+        .map(li => li.textContent.trim())
+        .filter(Boolean);
+    if (!questions.length) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "followup-chips";
+    questions.forEach(q => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "followup-chip";
+        btn.textContent = q;
+        wrapper.appendChild(btn);
+    });
+
+    h2.className = "followup-label";
+    ul.replaceWith(wrapper);
 }
 
 function injectCountryBadge(bubble) {
@@ -504,6 +537,15 @@ function appendBotMessage() {
 }
 
 // Bot message copy — delegated
+// Follow-up chip clicks — delegated so history bubbles work too
+messageList?.addEventListener("click", (e) => {
+    const chip = e.target.closest(".followup-chip");
+    if (!chip || abortController) return;
+    input.value = chip.textContent.trim();
+    input.dispatchEvent(new Event("input"));
+    form.requestSubmit();
+});
+
 messageList?.addEventListener("click", (e) => {
     const btn = e.target.closest(".bot-copy-btn");
     if (!btn) return;
