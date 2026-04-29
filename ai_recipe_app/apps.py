@@ -27,15 +27,25 @@ class AiRecipeAppConfig(AppConfig):
         )
 
         # ── Rotating file sink ────────────────────────────────────────────────
-        log_dir = Path(settings.BASE_DIR) / "logs"
-        log_dir.mkdir(exist_ok=True)
-        logger.add(
-            log_dir / "recipe_chef_{time:YYYY-MM-DD}.log",
-            level="DEBUG",
-            rotation="00:00",       # new file every midnight
-            retention="30 days",
-            encoding="utf-8",
-            format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} — {message}",
-        )
+        # Use /tmp on read-only filesystems (e.g. Vercel), project logs/ locally
+        for candidate in (Path(settings.BASE_DIR) / "logs", Path("/tmp/logs")):
+            try:
+                candidate.mkdir(exist_ok=True)
+                log_dir = candidate
+                break
+            except OSError:
+                continue
+        else:
+            log_dir = None
+
+        if log_dir:
+            logger.add(
+                log_dir / "recipe_chef_{time:YYYY-MM-DD}.log",
+                level="DEBUG",
+                rotation="00:00",
+                retention="30 days",
+                encoding="utf-8",
+                format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} — {message}",
+            )
 
         logger.info("Recipe Chef — app ready, logging initialised")
