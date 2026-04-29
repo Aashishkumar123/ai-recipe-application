@@ -76,32 +76,35 @@
                     <span class="pan-wobble">🍳</span>
                 </div>
             </div>
-
+            {% if user.is_authenticated and user.name %}
+            <h1 class="text-xl md:text-2xl font-bold mb-2">Hey {{ user.name }}, what are we cooking?</h1>
+            {% else %}
             <h1 class="text-xl md:text-2xl font-bold mb-2">What are we cooking today?</h1>
+            {% endif %}
             <p class="page-text-muted text-sm mb-8 md:mb-10 max-w-sm leading-relaxed">
-                Tell me a dish name, a craving, or a cuisine — I'll generate a detailed step-by-step recipe.
+                Name a dish, describe a craving, or just say what's in your fridge — I'll craft a recipe in seconds.
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 w-full max-w-xs sm:max-w-lg">
                 <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
                     <span class="text-xl leading-none">🇮🇳</span>
                     <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Chicken Tikka Masala</span>
-                    <span class="text-xs page-text-muted">Indian classic</span>
+                    <span class="text-xs page-text-muted">Rich, smoky & deeply spiced</span>
                 </button>
                 <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
                     <span class="text-xl leading-none">🇯🇵</span>
                     <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Miso Ramen</span>
-                    <span class="text-xs page-text-muted">Japanese comfort food</span>
+                    <span class="text-xs page-text-muted">Warming broth, silky noodles</span>
                 </button>
                 <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
                     <span class="text-xl leading-none">🇮🇹</span>
                     <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Tiramisu</span>
-                    <span class="text-xs page-text-muted">Italian dessert</span>
+                    <span class="text-xs page-text-muted">Coffee-soaked, bittersweet layers</span>
                 </button>
                 <button class="suggestion-chip group text-left px-4 py-3 md:py-3.5 rounded-xl transition-all shadow-sm">
                     <span class="text-xl leading-none">🇹🇭</span>
                     <span class="block text-sm font-semibold mt-1.5 md:mt-2 mb-0.5">Pad Thai</span>
-                    <span class="text-xs page-text-muted">Thai street food</span>
+                    <span class="text-xs page-text-muted">Sweet, tangy & wok-charred</span>
                 </button>
             </div>
 
@@ -109,12 +112,12 @@
             <div class="mt-6 flex items-center gap-3 flex-wrap justify-center">
                 <button id="pantry-welcome-btn" class="pantry-pill flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
                     <span>🧺</span>
-                    <span>Use what's in my pantry</span>
+                    <span>Cook from my pantry</span>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
                 <button id="meal-plan-welcome-btn" class="meal-plan-pill flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
                     <span>🗓️</span>
-                    <span>Plan my week</span>
+                    <span>Plan my week's meals</span>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
             </div>
