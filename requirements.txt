@@ -181,6 +181,7 @@ typer==0.24.1
     # via huggingface-hub
 typing-extensions==4.15.0
     # via
+    #   anyio
     #   huggingface-hub
     #   langchain-core
     #   langchain-protocol
