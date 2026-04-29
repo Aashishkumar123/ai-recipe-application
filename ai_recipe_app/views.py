@@ -1,10 +1,13 @@
 import re
 import json
+import urllib.request
+import urllib.parse
 from io import BytesIO
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
+from django.conf import settings as django_settings
 from langchain_core.messages import HumanMessage, AIMessage
 from loguru import logger
 from .chat import stream_recipe
@@ -395,3 +398,43 @@ def share_chat(request):
 
     public_url = request.build_absolute_uri(f"/chat/public/{chat_obj.id}/") if chat_obj.is_public else None
     return JsonResponse({"ok": True, "is_public": chat_obj.is_public, "public_url": public_url})
+
+
+@require_http_methods(["GET"])
+def youtube_videos(request):
+    """Return up to 3 YouTube video objects (id/title/thumbnail/channel) for a dish query."""
+    q = request.GET.get("q", "").strip()
+    api_key = django_settings.YOUTUBE_API_KEY
+    if not q or not api_key:
+        return JsonResponse({"videos": []})
+
+    try:
+        params = urllib.parse.urlencode({
+            "q": f"{q} recipe",
+            "type": "video",
+            "maxResults": 3,
+            "key": api_key,
+            "part": "snippet",
+            "relevanceLanguage": "en",
+            "safeSearch": "strict",
+        })
+        url = f"https://www.googleapis.com/youtube/v3/search?{params}"
+        req = urllib.request.Request(url, headers={"User-Agent": "RecipeChef/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310
+            data = json.loads(resp.read())
+
+        videos = [
+            {
+                "id":        item["id"]["videoId"],
+                "title":     item["snippet"]["title"],
+                "thumbnail": item["snippet"]["thumbnails"]["medium"]["url"],
+                "channel":   item["snippet"]["channelTitle"],
+            }
+            for item in data.get("items", [])
+            if item.get("id", {}).get("videoId")
+        ]
+        logger.info("youtube_videos | q={!r} results={}", q, len(videos))
+        return JsonResponse({"videos": videos})
+    except Exception:
+        logger.exception("youtube_videos failed | q={!r}", q)
+        return JsonResponse({"videos": []})

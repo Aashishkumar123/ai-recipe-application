@@ -156,6 +156,8 @@ APPLE_KEY_ID       = os.environ.get("APPLE_KEY_ID", "")
 APPLE_PRIVATE_KEY  = os.environ.get("APPLE_PRIVATE_KEY", "")
 APPLE_REDIRECT_URI = os.environ.get("APPLE_REDIRECT_URI", "http://localhost:8000/auth/apple/callback/")
 
+YOUTUBE_API_KEY        = os.environ.get("YOUTUBE_API_KEY", "")
+
 AZURE_OPENAI_API_KEY   = os.environ.get("AZURE_OPENAI_API_KEY", "")
 AZURE_OPENAI_ENDPOINT  = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 AZURE_DEPLOYMENT_NAME  = os.environ.get("AZURE_DEPLOYMENT_NAME", "")

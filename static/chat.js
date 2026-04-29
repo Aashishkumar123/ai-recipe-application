@@ -166,6 +166,53 @@ function applyRecipeStyles(bubble) {
     animateInstructions(bubble);
     styleFollowUpSuggestions(bubble);
     injectRecipeImage(bubble);
+    injectYouTubeVideos(bubble);
+}
+
+async function injectYouTubeVideos(bubble) {
+    if (bubble.dataset.ytState || bubble.querySelector(".recipe-videos")) return;
+    bubble.dataset.ytState = "loading";
+
+    const dishName = (bubble.querySelector("h1")?.textContent ?? "")
+        .replace(/\p{Emoji}/gu, "").trim();
+    if (!dishName) { delete bubble.dataset.ytState; return; }
+
+    try {
+        const res  = await fetch(`/chat/api/youtube-videos/?q=${encodeURIComponent(dishName)}`);
+        const data = await res.json();
+        if (!data.videos?.length || !bubble.isConnected) return;
+
+        const section = document.createElement("div");
+        section.className = "recipe-videos";
+
+        const heading = document.createElement("h2");
+        heading.className = "recipe-videos-heading";
+        heading.textContent = "📺 Watch & Learn";
+        section.appendChild(heading);
+
+        const grid = document.createElement("div");
+        grid.className = "recipe-videos-grid";
+
+        data.videos.forEach(v => {
+            const card = document.createElement("div");
+            card.className = "recipe-video-card";
+            card.innerHTML =
+                `<div class="recipe-video-thumb" data-vid="${v.id}">` +
+                    `<img src="${v.thumbnail}" alt="" loading="lazy" class="recipe-video-img">` +
+                    `<div class="recipe-video-play"><svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M8 5v14l11-7z"/></svg></div>` +
+                `</div>` +
+                `<p class="recipe-video-title">${v.title}</p>` +
+                `<p class="recipe-video-channel">${v.channel}</p>`;
+            grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        bubble.appendChild(section);
+    } catch {
+        // silently skip if API unavailable or key not set
+    } finally {
+        delete bubble.dataset.ytState;
+    }
 }
 
 function styleFollowUpSuggestions(bubble) {
@@ -544,6 +591,20 @@ messageList?.addEventListener("click", (e) => {
     input.value = chip.textContent.trim();
     input.dispatchEvent(new Event("input"));
     form.requestSubmit();
+});
+
+// YouTube thumbnail → inline iframe
+messageList?.addEventListener("click", (e) => {
+    const thumb = e.target.closest(".recipe-video-thumb");
+    if (!thumb) return;
+    const vid = thumb.dataset.vid;
+    if (!vid) return;
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+    iframe.className = "recipe-video-iframe";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    thumb.replaceWith(iframe);
 });
 
 messageList?.addEventListener("click", (e) => {
