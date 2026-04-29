@@ -22,7 +22,7 @@
     </header>
 
     <!-- Settings body -->
-    <div class="relative flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden">
 
         <!-- Desktop settings nav -->
         <nav class="settings-sidebar-nav hidden sm:flex flex-col w-48 shrink-0 border-r p-3 gap-0.5 overflow-y-auto">
@@ -52,8 +52,11 @@
             </button>
         </nav>
 
-        <!-- Mobile tab bar -->
-        <div class="settings-mobile-tabs sm:hidden flex border-b overflow-x-auto shrink-0 absolute top-[49px] left-0 right-0 z-10">
+        <!-- Mobile + content column -->
+        <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+        <!-- Mobile tab bar — in normal flow, no absolute positioning -->
+        <div class="settings-mobile-tabs sm:hidden flex border-b overflow-x-auto shrink-0">
             <button data-tab="general"      class="settings-tab-btn active px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">General</button>
             <button data-tab="privacy"      class="settings-tab-btn px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">Privacy</button>
             <button data-tab="integrations" class="settings-tab-btn px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 border-transparent">Integrations</button>
@@ -61,7 +64,7 @@
         </div>
 
         <!-- Content -->
-        <div class="settings-body flex-1 overflow-y-auto pt-10 sm:pt-0">
+        <div class="settings-body flex-1 overflow-y-auto">
             <div class="max-w-2xl mx-auto px-4 md:px-8 py-8">
 
                 <!-- ── General ── -->
@@ -364,6 +367,7 @@
 
             </div>
         </div>
+        </div><!-- end mobile+content column -->
     </div>
 </div>
 {% endblock %}
