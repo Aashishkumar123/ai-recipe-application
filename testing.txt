@@ -1,0 +1,80 @@
+------------------------ Testing --------------------------
+
+we have three modes - recipe mode, pantry mode, meal plan mode. 
+So i just want to test each of the feature of our recipe chef app, so could provide me few examples that can try to test our application"""
+
+
+Here are test examples for each mode, covering the main features:                                                     
+                                                
+  ---                                                                                                                   
+  Recipe Mode                                                                                                           
+                                                                                                                        
+  These are typed directly into the chat input:                                                                         
+                                                                                                                        
+  ┌───────────────────────────────────┬──────────────────────────────┐
+  │           What to test            │        Example prompt        │                                                  
+  ├───────────────────────────────────┼──────────────────────────────┤                                                
+  │ Basic recipe                      │ Chicken tikka masala         │
+  ├───────────────────────────────────┼──────────────────────────────┤
+  │ Cuisine-only request              │ Something Korean             │                                                  
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Craving / vague                   │ I need comfort food          │                                                  
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Quick weeknight                   │ A quick 20-minute pasta      │                                                
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Ambiguous dish (AI picks version) │ Curry                        │
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Follow-up (after a recipe)        │ Can I make it without cream? │                                                
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Scaling                           │ Scale it up to 6 servings    │                                                
+  ├───────────────────────────────────┼──────────────────────────────┤                                                  
+  │ Off-topic (should deflect)        │ Fix my code                  │                                                
+  └───────────────────────────────────┴──────────────────────────────┘                                                  
+   
+  ---                                                                                                                   
+  Pantry Mode     
+             
+  Click Pantry mode button first — it prefixes your input with 🧺 I have: — then type:
+                                                                                                                        
+  ┌─────────────────────────────┬────────────────────────────────────────┐
+  │        What to test         │             Example input              │                                              
+  ├─────────────────────────────┼────────────────────────────────────────┤
+  │ Good match with few missing │ eggs, butter, flour, sugar             │
+  ├─────────────────────────────┼────────────────────────────────────────┤
+  │ Protein + veggies           │ chicken breast, garlic, lemon, spinach │                                              
+  ├─────────────────────────────┼────────────────────────────────────────┤                                              
+  │ Minimal ingredients         │ rice, soy sauce, egg                   │                                              
+  ├─────────────────────────────┼────────────────────────────────────────┤                                              
+  │ Bare list (no "I have")     │ tomatoes, basil, mozzarella            │
+  └─────────────────────────────┴────────────────────────────────────────┘                                              
+                  
+  ---                                                                                                                   
+  Meal Plan Mode  
+                
+  Click Plan my week button first — it prefixes with 🗓️  Meal plan: — then type:
+                                                                                                                        
+  ┌─────────────────────────┬────────────────────────────┐
+  │      What to test       │       Example input        │                                                              
+  ├─────────────────────────┼────────────────────────────┤                                                              
+  │ Full 7-day plan         │ for the week               │
+  ├─────────────────────────┼────────────────────────────┤                                                              
+  │ Specific number of days │ 5 days                     │
+  ├─────────────────────────┼────────────────────────────┤                                                              
+  │ Diet-specific plan      │ vegetarian week            │
+  ├─────────────────────────┼────────────────────────────┤                                                              
+  │ Dinner-only plan        │ just dinners for the week  │
+  ├─────────────────────────┼────────────────────────────┤                                                              
+  │ Budget constraint       │ budget-friendly 7-day plan │
+  └─────────────────────────┴────────────────────────────┘                                                              
+                  
+  ---                                                                                                                   
+  Cross-cutting features to check
+                                 
+  - Language: Go to Settings → General → Language, switch to e.g. Spanish, then ask for Paella — the recipe should come
+  back in Spanish.                                                                                                      
+  - Profile preferences: Settings → Profile → set dietary restriction to "vegan", then ask for a burger — it should give
+   a vegan version without dairy or meat.                                                                               
+  - Chat history: After getting a recipe, refresh the page and reopen that chat from the sidebar — it should render
+  identically.                                                                                                          
+  - Follow-up memory: Ask Spaghetti carbonara, then ask What can I substitute for pancetta? — the AI should know you
+  mean carbonara.             
