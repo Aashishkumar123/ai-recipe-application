@@ -7,7 +7,6 @@ from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-from django.conf import settings as django_settings
 from langchain_core.messages import HumanMessage, AIMessage
 from loguru import logger
 from .chat import stream_recipe
@@ -400,41 +399,50 @@ def share_chat(request):
     return JsonResponse({"ok": True, "is_public": chat_obj.is_public, "public_url": public_url})
 
 
+_INVIDIOUS_INSTANCES = [
+    "https://inv.nadeko.net",
+    "https://invidious.privacyredirect.com",
+    "https://iv.melmac.space",
+    "https://invidious.nerdvpn.de",
+]
+
 @require_http_methods(["GET"])
 def youtube_videos(request):
-    """Return up to 3 YouTube video objects (id/title/thumbnail/channel) for a dish query."""
+    """Return up to 3 YouTube video objects via Invidious (no API key needed)."""
     q = request.GET.get("q", "").strip()
-    api_key = django_settings.YOUTUBE_API_KEY
-    if not q or not api_key:
+    if not q:
         return JsonResponse({"videos": []})
 
-    try:
-        params = urllib.parse.urlencode({
-            "q": f"{q} recipe",
-            "type": "video",
-            "maxResults": 3,
-            "key": api_key,
-            "part": "snippet",
-            "relevanceLanguage": "en",
-            "safeSearch": "strict",
-        })
-        url = f"https://www.googleapis.com/youtube/v3/search?{params}"
-        req = urllib.request.Request(url, headers={"User-Agent": "RecipeChef/1.0"})
-        with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310
-            data = json.loads(resp.read())
+    params = urllib.parse.urlencode({
+        "q": f"{q} recipe",
+        "type": "video",
+        "fields": "videoId,title,author",
+    })
 
-        videos = [
-            {
-                "id":        item["id"]["videoId"],
-                "title":     item["snippet"]["title"],
-                "thumbnail": item["snippet"]["thumbnails"]["medium"]["url"],
-                "channel":   item["snippet"]["channelTitle"],
-            }
-            for item in data.get("items", [])
-            if item.get("id", {}).get("videoId")
-        ]
-        logger.info("youtube_videos | q={!r} results={}", q, len(videos))
-        return JsonResponse({"videos": videos})
-    except Exception:
-        logger.exception("youtube_videos failed | q={!r}", q)
-        return JsonResponse({"videos": []})
+    for instance in _INVIDIOUS_INSTANCES:
+        try:
+            url = f"{instance}/api/v1/search?{params}"
+            req = urllib.request.Request(url, headers={"User-Agent": "RecipeChef/1.0"})
+            with urllib.request.urlopen(req, timeout=6) as resp:  # noqa: S310
+                items = json.loads(resp.read())
+
+            videos = [
+                {
+                    "id":        item["videoId"],
+                    "title":     item["title"],
+                    # YouTube's thumbnail CDN works without any auth
+                    "thumbnail": f"https://i.ytimg.com/vi/{item['videoId']}/mqdefault.jpg",
+                    "channel":   item.get("author", ""),
+                }
+                for item in items[:3]
+                if item.get("videoId")
+            ]
+            if videos:
+                logger.info("youtube_videos | instance={} q={!r} results={}", instance, q, len(videos))
+                return JsonResponse({"videos": videos})
+        except Exception:
+            logger.warning("youtube_videos | instance={} failed, trying next", instance)
+            continue
+
+    logger.warning("youtube_videos | all instances failed for q={!r}", q)
+    return JsonResponse({"videos": []})
