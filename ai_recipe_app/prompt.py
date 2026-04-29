@@ -112,11 +112,6 @@ Return this structure and nothing else:
 
 List at most 2 critical missing items. If nothing important is missing, write: *You're good to go — no extra shopping needed.*
 
-## 💬 Try asking
-- {{Short, casual question a curious home cook would actually say — name a specific ingredient or step from this recipe}}
-- {{Another natural question — what to serve it with, how to tweak heat/richness, or a quick swap}}
-- {{A practical real-life question — make-ahead, storage, scaling, or leftovers}}
-
 ---
 
 ## Recipe Mode — format
@@ -146,11 +141,6 @@ Return this structure and nothing else — no preamble, no sign-off:
 |---|---|---|---|---|
 | Per serving | ~{{N}} kcal | ~{{N}} g | ~{{N}} g | ~{{N}} g |
 
-## 💬 Try asking
-- {{Short, casual question a curious home cook would actually say — name a specific ingredient or step from this recipe}}
-- {{Another natural question — what to serve it with, how to tweak heat/richness, or a quick swap}}
-- {{A practical real-life question — make-ahead, storage, scaling, or leftovers}}
-
 ---
 
 ## Rules (apply to all modes)
@@ -177,11 +167,4 @@ Return this structure and nothing else — no preamble, no sign-off:
 7. Nutrition estimates are rough per-serving figures based on standard ingredient databases. Use a realistic range (e.g. ~350–400 kcal) when there is meaningful uncertainty; round values to the nearest 5. Always prefix numbers with ~. Never claim clinical accuracy.
 8. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
 8. CRITICAL — Instructions formatting: each numbered step must be written on a single line with no internal line breaks or blank lines. Never split one step across multiple lines. Never put a blank line between the number and its text. All sentences belonging to one step stay together on that line.
-9. The `## 💬 Try asking` section must contain exactly 3 questions. Rules for these questions:
-   - Sound like something a home cook would naturally say out loud — short, casual, first-person. Aim for under 10 words each.
-   - Reference a specific ingredient or step from THIS recipe by name (not "the main ingredient" or "the sauce").
-   - Vary the angle: one about swapping/skipping something, one about serving or pairing, one about make-ahead/storage/scaling.
-   - Start naturally: "Can I...", "What if I skip the...", "How spicy is...", "What goes well with...", "Can I freeze...", "How do I know when..."
-   - NEVER: "Do you have other recipes?", "Can I make a variation?", "What are some tips?" — these are too vague.
-   - Good: "Can I use Greek yogurt instead of cream?", "What should I serve this with?", "Can I make the sauce a day ahead?"
-   - Skip this section entirely in Meal Plan mode and Follow-up mode."""
+9. After the Nutrition section, always output a `## 💬 Follow-up` section with exactly 3 short follow-up questions a home cook would naturally ask. Rules: under 10 words each, reference specific ingredients by name, vary the angle (swap/skip, serving/pairing, make-ahead/storage). Start with "Can I...", "What if I...", "What goes well with...", etc. Skip in Meal Plan and Follow-up modes."""

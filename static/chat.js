@@ -216,7 +216,12 @@ async function injectYouTubeVideos(bubble) {
 }
 
 function styleFollowUpSuggestions(bubble) {
-    if (bubble.querySelector(".followup-chips")) return;
+    const contentWrap = bubble.parentElement;
+    // Guard: chips already placed outside bubble
+    if (contentWrap?.querySelector(".followup-chips")) return;
+    // Also migrate any old chips that are still inside the bubble
+    const oldChips = bubble.querySelector(".followup-chips");
+    if (oldChips) { bubble.insertAdjacentElement("afterend", oldChips); return; }
 
     let h2 = null;
     bubble.querySelectorAll("h2").forEach(el => {
@@ -233,6 +238,10 @@ function styleFollowUpSuggestions(bubble) {
         .filter(Boolean);
     if (!questions.length) return;
 
+    // Hide heading and list inside bubble (keep in DOM so saved HTML preserves them for history reloads)
+    h2.style.display = "none";
+    ul.style.display = "none";
+
     const wrapper = document.createElement("div");
     wrapper.className = "followup-chips";
     questions.forEach(q => {
@@ -243,8 +252,8 @@ function styleFollowUpSuggestions(bubble) {
         wrapper.appendChild(btn);
     });
 
-    h2.className = "followup-label";
-    ul.replaceWith(wrapper);
+    // Place chips after the bubble, outside it
+    bubble.insertAdjacentElement("afterend", wrapper);
 }
 
 function injectCountryBadge(bubble) {

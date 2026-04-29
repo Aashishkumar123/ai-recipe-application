@@ -1131,24 +1131,13 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     margin: 0;
 }
 
-/* ── Follow-up question suggestions ── */
-.followup-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #9ca3af;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin: 1.1rem 0 0.45rem;
-    border: none;
-    background: none;
-    -webkit-text-fill-color: #9ca3af;
-    padding: 0;
-}
+/* ── Follow-up chips (rendered outside .bot-bubble) ── */
 .followup-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-bottom: 0.75rem;
+    margin-top: 0.6rem;
+    padding-left: 0.25rem;
 }
 .followup-chip {
     display: inline-flex;
@@ -1159,7 +1148,7 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 999px;
-    padding: 0.28rem 0.75rem;
+    padding: 0.28rem 0.8rem;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
     white-space: nowrap;
@@ -1168,10 +1157,6 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     background: #fff7ed;
     border-color: #fed7aa;
     color: #c2410c;
-}
-[data-theme="dark"] .followup-label {
-    color: #6b7280;
-    -webkit-text-fill-color: #6b7280;
 }
 [data-theme="dark"] .followup-chip {
     color: #d1d5db;
