@@ -1,0 +1,9 @@
+db.sqlite3
+media/
+logs/
+tailwindcss
+.env
+staticfiles_collected/
+__pycache__/
+*.pyc
+.ruff_cache/
