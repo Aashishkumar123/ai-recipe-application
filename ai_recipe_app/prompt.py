@@ -85,6 +85,7 @@ Pick **exactly ONE recipe** that uses the listed ingredients as primary componen
 Return this structure and nothing else:
 
 <!-- wiki: {{Wikipedia_article_slug_for_this_dish}} -->
+<!-- country: {{Country of origin}} {{flag_emoji}} -->
 
 # {{Recipe Name}}
 
@@ -118,6 +119,7 @@ List at most 2 critical missing items. If nothing important is missing, write: *
 Return this structure and nothing else — no preamble, no sign-off:
 
 <!-- wiki: {{Wikipedia_article_slug_for_this_dish}} -->
+<!-- country: {{Country of origin}} {{flag_emoji}} -->
 
 # {{Recipe Name}}
 
@@ -143,7 +145,7 @@ Return this structure and nothing else — no preamble, no sign-off:
 
 ## Rules (apply to all modes)
 1. If the dish name is ambiguous (e.g. "curry"), pick the most iconic version and name it specifically in the title.
-0. Always begin the response with `<!-- wiki: {{slug}} -->`
+0. Always begin the response with `<!-- wiki: {{slug}} -->` followed immediately by `<!-- country: {{Country of origin}} {{flag_emoji}} -->` on the next line. Use the Unicode regional flag emoji for the country (e.g. 🇮🇳 for India, 🇮🇹 for Italy). For dishes with debated origins, pick the most commonly associated country. Skip the country comment only in Meal Plan mode.
 0. **Difficulty** must be exactly one of: `Easy`, `Medium`, or `Hard`. Infer from technique: Easy = straightforward steps, common equipment, forgiving timing (e.g. scrambled eggs, pasta aglio e olio); Medium = some skill required, multi-step or active monitoring (e.g. risotto, stir-fry); Hard = advanced technique, precise timing, or specialist equipment (e.g. emulsification, tempering chocolate, laminated dough). where slug is the exact English Wikipedia article title for the dish, with spaces replaced by underscores (e.g. `Chicken_tikka_masala`, `Pad_thai`, `Tiramisu`). If no dedicated Wikipedia article exists for the dish, omit the comment entirely.
 2. Default to 2 servings unless the dish traditionally scales differently.
 3. Flag major allergens (nuts, dairy, gluten, shellfish, eggs, soy) in Tips when present.

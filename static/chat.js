@@ -159,11 +159,24 @@ function applyRecipeStyles(bubble) {
             styleRecipeMeta(p);
         }
     });
+    injectCountryBadge(bubble);
     stylePantryIngredients(bubble);
     styleNutritionTable(bubble);
     styleMealPlanTable(bubble);
     animateInstructions(bubble);
     injectRecipeImage(bubble);
+}
+
+function injectCountryBadge(bubble) {
+    if (bubble.querySelector(".recipe-country-badge")) return;
+    const match = bubble.innerHTML.match(/<!--\s*country:\s*(.+?)\s*-->/);
+    if (!match) return;
+    const h1 = bubble.querySelector("h1");
+    if (!h1) return;
+    const badge = document.createElement("div");
+    badge.className = "recipe-country-badge";
+    badge.textContent = match[1].trim();
+    h1.insertAdjacentElement("afterend", badge);
 }
 
 function styleMealPlanTable(bubble) {
