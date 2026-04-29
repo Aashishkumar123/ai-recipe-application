@@ -139,6 +139,10 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
+# Serve directly from STATICFILES_DIRS without requiring collectstatic.
+# Safe here because all static files are committed to the repo.
+WHITENOISE_USE_FINDERS = True
+
 MISTRAL_API_KEY = os.environ.get("MISTRAL_API_KEY", "")
 MISTRAL_MODEL   = os.environ.get("MISTRAL_MODEL", "mistral-large-latest")
 
