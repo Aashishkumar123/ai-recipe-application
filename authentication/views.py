@@ -405,3 +405,21 @@ def mark_notification_read(request):
 def mark_all_notifications_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return JsonResponse({"ok": True})
+
+
+@login_required
+@csrf_protect
+@require_http_methods(["POST"])
+def update_display_name(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    name = data.get("name", "").strip()
+    if len(name) > 150:
+        return JsonResponse({"error": "Name must be 150 characters or fewer."}, status=400)
+
+    request.user.name = name
+    request.user.save(update_fields=["name"])
+    return JsonResponse({"ok": True, "name": name})

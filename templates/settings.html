@@ -123,7 +123,8 @@
                                     <p class="page-text-muted text-xs mt-0.5">Shown in chat history</p>
                                 </div>
                                 <div class="flex flex-1 gap-2">
-                                    <input id="display-name" type="text" value={{user.name}}
+                                    <input id="display-name" type="text" value="{{ user.name }}"
+                                        maxlength="150"
                                         class="settings-input flex-1 px-3 py-2 border rounded-xl text-sm outline-none transition-all">
                                     <button id="save-name-btn"
                                         class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-colors shrink-0">
@@ -320,30 +321,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Other appearance options -->
-                        <div class="settings-card rounded-2xl border divide-y overflow-hidden shadow-sm">
-                            <div class="flex items-center justify-between px-5 py-4">
-                                <div>
-                                    <p class="text-sm font-medium">Background animations</p>
-                                    <p class="page-text-muted text-xs mt-0.5">Subtle motion effects in the interface</p>
-                                </div>
-                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
-                            </div>
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4">
-                                <div>
-                                    <p class="text-sm font-medium">Chat font</p>
-                                    <p class="page-text-muted text-xs mt-0.5">Font used for recipe text</p>
-                                </div>
-                                <select id="chat-font-select" class="settings-input w-full sm:w-auto px-3 py-2 border rounded-xl text-sm outline-none transition-all">
-                                    <option value="system">System Default</option>
-                                    <option value="inter">Inter</option>
-                                    <option value="georgia">Georgia (Serif)</option>
-                                    <option value="mono">Courier New (Mono)</option>
-                                    <option value="dyslexic">OpenDyslexic</option>
-                                </select>
-                            </div>
-                        </div>
                     </section>
 
                 </div>
@@ -448,11 +425,40 @@ document.querySelectorAll(".toggle-switch").forEach((btn) => {
     });
 });
 
-// Save name
-document.getElementById("save-name-btn")?.addEventListener("click", () => {
+// Save display name
+document.getElementById("save-name-btn")?.addEventListener("click", async () => {
+    const input = document.getElementById("display-name");
+    const btn   = document.getElementById("save-name-btn");
     const toast = document.getElementById("save-name-toast");
-    toast.classList.remove("hidden");
-    setTimeout(() => toast.classList.add("hidden"), 3000);
+    const name  = input.value.trim();
+
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+        const res  = await fetch("{% url 'update_display_name' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+            body: JSON.stringify({ name }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            toast.textContent = data.error || "Failed to save.";
+            toast.classList.remove("hidden", "bg-green-50", "text-green-700");
+            toast.classList.add("bg-red-50", "text-red-700");
+        } else {
+            input.value = data.name;
+            toast.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Name saved successfully`;
+            toast.classList.remove("hidden", "bg-red-50", "text-red-700");
+            toast.classList.add("bg-green-50", "text-green-700");
+        }
+        setTimeout(() => toast.classList.add("hidden"), 3000);
+    } catch {
+        toast.textContent = "Network error. Please try again.";
+        toast.classList.remove("hidden", "bg-green-50", "text-green-700");
+        toast.classList.add("bg-red-50", "text-red-700");
+        setTimeout(() => toast.classList.add("hidden"), 3000);
+    } finally {
+        btn.disabled = false; btn.textContent = "Save";
+    }
 });
 
 // ── Recipe Preferences ──────────────────────────────────────────
