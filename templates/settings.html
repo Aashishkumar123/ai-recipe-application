@@ -151,21 +151,25 @@
                                     <p class="text-sm font-medium">Recipe suggestions</p>
                                     <p class="page-text-muted text-xs mt-0.5">Weekly personalised recipe ideas based on your history</p>
                                 </div>
-                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
+                                <button class="toggle-switch notif-toggle" data-notif="recipe_suggestions" role="switch" aria-checked="{{ user.notif_recipe_suggestions|yesno:'true,false' }}"><span class="toggle-thumb"></span></button>
                             </div>
                             <div class="flex items-center justify-between px-5 py-4">
                                 <div>
                                     <p class="text-sm font-medium">Weekly digest</p>
                                     <p class="page-text-muted text-xs mt-0.5">A summary of your saved recipes every Sunday</p>
                                 </div>
-                                <button class="toggle-switch" role="switch" aria-checked="false"><span class="toggle-thumb"></span></button>
+                                <button class="toggle-switch notif-toggle" data-notif="weekly_digest" role="switch" aria-checked="{{ user.notif_weekly_digest|yesno:'true,false' }}"><span class="toggle-thumb"></span></button>
                             </div>
                             <div class="flex items-center justify-between px-5 py-4">
                                 <div>
                                     <p class="text-sm font-medium">Tips &amp; updates</p>
                                     <p class="page-text-muted text-xs mt-0.5">Product news, cooking tips, and feature announcements</p>
                                 </div>
-                                <button class="toggle-switch" role="switch" aria-checked="true"><span class="toggle-thumb"></span></button>
+                                <button class="toggle-switch notif-toggle" data-notif="tips_updates" role="switch" aria-checked="{{ user.notif_tips_updates|yesno:'true,false' }}"><span class="toggle-thumb"></span></button>
+                            </div>
+                            <div id="notif-saved-msg" class="hidden flex items-center gap-2 px-5 py-2.5 bg-green-50 text-green-700 text-xs font-medium">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                Preferences saved
                             </div>
                         </div>
                     </section>
@@ -418,10 +422,32 @@ document.querySelectorAll(".settings-nav-btn, .settings-tab-btn").forEach((btn) 
     btn.addEventListener("click", () => activateTab(btn.dataset.tab));
 });
 
-// Toggle switches
-document.querySelectorAll(".toggle-switch").forEach((btn) => {
+// Notification toggles — save on each flip
+const CSRF = () => document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+async function saveNotifPrefs() {
+    const prefs = {};
+    document.querySelectorAll(".notif-toggle").forEach((btn) => {
+        prefs[btn.dataset.notif] = btn.getAttribute("aria-checked") === "true";
+    });
+    try {
+        await fetch("{% url 'save_notification_prefs' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF() },
+            body: JSON.stringify(prefs),
+        });
+        const msg = document.getElementById("notif-saved-msg");
+        msg.classList.remove("hidden");
+        setTimeout(() => msg.classList.add("hidden"), 2500);
+    } catch (e) {
+        console.error("Failed to save notification prefs", e);
+    }
+}
+
+document.querySelectorAll(".notif-toggle").forEach((btn) => {
     btn.addEventListener("click", () => {
         btn.setAttribute("aria-checked", btn.getAttribute("aria-checked") !== "true");
+        saveNotifPrefs();
     });
 });
 

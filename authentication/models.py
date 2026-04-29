@@ -56,6 +56,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 	cuisine_preferences  = models.JSONField(default=list, blank=True)
 	cooking_skill        = models.CharField(max_length=20, choices=SKILL_CHOICES, default='intermediate')
 	default_servings     = models.PositiveSmallIntegerField(default=2)
+	notif_recipe_suggestions = models.BooleanField(default=True)
+	notif_weekly_digest      = models.BooleanField(default=False)
+	notif_tips_updates       = models.BooleanField(default=True)
 	is_staff = models.BooleanField(
 		'staff status',
 		default=False,

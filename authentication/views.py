@@ -410,6 +410,23 @@ def mark_all_notifications_read(request):
 @login_required
 @csrf_protect
 @require_http_methods(["POST"])
+def save_notification_prefs(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    user = request.user
+    user.notif_recipe_suggestions = bool(data.get("recipe_suggestions", user.notif_recipe_suggestions))
+    user.notif_weekly_digest      = bool(data.get("weekly_digest",      user.notif_weekly_digest))
+    user.notif_tips_updates       = bool(data.get("tips_updates",       user.notif_tips_updates))
+    user.save(update_fields=["notif_recipe_suggestions", "notif_weekly_digest", "notif_tips_updates"])
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@csrf_protect
+@require_http_methods(["POST"])
 def update_display_name(request):
     try:
         data = json.loads(request.body)
