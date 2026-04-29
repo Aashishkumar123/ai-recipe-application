@@ -214,13 +214,19 @@ document.addEventListener("click", (e) => {
         e.stopPropagation();
         menuChatId    = btn.dataset.chatId;
         menuChatTitle = btn.dataset.chatTitle;
-        const rect = btn.getBoundingClientRect();
-        // Position below the button, clamped to viewport
-        const top  = rect.bottom + 4;
-        const left = Math.min(rect.left, window.innerWidth - 168);
-        chatMenuDropdown.style.top  = top  + "px";
-        chatMenuDropdown.style.left = left + "px";
-        chatMenuDropdown.classList.toggle("hidden");
+        const rect  = btn.getBoundingClientRect();
+        const dropW = 160;
+        const dropH = 76;
+        // Open to the right of the button so it never overlaps chat titles
+        let left = rect.right + 4;
+        let top  = rect.top;
+        // Flip left if it would clip the right edge
+        if (left + dropW > window.innerWidth - 4) left = rect.left - dropW - 4;
+        // Clamp top so it doesn't go below viewport
+        if (top + dropH > window.innerHeight - 8) top = window.innerHeight - dropH - 8;
+        chatMenuDropdown.style.top  = Math.max(4, top)  + "px";
+        chatMenuDropdown.style.left = Math.max(4, left) + "px";
+        chatMenuDropdown.classList.remove("hidden");
     } else if (!e.target.closest("#chat-menu-dropdown")) {
         closeChatMenu();
     }
