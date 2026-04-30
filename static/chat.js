@@ -69,6 +69,11 @@ document.querySelectorAll(".suggestion-chip").forEach((chip) => {
     });
 });
 
+// Header "New Chat" button delegates to the sidebar new-chat button
+document.getElementById("header-new-chat-btn")?.addEventListener("click", () => {
+    newChatBtn?.click();
+});
+
 // New chat — reset to welcome screen
 newChatBtn?.addEventListener("click", () => {
     messageList?.querySelectorAll(".chat-msg").forEach((el) => el.remove());
