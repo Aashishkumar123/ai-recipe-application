@@ -246,24 +246,44 @@ async function injectYouTubeVideos(bubble) {
         const section = document.createElement("div");
         section.className = "recipe-videos";
 
-        const heading = document.createElement("h2");
-        heading.className = "recipe-videos-heading";
-        heading.textContent = "📺 Watch & Learn";
-        section.appendChild(heading);
+        section.innerHTML = `
+            <div class="recipe-videos-header">
+                <div class="recipe-videos-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+                <div class="recipe-videos-text">
+                    <p class="recipe-videos-title">Watch &amp; Learn</p>
+                    <p class="recipe-videos-subtitle">Hand-picked video tutorials</p>
+                </div>
+            </div>
+        `;
 
         const grid = document.createElement("div");
         grid.className = "recipe-videos-grid";
 
-        data.videos.forEach(v => {
+        data.videos.forEach((v, idx) => {
+            const initial = (v.channel?.[0] ?? "Y").toUpperCase();
+            const total   = data.videos.length;
             const card = document.createElement("div");
             card.className = "recipe-video-card";
             card.innerHTML =
                 `<div class="recipe-video-thumb" data-vid="${v.id}">` +
-                    `<img src="${v.thumbnail}" alt="" loading="lazy" class="recipe-video-img">` +
-                    `<div class="recipe-video-play"><svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M8 5v14l11-7z"/></svg></div>` +
+                    `<img src="${v.thumbnail}" alt="${v.title}" loading="lazy" class="recipe-video-img">` +
+                    `<div class="recipe-video-overlay"></div>` +
+                    `<div class="recipe-video-play">` +
+                        `<span class="recipe-video-play-btn"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg></span>` +
+                    `</div>` +
+                    `<span class="recipe-video-badge">${idx + 1}/${total}</span>` +
+                    `<span class="recipe-video-watch-pill"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg>Watch</span>` +
                 `</div>` +
-                `<p class="recipe-video-title">${v.title}</p>` +
-                `<p class="recipe-video-channel">${v.channel}</p>`;
+                `<div class="recipe-video-info">` +
+                    `<p class="recipe-video-title">${v.title}</p>` +
+                    `<div class="recipe-video-meta">` +
+                        `<span class="recipe-video-avatar">${initial}</span>` +
+                        `<span class="recipe-video-channel">${v.channel}</span>` +
+                        `<span class="recipe-video-yt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>` +
+                    `</div>` +
+                `</div>`;
             grid.appendChild(card);
         });
 
@@ -563,21 +583,17 @@ function stylePantryIngredients(bubble) {
 }
 
 function bubbleHtmlForSave(bubble) {
-    // Return bubble HTML with ephemeral image elements stripped so they're
-    // not persisted — images are always re-fetched fresh on load.
     const clone = bubble.cloneNode(true);
     clone.querySelectorAll(
-        ".recipe-hero-placeholder, .recipe-hero-single, .recipe-image-grid"
+        ".recipe-hero-placeholder, .recipe-hero-single, .recipe-image-grid, .recipe-images-section"
     ).forEach(el => el.remove());
     return clone.innerHTML;
 }
 
 async function injectRecipeImage(bubble) {
-    // Guard: already has images, OR a load is already in-flight (data attr, not DOM)
-    if (bubble.dataset.imgState || bubble.querySelector(".recipe-hero-img, .recipe-image-grid")) return;
+    if (bubble.dataset.imgState || bubble.querySelector(".recipe-hero-img, .recipe-image-grid, .recipe-images-section")) return;
     bubble.dataset.imgState = "loading";
 
-    // Derive slug: prefer <!-- wiki: ... --> comment, fall back to <h1> text
     const commentMatch = bubble.innerHTML.match(/<!--\s*wiki:\s*([A-Za-z0-9_%()\-]+)\s*-->/);
     let slug = commentMatch?.[1]?.trim();
 
@@ -604,7 +620,6 @@ async function injectRecipeImage(bubble) {
 
         let srcs = [];
 
-        // Try media-list for up to 3 images
         const mediaRes = await fetch(
             `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(slug)}`
         );
@@ -625,7 +640,6 @@ async function injectRecipeImage(bubble) {
                 .slice(0, 3);
         }
 
-        // Fall back to summary thumbnail
         if (srcs.length === 0) {
             const summaryRes = await fetch(
                 `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`
@@ -641,22 +655,53 @@ async function injectRecipeImage(bubble) {
             return;
         }
 
-        const container = document.createElement("div");
-        container.className = srcs.length === 1
-            ? "recipe-hero-single"
-            : `recipe-image-grid recipe-image-grid--${srcs.length}`;
+        const cameraSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+        const zoomSvg   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
+
+        const section = document.createElement("div");
+        section.className = "recipe-images-section";
+        section.innerHTML = `
+          <div class="recipe-images-header">
+            <div class="recipe-images-header-icon">${cameraSvg}</div>
+            <div class="recipe-images-header-text">
+              <span class="recipe-images-header-title">Recipe Gallery</span>
+              <span class="recipe-images-header-sub">Visual reference · Wikipedia</span>
+            </div>
+            <span class="recipe-images-count-badge">${srcs.length} photo${srcs.length > 1 ? "s" : ""}</span>
+          </div>`;
+
+        const grid = document.createElement("div");
+        grid.className = `recipe-img-grid recipe-img-grid--${srcs.length}`;
 
         srcs.forEach((src, i) => {
-            const img     = document.createElement("img");
-            img.src       = src;
-            img.alt       = `${label} — photo ${i + 1}`;
+            const card = document.createElement("div");
+            card.className = "recipe-image-card";
+
+            const img   = document.createElement("img");
+            img.src     = src;
+            img.alt     = `${label} — photo ${i + 1}`;
             img.className = "recipe-hero-img";
-            img.loading   = "lazy";
-            img.onerror   = () => img.remove();
-            container.appendChild(img);
+            img.loading = "lazy";
+            img.onerror = () => card.remove();
+
+            const overlay = document.createElement("div");
+            overlay.className = "recipe-image-overlay";
+            overlay.innerHTML = `
+              <span class="recipe-image-card-label">${label}</span>
+              <span class="recipe-image-card-counter">${i + 1}/${srcs.length}</span>`;
+
+            const zoomBtn = document.createElement("div");
+            zoomBtn.className = "recipe-image-zoom-btn";
+            zoomBtn.innerHTML = zoomSvg;
+
+            card.appendChild(img);
+            card.appendChild(overlay);
+            card.appendChild(zoomBtn);
+            grid.appendChild(card);
         });
 
-        placeholder.replaceWith(container);
+        section.appendChild(grid);
+        placeholder.replaceWith(section);
     } catch {
         placeholder.remove();
     } finally {
