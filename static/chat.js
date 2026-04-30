@@ -6,7 +6,6 @@ const messageList = document.getElementById("message-list");
 const welcomeScreen = document.getElementById("welcome-screen");
 const sendBtn     = document.getElementById("send-btn");
 const newChatBtn  = document.getElementById("new-chat-btn");
-const shareBtn    = document.getElementById("share-btn");
 const headerNewChatBtn = document.getElementById("header-new-chat-btn");
 
 // True if server pre-rendered history or user already sent a message this session
@@ -89,7 +88,7 @@ newChatBtn?.addEventListener("click", () => {
         a.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-200";
     });
     if (input) { input.value = ""; input.style.height = "auto"; input.focus(); }
-    shareBtn?.classList.add("hidden");
+    document.getElementById("share-btn")?.classList.add("hidden");
     headerNewChatBtn?.classList.add("hidden");
 });
 
@@ -549,7 +548,7 @@ async function injectRecipeImage(bubble) {
 }
 
 function showMessages() {
-    if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; shareBtn?.classList.remove("hidden"); headerNewChatBtn?.classList.remove("hidden"); }
+    if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; document.getElementById("share-btn")?.classList.remove("hidden"); headerNewChatBtn?.classList.remove("hidden"); }
 }
 
 // Apply to any history bubbles already in the DOM.
