@@ -350,6 +350,25 @@ function styleMealPlanTable(bubble) {
     wrapper.appendChild(table);
 }
 
+// ── Floating step tooltip ──
+let _stepTooltipEl = null;
+function showStepTooltip(e) {
+    if (e.currentTarget.dataset.expanded === "1") return;
+    if (!_stepTooltipEl) {
+        _stepTooltipEl = document.createElement("div");
+        _stepTooltipEl.className = "step-tooltip";
+        _stepTooltipEl.textContent = "Tap for tips";
+        document.body.appendChild(_stepTooltipEl);
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    _stepTooltipEl.style.top  = (r.top - 28) + "px";
+    _stepTooltipEl.style.left = (r.left + r.width / 2 - _stepTooltipEl.offsetWidth / 2) + "px";
+    _stepTooltipEl.classList.add("visible");
+}
+function hideStepTooltip() {
+    _stepTooltipEl?.classList.remove("visible");
+}
+
 function animateInstructions(bubble) {
     if (bubble.dataset.instructionsAnimated) return;
     bubble.querySelectorAll("h2").forEach(h2 => {
@@ -363,8 +382,9 @@ function animateInstructions(bubble) {
                 li.classList.add("instruction-step-animated", "instruction-expandable");
                 // Store plain step text before we append any children
                 li.dataset.stepText = li.textContent.trim();
-                li.dataset.tooltip = "Tap for tips";
                 li.addEventListener("click", () => expandStep(li, recipeName));
+                li.addEventListener("mouseenter", showStepTooltip);
+                li.addEventListener("mouseleave", hideStepTooltip);
             });
         }
     });
