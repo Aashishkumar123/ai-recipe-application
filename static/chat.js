@@ -351,6 +351,25 @@ function styleMealPlanTable(bubble) {
 }
 
 // ── Floating step tooltip ──
+const TOOLTIP_MODE_COLORS = {
+    "Pantry":    { bg: "#16a34a", text: "#fff" },
+    "Meal Plan": { bg: "#7c3aed", text: "#fff" },
+    "Recipe":    { bg: "#f97316", text: "#fff" },
+};
+const TOOLTIP_MODE_COLORS_DARK = {
+    "Pantry":    { bg: "#15803d", text: "#d1fae5" },
+    "Meal Plan": { bg: "#6d28d9", text: "#ede9fe" },
+    "Recipe":    { bg: "#c2410c", text: "#ffedd5" },
+};
+
+function _tooltipModeFromBubble(li) {
+    const bubble = li.closest(".bot-bubble");
+    if (!bubble) return "Recipe";
+    if (bubble.classList.contains("pantry-bubble"))    return "Pantry";
+    if (bubble.classList.contains("meal-plan-bubble")) return "Meal Plan";
+    return "Recipe";
+}
+
 let _stepTooltipEl = null;
 function showStepTooltip(e) {
     if (e.currentTarget.dataset.expanded === "1") return;
@@ -360,6 +379,12 @@ function showStepTooltip(e) {
         _stepTooltipEl.textContent = "Tap for tips";
         document.body.appendChild(_stepTooltipEl);
     }
+    const isDark  = document.documentElement.getAttribute("data-theme") === "dark";
+    const mode    = _tooltipModeFromBubble(e.currentTarget);
+    const palette = (isDark ? TOOLTIP_MODE_COLORS_DARK : TOOLTIP_MODE_COLORS)[mode];
+    _stepTooltipEl.style.background = palette.bg;
+    _stepTooltipEl.style.color      = palette.text;
+
     const r = e.currentTarget.getBoundingClientRect();
     _stepTooltipEl.style.top  = (r.top - 28) + "px";
     _stepTooltipEl.style.left = (r.left + r.width / 2 - _stepTooltipEl.offsetWidth / 2) + "px";
