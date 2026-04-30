@@ -363,7 +363,7 @@ function animateInstructions(bubble) {
                 li.classList.add("instruction-step-animated", "instruction-expandable");
                 // Store plain step text before we append any children
                 li.dataset.stepText = li.textContent.trim();
-                li.dataset.tooltip = "Click for cooking tips";
+                li.dataset.tooltip = "Tap for tips";
                 li.addEventListener("click", () => expandStep(li, recipeName));
             });
         }

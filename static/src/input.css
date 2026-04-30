@@ -511,31 +511,29 @@ body {
 .instruction-expandable:hover {
     border-color: #f97316 !important;
 }
-/* Tooltip on hover */
+/* Tooltip on hover — rendered inside the li to avoid overflow clipping */
 .instruction-expandable[data-tooltip] {
     position: relative;
 }
 .instruction-expandable[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.92);
-    background: #1c1917;
-    color: #fafaf9;
-    font-size: 0.7rem;
-    font-weight: 500;
+    top: 8px;
+    right: 10px;
+    background: #f97316;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 600;
     white-space: nowrap;
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s, transform 0.15s;
-    z-index: 10;
+    transition: opacity 0.18s;
+    letter-spacing: 0.02em;
 }
 .instruction-expandable[data-tooltip]:hover::after {
     opacity: 1;
-    transform: translateX(-50%) scale(1);
 }
 .step-expanded {
     border-color: #f97316 !important;
