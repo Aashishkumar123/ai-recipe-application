@@ -156,11 +156,14 @@ requests==2.33.1
     # via
     #   langsmith
     #   requests-toolbelt
+    #   scrapetube
     #   tiktoken
 requests-toolbelt==1.0.0
     # via langsmith
 rich==15.0.0
     # via typer
+scrapetube==2.6.0
+    # via ai-recipe-generator
 shellingham==1.5.4
     # via typer
 sniffio==1.3.1
@@ -188,6 +191,7 @@ typing-extensions==4.15.0
     #   openai
     #   pydantic
     #   pydantic-core
+    #   scrapetube
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic

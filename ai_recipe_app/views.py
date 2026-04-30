@@ -1,7 +1,5 @@
 import re
 import json
-import urllib.request
-import urllib.parse
 from io import BytesIO
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
@@ -399,50 +397,31 @@ def share_chat(request):
     return JsonResponse({"ok": True, "is_public": chat_obj.is_public, "public_url": public_url})
 
 
-_INVIDIOUS_INSTANCES = [
-    "https://inv.nadeko.net",
-    "https://invidious.privacyredirect.com",
-    "https://iv.melmac.space",
-    "https://invidious.nerdvpn.de",
-]
-
 @require_http_methods(["GET"])
 def youtube_videos(request):
-    """Return up to 3 YouTube video objects via Invidious (no API key needed)."""
+    """Return up to 3 YouTube video objects using scrapetube (no API key needed)."""
+    import scrapetube
     q = request.GET.get("q", "").strip()
     if not q:
         return JsonResponse({"videos": []})
 
-    params = urllib.parse.urlencode({
-        "q": f"{q} recipe",
-        "type": "video",
-        "fields": "videoId,title,author",
-    })
-
-    for instance in _INVIDIOUS_INSTANCES:
-        try:
-            url = f"{instance}/api/v1/search?{params}"
-            req = urllib.request.Request(url, headers={"User-Agent": "RecipeChef/1.0"})
-            with urllib.request.urlopen(req, timeout=6) as resp:  # noqa: S310
-                items = json.loads(resp.read())
-
-            videos = [
-                {
-                    "id":        item["videoId"],
-                    "title":     item["title"],
-                    # YouTube's thumbnail CDN works without any auth
-                    "thumbnail": f"https://i.ytimg.com/vi/{item['videoId']}/mqdefault.jpg",
-                    "channel":   item.get("author", ""),
-                }
-                for item in items[:3]
-                if item.get("videoId")
-            ]
-            if videos:
-                logger.info("youtube_videos | instance={} q={!r} results={}", instance, q, len(videos))
-                return JsonResponse({"videos": videos})
-        except Exception:
-            logger.warning("youtube_videos | instance={} failed, trying next", instance)
-            continue
-
-    logger.warning("youtube_videos | all instances failed for q={!r}", q)
-    return JsonResponse({"videos": []})
+    try:
+        raw = list(scrapetube.get_search(f"{q} recipe", limit=3))
+        videos = []
+        for v in raw:
+            vid_id = v.get("videoId")
+            if not vid_id:
+                continue
+            title   = v.get("title", {}).get("runs", [{}])[0].get("text", "")
+            channel = (v.get("longBylineText") or v.get("shortBylineText") or {}).get("runs", [{}])[0].get("text", "")
+            videos.append({
+                "id":        vid_id,
+                "title":     title,
+                "thumbnail": f"https://i.ytimg.com/vi/{vid_id}/mqdefault.jpg",
+                "channel":   channel,
+            })
+        logger.info("youtube_videos | q={!r} results={}", q, len(videos))
+        return JsonResponse({"videos": videos})
+    except Exception:
+        logger.exception("youtube_videos failed | q={!r}", q)
+        return JsonResponse({"videos": []})

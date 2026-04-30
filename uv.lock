@@ -20,6 +20,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pyjwt" },
     { name = "python-dotenv" },
+    { name = "scrapetube" },
     { name = "whitenoise" },
 ]
 
@@ -44,6 +45,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.12" },
     { name = "pyjwt", specifier = ">=2.12.1" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "scrapetube", specifier = ">=2.6.0" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
 
@@ -1362,6 +1364,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/88/27/0195d15fe7a897cbcba0904792c4b7c9fdd958456c3a17d2ea6093716a9a/ruff-0.15.11-py3-none-win32.whl", hash = "sha256:476a2aa56b7da0b73a3ee80b6b2f0e19cce544245479adde7baa65466664d5f3", size = 10655535, upload-time = "2026-04-16T18:46:12.47Z" },
     { url = "https://files.pythonhosted.org/packages/3a/5e/c927b325bd4c1d3620211a4b96f47864633199feed60fa936025ab27e090/ruff-0.15.11-py3-none-win_amd64.whl", hash = "sha256:8b6756d88d7e234fb0c98c91511aae3cd519d5e3ed271cae31b20f39cb2a12a3", size = 11779692, upload-time = "2026-04-16T18:46:17.268Z" },
     { url = "https://files.pythonhosted.org/packages/63/b6/aeadee5443e49baa2facd51131159fd6301cc4ccfc1541e4df7b021c37dd/ruff-0.15.11-py3-none-win_arm64.whl", hash = "sha256:063fed18cc1bbe0ee7393957284a6fe8b588c6a406a285af3ee3f46da2391ee4", size = 11032614, upload-time = "2026-04-16T18:46:34.487Z" },
+]
+
+[[package]]
+name = "scrapetube"
+version = "2.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f6/9f/a1a209c52605bc04499461f3e8ce05ab90a7f45b0f09b950e0a4e6b78a92/scrapetube-2.6.0-py3-none-any.whl", hash = "sha256:70077c2b80474896cd2490801d1ce33488bc8fb8ef9d2137f683a799ffac00af", size = 5874, upload-time = "2025-09-16T17:47:21.108Z" },
 ]
 
 [[package]]
