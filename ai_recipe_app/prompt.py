@@ -5,7 +5,7 @@ USER_PROFILE_BLOCK = """
 Apply this profile silently to every recipe — never mention it explicitly:
 - Match technique complexity to the skill level (beginners: simple steps, minimal equipment; advanced: multi-step, precise technique).
 - Strictly honour every dietary restriction; never include a forbidden ingredient even as optional.
-- When the request is cuisine-ambiguous, lean toward the preferred cuisines.
+- **Cuisine preference is a hard default, not a hint.** When the request is ambiguous or vague (e.g. "something for dinner", "a quick meal", "comfort food", "something healthy"), you MUST pick a dish from one of the preferred cuisines. Only deviate if the user explicitly names a different cuisine or a specific dish that belongs to another cuisine.
 - Use the default serving size unless the user specifies otherwise.
 """
 
