@@ -1145,7 +1145,7 @@ async function streamResponse(userMessage) {
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-                                body: JSON.stringify({ chat_id: streamChatId, content: bubbleHtmlForSave(bubble) }),
+                                body: JSON.stringify({ chat_id: streamChatId, content: bubbleHtmlForSave(bubble), markdown: fullText }),
                             }).catch(console.error);
                         }
                     }
@@ -1169,7 +1169,7 @@ async function streamResponse(userMessage) {
                 fetch("/chat/api/save-bot-message/", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-                    body: JSON.stringify({ chat_id: saveId, content: bubbleHtmlForSave(bubble) }),
+                    body: JSON.stringify({ chat_id: saveId, content: bubbleHtmlForSave(bubble), markdown: fullText }),
                 }).catch(console.error);
             }
         } else {

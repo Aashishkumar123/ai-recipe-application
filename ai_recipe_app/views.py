@@ -98,7 +98,7 @@ def chat_message(request):
                 if msg.sender == "user":
                     lc_history.append(HumanMessage(content=msg.content))
                 else:
-                    lc_history.append(AIMessage(content=html_to_text(msg.content)))
+                    lc_history.append(AIMessage(content=msg.raw_content or html_to_text(msg.content)))
             logger.debug("History loaded | chat_id={} turns={}", chat_obj.id, len(lc_history))
 
         ChatMessage.objects.create(chat=chat_obj, sender="user", content=dish_name)
@@ -211,8 +211,9 @@ def save_bot_message(request):
     """Save the rendered HTML of a bot reply after streaming completes."""
     try:
         data = json.loads(request.body)
-        chat_id = data.get("chat_id", "").strip()
-        html    = data.get("content", "").strip()
+        chat_id  = data.get("chat_id", "").strip()
+        html     = data.get("content", "").strip()
+        markdown = data.get("markdown", "").strip()
     except json.JSONDecodeError:
         logger.warning("save_bot_message | invalid JSON from user={}", request.user)
         return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -230,7 +231,7 @@ def save_bot_message(request):
         logger.warning("save_bot_message | chat not found chat_id={} user={}", chat_id, request.user)
         return JsonResponse({"error": "Chat not found"}, status=404)
 
-    ChatMessage.objects.create(chat=chat_obj, sender="bot", content=html)
+    ChatMessage.objects.create(chat=chat_obj, sender="bot", content=html, raw_content=markdown)
     logger.success("Bot message saved | chat_id={} user={}", chat_id, request.user)
     return JsonResponse({"ok": True})
 
