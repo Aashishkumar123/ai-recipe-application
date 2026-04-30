@@ -73,6 +73,19 @@ def stream_recipe(
         HumanMessage(content=dish_name),
     ]
 
+    sep = "=" * 60
+    history_block = "".join(
+        f"[{msg.__class__.__name__.replace('Message', '').upper()}]\n{msg.content}\n{sep}\n"
+        for msg in history
+    )
+    logger.debug(
+        "stream_recipe PROMPT\n{sep}\n[SYSTEM]\n{system}\n{sep}\n{history}[USER]\n{user}\n{sep}",
+        sep=sep,
+        system=system_prompt,
+        history=history_block,
+        user=dish_name,
+    )
+
     token_count = 0
     try:
         for chunk in (llm | _parser).stream(messages):
