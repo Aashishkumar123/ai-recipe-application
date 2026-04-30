@@ -268,6 +268,11 @@ document.getElementById("chat-menu-rename")?.addEventListener("click", () => {
                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
                 body: JSON.stringify({ chat_id: menuChatId, title: newTitle }),
             }).catch(console.error);
+            // Sync the header title if this is the currently open chat
+            const headerDisplay = document.getElementById("chat-title-display");
+            if (headerDisplay && headerDisplay.textContent.trim() === savedTitle) {
+                headerDisplay.textContent = newTitle;
+            }
         }
     }
 

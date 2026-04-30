@@ -76,6 +76,7 @@ newChatBtn?.addEventListener("click", () => {
     hasMessages = false;
     currentChatId = null;
     history.pushState(null, "", "/chat/");
+    updateHeaderTitle("");
     // Clear active highlight from sidebar
     document.querySelectorAll("#sidebar-history a").forEach((a) => {
         a.className = "flex items-center px-3 py-2 text-xs rounded-md truncate transition-colors text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-200";
@@ -86,6 +87,59 @@ newChatBtn?.addEventListener("click", () => {
 function getCsrfToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
+
+// ── Header chat title ────────────────────────────────────────────────────────
+const titleWrap    = document.getElementById("chat-title-wrap");
+const titleDisplay = document.getElementById("chat-title-display");
+const titlePencil  = document.getElementById("chat-title-pencil");
+const titleInput   = document.getElementById("chat-title-input");
+
+function updateHeaderTitle(title) {
+    if (!titleDisplay) return;
+    titleDisplay.textContent = title || "";
+    if (titleWrap) titleWrap.classList.toggle("invisible", !title);
+}
+
+function startTitleEdit() {
+    if (!titleInput || !titleDisplay) return;
+    titleInput.value = titleDisplay.textContent.trim();
+    titleDisplay.classList.add("hidden");
+    titlePencil?.classList.add("hidden");
+    titleInput.classList.remove("hidden");
+    titleInput.focus();
+    titleInput.select();
+}
+
+async function commitTitleEdit() {
+    const newTitle = titleInput.value.trim();
+    const oldTitle = titleDisplay.textContent.trim();
+    titleInput.classList.add("hidden");
+    titleDisplay.classList.remove("hidden");
+    titlePencil?.classList.remove("hidden");
+    if (!newTitle || newTitle === oldTitle || !currentChatId) return;
+    titleDisplay.textContent = newTitle;
+    // Sync sidebar link if present
+    const sidebarLink = document.querySelector(`.chat-menu-btn[data-chat-id="${currentChatId}"]`);
+    if (sidebarLink) {
+        sidebarLink.dataset.chatTitle = newTitle;
+        const a = sidebarLink.closest(".chat-item")?.querySelector("a");
+        if (a) a.textContent = newTitle;
+    }
+    await fetch("/chat/api/rename-chat/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+        body: JSON.stringify({ chat_id: currentChatId, title: newTitle }),
+    }).catch(console.error);
+}
+
+titleDisplay?.addEventListener("click", startTitleEdit);
+titlePencil?.addEventListener("click",  startTitleEdit);
+titleInput?.addEventListener("blur",    commitTitleEdit);
+titleInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter")  { e.preventDefault(); titleInput.blur(); }
+    if (e.key === "Escape") { titleInput.value = titleDisplay.textContent; titleInput.blur(); }
+});
+// ────────────────────────────────────────────────────────────────────────────
 
 function addChatToSidebar(chatId, title) {
     const historyEl = document.getElementById("sidebar-history");
@@ -685,6 +739,7 @@ async function streamResponse(userMessage) {
                             currentChatId = data.chat_id;
                             window.history.pushState(null, "", `/chat/${currentChatId}/`);
                             addChatToSidebar(currentChatId, data.chat_title || userMessage);
+                            updateHeaderTitle(data.chat_title || userMessage);
                         }
                         if (streamChatId) {
                             // Fetch YouTube videos first so they're included in the saved HTML
@@ -712,6 +767,7 @@ async function streamResponse(userMessage) {
                     currentChatId = streamChatId;
                     window.history.pushState(null, "", `/chat/${currentChatId}/`);
                     addChatToSidebar(currentChatId, userMessage);
+                    updateHeaderTitle(userMessage);
                 }
                 fetch("/chat/api/save-bot-message/", {
                     method: "POST",

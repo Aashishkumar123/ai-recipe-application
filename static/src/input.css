@@ -44,6 +44,15 @@ body {
     @apply border-zinc-800 text-zinc-300;
 }
 
+/* ── Header chat title inline edit ── */
+#chat-title-input {
+    color: inherit;
+    caret-color: #f97316;
+}
+#chat-title-input:focus {
+    border-bottom-color: #f97316;
+}
+
 /* ── Chat page shell ── */
 .page-chat {
     @apply bg-white;
