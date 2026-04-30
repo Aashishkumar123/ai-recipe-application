@@ -7,6 +7,7 @@ const welcomeScreen = document.getElementById("welcome-screen");
 const sendBtn     = document.getElementById("send-btn");
 const newChatBtn  = document.getElementById("new-chat-btn");
 const shareBtn    = document.getElementById("share-btn");
+const headerNewChatBtn = document.getElementById("header-new-chat-btn");
 
 // True if server pre-rendered history or user already sent a message this session
 let hasMessages = document.querySelectorAll(".chat-msg").length > 0;
@@ -89,6 +90,7 @@ newChatBtn?.addEventListener("click", () => {
     });
     if (input) { input.value = ""; input.style.height = "auto"; input.focus(); }
     shareBtn?.classList.add("hidden");
+    headerNewChatBtn?.classList.add("hidden");
 });
 
 function getCsrfToken() {
@@ -547,7 +549,7 @@ async function injectRecipeImage(bubble) {
 }
 
 function showMessages() {
-    if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; shareBtn?.classList.remove("hidden"); }
+    if (!hasMessages) { hasMessages = true; if (welcomeScreen) welcomeScreen.style.display = "none"; shareBtn?.classList.remove("hidden"); headerNewChatBtn?.classList.remove("hidden"); }
 }
 
 // Apply to any history bubbles already in the DOM.
