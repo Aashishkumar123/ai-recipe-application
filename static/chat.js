@@ -357,13 +357,85 @@ function animateInstructions(bubble) {
             let el = h2.nextElementSibling;
             while (el && el.tagName !== "OL") el = el.nextElementSibling;
             if (!el) return;
+            const recipeName = bubble.querySelector("h1")?.textContent.replace(/\p{Emoji}/gu, "").trim() ?? "";
             el.querySelectorAll("li").forEach((li, i) => {
                 li.style.animationDelay = `${i * 0.09}s`;
-                li.classList.add("instruction-step-animated");
+                li.classList.add("instruction-step-animated", "instruction-expandable");
+                // Store plain step text before we append any children
+                li.dataset.stepText = li.textContent.trim();
+                li.dataset.tooltip = "Click for cooking tips";
+                li.addEventListener("click", () => expandStep(li, recipeName));
             });
         }
     });
     bubble.dataset.instructionsAnimated = "1";
+}
+
+async function expandStep(li, recipeName) {
+    if (li.dataset.loading === "1") return;
+
+    if (li.dataset.expanded === "1") {
+        const detail = li.querySelector(".step-detail");
+        if (detail) {
+            detail.classList.add("step-detail-collapsing");
+            setTimeout(() => { detail.remove(); }, 250);
+        }
+        li.dataset.expanded = "0";
+        li.classList.remove("step-expanded");
+        return;
+    }
+
+    // Already fetched — just re-show from cache
+    if (li.dataset.detailText) {
+        renderStepDetail(li, li.dataset.detailText);
+        return;
+    }
+
+    // First fetch — show loader
+    li.dataset.loading = "1";
+    li.classList.add("step-loading");
+
+    const loader = document.createElement("div");
+    loader.className = "step-loader";
+    loader.innerHTML = `
+        <span class="step-spinner"></span>
+        <span class="step-loader-text">Getting cooking tips…</span>
+    `;
+    li.appendChild(loader);
+
+    const stepText = (li.dataset.stepText || li.childNodes[0]?.textContent || li.textContent).trim();
+
+    try {
+        const res = await fetch("/chat/api/step-detail/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+            body: JSON.stringify({ recipe: recipeName, step: stepText }),
+        });
+        const data = await res.json();
+        loader.remove();
+        if (data.detail) {
+            li.dataset.detailText = data.detail;
+            renderStepDetail(li, data.detail);
+        }
+    } catch (_) {
+        loader.remove();
+        li.querySelector(".step-hint")?.classList.remove("hidden");
+    }
+
+    li.dataset.loading = "0";
+    li.classList.remove("step-loading");
+}
+
+function renderStepDetail(li, text) {
+    const div = document.createElement("div");
+    div.className = "step-detail";
+    div.innerHTML = `
+        <div class="step-detail-icon">💡</div>
+        <p class="step-detail-text">${text}</p>
+    `;
+    li.appendChild(div);
+    li.dataset.expanded = "1";
+    li.classList.add("step-expanded");
 }
 
 function styleNutritionTable(bubble) {

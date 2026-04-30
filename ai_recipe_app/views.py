@@ -397,6 +397,48 @@ def share_chat(request):
     return JsonResponse({"ok": True, "is_public": chat_obj.is_public, "public_url": public_url})
 
 
+@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
+@csrf_protect
+def step_detail(request):
+    """Return a cached or freshly generated explanation for a recipe instruction step."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    recipe = data.get("recipe", "").strip()
+    step   = data.get("step", "").strip()
+    if not step:
+        return JsonResponse({"error": "Missing step"}, status=400)
+
+    from .models import StepDetail
+
+    cache_key = StepDetail.make_key(recipe, step)
+    cached = StepDetail.objects.filter(key=cache_key).first()
+    if cached:
+        logger.debug("step_detail cache hit | key={}", cache_key[:8])
+        return JsonResponse({"detail": cached.detail, "cached": True})
+
+    from langchain_core.messages import HumanMessage
+    from .chat import llm, _parser
+
+    context = f'for the recipe "{recipe}"' if recipe else ""
+    prompt = (
+        f"You are a cooking coach. Explain this instruction step {context} in 2–3 short sentences. "
+        f"Cover: why this step matters, a common mistake to avoid, and one practical tip. "
+        f"Be concise and conversational. No bullet points, no headers.\n\nStep: {step}"
+    )
+    try:
+        result = (llm | _parser).invoke([HumanMessage(content=prompt)])
+        StepDetail.objects.create(key=cache_key, step_text=step, detail=result)
+        logger.info("step_detail cached | key={} recipe={!r}", cache_key[:8], recipe)
+        return JsonResponse({"detail": result, "cached": False})
+    except Exception:
+        logger.exception("step_detail failed | recipe={!r} step={!r}", recipe, step)
+        return JsonResponse({"error": "Failed to get step detail"}, status=500)
+
+
 @require_http_methods(["GET"])
 def youtube_videos(request):
     """Return up to 3 YouTube video objects using scrapetube (no API key needed)."""
