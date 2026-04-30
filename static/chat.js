@@ -166,7 +166,6 @@ function applyRecipeStyles(bubble) {
     animateInstructions(bubble);
     styleFollowUpSuggestions(bubble);
     injectRecipeImage(bubble);
-    injectYouTubeVideos(bubble);
 }
 
 async function injectYouTubeVideos(bubble) {
@@ -242,8 +241,13 @@ function styleFollowUpSuggestions(bubble) {
     h2.style.display = "none";
     ul.style.display = "none";
 
+    // Store the recipe name so the click handler can anchor the question to the right dish
+    const recipeName = (bubble.querySelector("h1")?.textContent ?? "")
+        .replace(/\p{Emoji}/gu, "").trim();
+
     const wrapper = document.createElement("div");
     wrapper.className = "followup-chips";
+    if (recipeName) wrapper.dataset.recipe = recipeName;
     questions.forEach(q => {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -488,7 +492,10 @@ function showMessages() {
 // Apply to any history bubbles already in the DOM.
 // First strip any stale placeholders that were accidentally persisted before this fix.
 document.querySelectorAll(".bot-bubble .recipe-hero-placeholder").forEach(el => el.remove());
-document.querySelectorAll(".bot-bubble").forEach(applyRecipeStyles);
+document.querySelectorAll(".bot-bubble").forEach(bubble => {
+    applyRecipeStyles(bubble);
+    injectYouTubeVideos(bubble); // no-op if videos already in saved HTML; fallback for old messages
+});
 
 const copyIconSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
 const checkIconSvg    = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -597,7 +604,9 @@ function appendBotMessage() {
 messageList?.addEventListener("click", (e) => {
     const chip = e.target.closest(".followup-chip");
     if (!chip || abortController) return;
-    input.value = chip.textContent.trim();
+    const recipe = chip.closest(".followup-chips")?.dataset.recipe;
+    // Anchor question to the specific recipe so multi-recipe sessions don't confuse the LLM
+    input.value = recipe ? `For the ${recipe}: ${chip.textContent.trim()}` : chip.textContent.trim();
     input.dispatchEvent(new Event("input"));
     form.requestSubmit();
 });
@@ -678,6 +687,9 @@ async function streamResponse(userMessage) {
                             addChatToSidebar(currentChatId, data.chat_title || userMessage);
                         }
                         if (streamChatId) {
+                            // Fetch YouTube videos first so they're included in the saved HTML
+                            // and never need to be re-fetched on history reload.
+                            await injectYouTubeVideos(bubble);
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
