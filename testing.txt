@@ -1,6 +1,6 @@
 ------------------------ Testing --------------------------
 
-we have three modes - recipe mode, pantry mode, meal plan mode. 
+We have three modes - recipe mode, pantry mode, meal plan mode. 
 So i just want to test each of the feature of our recipe chef app, so could provide me few examples that can try to test our application"""
 
 
@@ -78,3 +78,168 @@ Here are test examples for each mode, covering the main features:
   identically.                                                                                                          
   - Follow-up memory: Ask Spaghetti carbonara, then ask What can I substitute for pancetta? — the AI should know you
   mean carbonara.             
+
+
+
+
+Here's a deep test plan organized by feature area:                                                                    
+                                                                                                                        
+  ---                                                                                                                   
+  Core Chat & Streaming
+                                                                                                                        
+  ┌─────────────────┬──────────────────────────────────────┬─────────────────────────────────────────────┐
+  │      Test       │                Input                 │                  Expected                   │              
+  ├─────────────────┼──────────────────────────────────────┼─────────────────────────────────────────────┤
+  │ Basic stream    │ Spaghetti carbonara                  │ Tokens stream in real-time, not all at once │              
+  ├─────────────────┼──────────────────────────────────────┼─────────────────────────────────────────────┤
+  │ Stop mid-stream │ Beef bourguignon → click Stop button │ Stream stops immediately                    │              
+  ├─────────────────┼──────────────────────────────────────┼─────────────────────────────────────────────┤              
+  │ Empty input     │ Submit with blank field              │ Nothing sent, no error                      │              
+  ├─────────────────┼──────────────────────────────────────┼─────────────────────────────────────────────┤              
+  │ Very long input │ Paste a 500-char paragraph           │ Handles gracefully                          │
+  └─────────────────┴──────────────────────────────────────┴─────────────────────────────────────────────┘              
+                  
+  ---                                                                                                                   
+  Recipe Mode — Edge Cases
+                                                                                                                        
+  ┌─────────────────────────────┬─────────────────────────────────┬────────────────────────────────────────────────┐
+  │            Test             │              Input              │                    Expected                    │    
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Ambiguous dish              │ Curry                           │ AI picks a specific version (e.g. Thai green   │
+  │                             │                                 │ curry)                                         │
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤    
+  │ Vague craving               │ Something warm and spicy        │ Returns a valid recipe, not an error           │    
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤    
+  │ Off-topic                   │ What's the capital of France?   │ Deflects: "I can only help with recipes"       │    
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Near off-topic              │ What should I eat after a       │ Returns a high-protein recipe                  │    
+  │                             │ workout?                        │                                                │
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤    
+  │ Dish with no Wikipedia      │ Grandma's potato soup           │ Renders without crashing (no wiki image)       │
+  │ article                     │                                 │                                                │    
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Country badge check         │ Pad Thai                        │ Badge shows Thailand 🇹🇭                        │
+  ├─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────────────┤    
+  │ Country badge check         │ Tiramisu                        │ Badge shows Italy 🇮🇹                           │
+  └─────────────────────────────┴─────────────────────────────────┴────────────────────────────────────────────────┘    
+                  
+  ---                                                                                                                   
+  Follow-up Conversation Memory
+                               
+  Ask these in sequence in the same chat:
+                                                                                                                        
+  1. Chicken tikka masala
+  2. Can I make it dairy-free? — should know you mean tikka masala                                                      
+  3. Scale it up to 8 servings — should scale the dairy-free version                                                    
+  4. How long can I store it in the fridge? — still in context                                                          
+                                                                                                                        
+  ---                                                                                                                   
+  Pantry Mode                                                                                                           
+                  
+  Click Pantry mode, then type:
+                                                                                                                        
+  ┌────────────────────────┬───────────────────────────────────────────┬───────────────────────────────────────────┐
+  │          Test          │                   Input                   │                 Expected                  │    
+  ├────────────────────────┼───────────────────────────────────────────┼───────────────────────────────────────────┤
+  │ Full match             │ pasta, eggs, parmesan, bacon, black       │ Carbonara with all ✓ checked              │
+  │                        │ pepper                                    │                                           │
+  ├────────────────────────┼───────────────────────────────────────────┼───────────────────────────────────────────┤    
+  │ Partial match          │ chicken, soy sauce, ginger                │ Recipe with missing items in "You'll      │    
+  │                        │                                           │ need"                                     │    
+  ├────────────────────────┼───────────────────────────────────────────┼───────────────────────────────────────────┤    
+  │ Only 2 items           │ rice, egg                                 │ Still picks a valid recipe                │
+  ├────────────────────────┼───────────────────────────────────────────┼───────────────────────────────────────────┤    
+  │ Non-food items mixed   │ eggs, flour, my phone                     │ Ignores "my phone", makes a recipe        │
+  │ in                     │                                           │                                           │    
+  └────────────────────────┴───────────────────────────────────────────┴───────────────────────────────────────────┘
+
+  ---
+  Meal Plan Mode
+                
+  Click Plan my week, then type:
+                                                                                                                        
+  ┌───────────────────────────────┬───────────────────────────────────────────────┬─────────────────────────────────┐
+  │             Test              │                     Input                     │            Expected             │   
+  ├───────────────────────────────┼───────────────────────────────────────────────┼─────────────────────────────────┤
+  │ Default week                  │ for the week                                  │ 7-day table, 3 meals/day        │
+  ├───────────────────────────────┼───────────────────────────────────────────────┼─────────────────────────────────┤
+  │ Custom days                   │ 3 days                                        │ Only 3 rows                     │   
+  ├───────────────────────────────┼───────────────────────────────────────────────┼─────────────────────────────────┤   
+  │ Dinner only                   │ just dinners for 5 days                       │ Only Dinner column              │   
+  ├───────────────────────────────┼───────────────────────────────────────────────┼─────────────────────────────────┤   
+  │ Diet-specific                 │ vegan week                                    │ No meat, dairy, or eggs         │
+  │                               │                                               │ anywhere                        │   
+  ├───────────────────────────────┼───────────────────────────────────────────────┼─────────────────────────────────┤
+  │ After meal plan, ask          │ Can you give me the recipe for Monday's       │ Returns full recipe for that    │   
+  │ follow-up                     │ dinner?                                       │ dish                            │
+  └───────────────────────────────┴───────────────────────────────────────────────┴─────────────────────────────────┘   
+                  
+  ---
+  User Profile Influence
+
+  Go to Settings → Profile and configure, then test:
+
+  ┌─────────────────────┬─────────────┬──────────────────────┬─────────────────────────────────────────┐                
+  │       Setting       │    Value    │     Test prompt      │                Expected                 │
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤                
+  │ Dietary restriction │ vegan       │ Lasagna              │ Uses plant-based alternatives           │
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤
+  │ Dietary restriction │ gluten-free │ Fried chicken        │ Uses gluten-free coating                │                
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤                
+  │ Cooking skill       │ beginner    │ Beef Wellington      │ Simplified steps, no advanced technique │                
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤                
+  │ Cooking skill       │ advanced    │ Scrambled eggs       │ Precise temperatures, technique notes   │
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤                
+  │ Default servings    │ 4           │ Omelette             │ Serves 4 by default                     │
+  ├─────────────────────┼─────────────┼──────────────────────┼─────────────────────────────────────────┤                
+  │ Cuisine preference  │ Japanese    │ Something for dinner │ Leans toward Japanese dish              │ xxxxx
+  └─────────────────────┴─────────────┴──────────────────────┴─────────────────────────────────────────┘                
+                  
+  ---                                                                                                                   
+  Language        
+          
+  Go to Settings → General → Language, switch to each:
+                                                                                                                        
+  ┌────────────────────────┬─────────────┬───────────────────────────────────────────┐
+  │        Language        │ Test prompt │                 Expected                  │                                  
+  ├────────────────────────┼─────────────┼───────────────────────────────────────────┤
+  │ Spanish                │ Paella      │ Full recipe in Spanish including headings │
+  ├────────────────────────┼─────────────┼───────────────────────────────────────────┤
+  │ French                 │ Croissant   │ Full recipe in French                     │                                  
+  ├────────────────────────┼─────────────┼───────────────────────────────────────────┤
+  │ Hindi                  │ Biryani     │ Full recipe in Hindi                      │                                  
+  ├────────────────────────┼─────────────┼───────────────────────────────────────────┤                                  
+  │ Switch back to English │ Pizza       │ Back to English                           │
+  └────────────────────────┴─────────────┴───────────────────────────────────────────┘                                  
+                  
+  ---
+  Chat History & Sidebar
+                        
+  ┌─────────────────────────┬────────────────────────────────────┬────────────────────────────────────────────────┐
+  │          Test           │               Action               │                    Expected                    │     
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Auto-title              │ Send first message → check sidebar │ Chat gets a title (dish name)                  │     
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Reload                  │ Refresh page, click the chat       │ Recipe renders identically (HTML stored)       │     
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤     
+  │ Rename                  │ Click ⋯ → Rename → type new name   │ Sidebar updates immediately                    │     
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤     
+  │ Delete                  │ Click ⋯ → Delete                   │ Chat removed from sidebar and DB               │
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤     
+  │ Multiple chats          │ Create 3+ chats                    │ Today / Yesterday / This Week grouping appears │
+  ├─────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────┤     
+  │ Load old chat, continue │ Open an old chat, type a follow-up │ AI has context from that chat's history        │
+  └─────────────────────────┴────────────────────────────────────┴────────────────────────────────────────────────┘     
+                  
+  ---                                                                                                                   
+  Notifications & Settings
+                                                                                                                        
+  ┌──────────────────────┬───────────────────────────────────────────────┬───────────────────────────────┐
+  │         Test         │                    Action                     │           Expected            │              
+  ├──────────────────────┼───────────────────────────────────────────────┼───────────────────────────────┤
+  │ Toggle notifications │ Settings → Notifications → flip switches      │ Saves without page reload     │
+  ├──────────────────────┼───────────────────────────────────────────────┼───────────────────────────────┤
+  │ Reload after toggle  │ Refresh settings page                         │ Toggles remain in saved state │              
+  ├──────────────────────┼───────────────────────────────────────────────┼───────────────────────────────┤              
+  │ Theme switch         │ Settings → Appearance → Dark / Light / System │ UI changes immediately        │              
+  └──────────────────────┴───────────────────────────────────────────────┴───────────────────────────────┘    

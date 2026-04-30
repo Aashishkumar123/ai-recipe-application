@@ -1811,21 +1811,21 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     align-items: center;
     gap: 0;
     margin: 0.375rem 0 0.5rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(249,115,22,0.22);
     border-radius: 999px;
     overflow: hidden;
-    background: #f9fafb;
+    background: rgba(249,115,22,0.06);
     font-size: 0.7rem;
     font-weight: 600;
 }
 [data-theme="dark"] .unit-toggle-wrap {
-    border-color: #3f3f46;
-    background: #27272a;
+    border-color: rgba(249,115,22,0.25);
+    background: rgba(249,115,22,0.07);
 }
 
 .unit-toggle-btn {
     padding: 0.25rem 0.75rem;
-    color: #6b7280;
+    color: #9a3412;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -1834,8 +1834,8 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     letter-spacing: 0.01em;
 }
 .unit-toggle-btn:hover {
-    background: #f3f4f6;
-    color: #374151;
+    background: rgba(249,115,22,0.12);
+    color: #c2410c;
 }
 .unit-toggle-btn.is-active {
     background: #f97316;
@@ -1843,13 +1843,44 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     border-radius: 999px;
 }
 [data-theme="dark"] .unit-toggle-btn {
-    color: #a1a1aa;
+    color: #fb923c;
 }
 [data-theme="dark"] .unit-toggle-btn:hover {
-    background: #3f3f46;
-    color: #d4d4d8;
+    background: rgba(249,115,22,0.18);
+    color: #fed7aa;
 }
 [data-theme="dark"] .unit-toggle-btn.is-active {
     background: #f97316;
+    color: #ffffff;
+}
+
+/* Pantry mode — green theme */
+.bot-bubble.pantry-bubble .unit-toggle-wrap {
+    border-color: rgba(22,163,74,0.22);
+    background: rgba(22,163,74,0.06);
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .unit-toggle-wrap {
+    border-color: rgba(22,163,74,0.25);
+    background: rgba(22,163,74,0.07);
+}
+.bot-bubble.pantry-bubble .unit-toggle-btn {
+    color: #166534;
+}
+.bot-bubble.pantry-bubble .unit-toggle-btn:hover {
+    background: rgba(22,163,74,0.12);
+    color: #14532d;
+}
+.bot-bubble.pantry-bubble .unit-toggle-btn.is-active {
+    background: #16a34a;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .unit-toggle-btn {
+    color: #4ade80;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .unit-toggle-btn:hover {
+    background: rgba(22,163,74,0.18);
+    color: #86efac;
+}
+[data-theme="dark"] .bot-bubble.pantry-bubble .unit-toggle-btn.is-active {
+    background: #16a34a;
     color: #ffffff;
 }
