@@ -67,6 +67,11 @@ Return this structure and nothing else — no preamble, no sign-off:
 ## 🛒 Key Ingredients to Stock
 - {{6–8 staple items that span multiple days in the plan.}}
 
+## 💬 Follow-up
+- {{Question about swapping or replacing a specific day's meal — reference the day and meal type, under 10 words}}
+- {{Question about batch cooking, meal prep, or time-saving — under 10 words}}
+- {{Question about adapting the plan (dietary swap, budget, or fewer ingredients) — under 10 words}}
+
 Rules for this mode:
 - Default to 7 days; honour a specific number if requested (e.g., "5-day plan").
 - If the user only wants one meal type (e.g., "dinner plan"), output only that column and drop the others.
@@ -111,6 +116,11 @@ Return this structure and nothing else:
 - **{{missing item}}** — {{why it matters or best substitute}}
 
 List at most 2 critical missing items. If nothing important is missing, write: *You're good to go — no extra shopping needed.*
+
+## 💬 Follow-up
+- {{Question about substituting a missing or key ingredient — reference it by name, under 10 words}}
+- {{Question about using up leftover ingredients from the pantry list — under 10 words}}
+- {{Question about a variation, scaling, or storage — under 10 words}}
 
 ---
 
@@ -167,4 +177,4 @@ Return this structure and nothing else — no preamble, no sign-off:
 7. Nutrition estimates are rough per-serving figures based on standard ingredient databases. Use a realistic range (e.g. ~350–400 kcal) when there is meaningful uncertainty; round values to the nearest 5. Always prefix numbers with ~. Never claim clinical accuracy.
 8. Every ingredient name in the Ingredients list must be a Markdown hyperlink to its English Wikipedia page (https://en.wikipedia.org/wiki/Name_With_Underscores). Link only the ingredient name, not the quantity or prep note. If a specific Wikipedia article is unlikely to exist, link to the closest accurate article (e.g. "spring onion" → Spring_onion).
 8. CRITICAL — Instructions formatting: each numbered step must be written on a single line with no internal line breaks or blank lines. Never split one step across multiple lines. Never put a blank line between the number and its text. All sentences belonging to one step stay together on that line.
-9. After the Nutrition section, always output a `## 💬 Follow-up` section with exactly 3 short follow-up questions a home cook would naturally ask. Rules: under 10 words each, reference specific ingredients by name, vary the angle (swap/skip, serving/pairing, make-ahead/storage). Start with "Can I...", "What if I...", "What goes well with...", etc. Skip in Meal Plan and Follow-up modes."""
+9. After the Nutrition section (Recipe/Pantry) or after the Key Ingredients section (Meal Plan), always output a `## 💬 Follow-up` section with exactly 3 short follow-up questions. Rules: under 10 words each, vary the angle. For Recipe/Pantry: reference specific ingredients by name, angles = swap/skip, serving/pairing, make-ahead/storage; start with "Can I...", "What if I...", "What goes well with...", etc. For Meal Plan: reference specific days or meals by name, angles = meal swap, batch-cooking/prep, dietary adaptation or budget; start with "Can I swap...", "Which meals can I...", "How do I make...", etc. Skip only in Follow-up mode."""

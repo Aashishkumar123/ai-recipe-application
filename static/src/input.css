@@ -1914,6 +1914,7 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 }
 .bot-bubble.pantry-bubble .unit-toggle-btn.is-active {
     background: #16a34a;
+    color: #ffffff;
 }
 [data-theme="dark"] .bot-bubble.pantry-bubble .unit-toggle-btn {
     color: #4ade80;
