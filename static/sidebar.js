@@ -679,3 +679,28 @@ notifMarkAll?.addEventListener("click", async () => {
     });
     updateBadge(0);
 });
+
+// --- Theme toggle ---
+function applyThemeIcons(theme) {
+    const sun  = document.getElementById("theme-icon-sun");
+    const moon = document.getElementById("theme-icon-moon");
+    if (!sun || !moon) return;
+    const isDark = theme === "dark";
+    sun.classList.toggle("hidden", !isDark);
+    moon.classList.toggle("hidden", isDark);
+}
+
+// Sync icons on page load
+applyThemeIcons(document.documentElement.getAttribute("data-theme") || "light");
+
+document.getElementById("theme-toggle-btn")?.addEventListener("click", async () => {
+    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    applyThemeIcons(next);
+    await fetch("/auth/api/set-theme/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ theme: next }),
+    }).catch(console.error);
+});
