@@ -25,6 +25,18 @@ let abortController = null;
 const sendIconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></svg>`;
 const stopIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2.5"/></svg>`;
 
+// Unit converter — metric/imperial toggle
+const UNIT_TOGGLE_KEY = "recipeUnitPref";
+const IMP_TO_MET = {
+  cup: { factor: 240, to: "ml" }, cups: { factor: 240, to: "ml" },
+  tablespoon: { factor: 15, to: "ml" }, tablespoons: { factor: 15, to: "ml" }, tbsp: { factor: 15, to: "ml" },
+  teaspoon:   { factor: 5,  to: "ml" }, teaspoons:   { factor: 5,  to: "ml" }, tsp:  { factor: 5,  to: "ml" },
+  "fl oz": { factor: 30, to: "ml" },
+  oz:      { factor: 28, to: "g"  },
+  lb:      { factor: 454, to: "g" }, pound: { factor: 454, to: "g" }, pounds: { factor: 454, to: "g" },
+};
+const QTY_UNIT_RE = /^((?:\d+\s+)?\d+\/\d+|\d*[.,]?\d+|[¼½¾⅓⅔⅛⅜⅝⅞])\s*(fl oz|tablespoons?|tbsp|teaspoons?|tsp|cups?|oz|lbs?|pounds?|ml|g|kg|liters?|litres?|l)\b/i;
+
 // Switch the send button between send-mode and stop-mode
 function setStopMode(on) {
     if (!sendBtn) return;
@@ -214,6 +226,204 @@ function styleRecipeMeta(p) {
     if (chips.length) p.innerHTML = chips.join("");
 }
 
+function parseFraction(str) {
+    const UNICODE_FRACS = {
+        "¼": 0.25, "½": 0.5, "¾": 0.75,
+        "⅓": 1/3,  "⅔": 2/3,
+        "⅛": 0.125,"⅜": 0.375,"⅝": 0.625,"⅞": 0.875,
+    };
+    str = str.trim();
+    if (UNICODE_FRACS[str]) return UNICODE_FRACS[str];
+    const mixed = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+    if (mixed) return parseInt(mixed[1]) + parseInt(mixed[2]) / parseInt(mixed[3]);
+    const simple = str.match(/^(\d+)\/(\d+)$/);
+    if (simple) return parseInt(simple[1]) / parseInt(simple[2]);
+    return parseFloat(str.replace(",", "."));
+}
+
+function formatQuantity(num) {
+    const FRACS = [[1/8,"⅛"],[1/4,"¼"],[1/3,"⅓"],[1/2,"½"],[2/3,"⅔"],[3/4,"¾"]];
+    if (num < 10) {
+        const whole = Math.floor(num);
+        const frac  = num - whole;
+        for (const [val, sym] of FRACS) {
+            if (Math.abs(frac - val) < 0.07) {
+                return whole > 0 ? `${whole} ${sym}` : sym;
+            }
+        }
+    }
+    if (num >= 100) return Math.round(num).toString();
+    if (Number.isInteger(num)) return num.toString();
+    return parseFloat(num.toFixed(1)).toString();
+}
+
+function convertQtyUnit(qty, unitRaw, direction) {
+    const unit = unitRaw.toLowerCase().trim();
+    const num  = parseFraction(qty);
+
+    if (direction === "metric") {
+        const rule = IMP_TO_MET[unit];
+        if (!rule) return { qty, unit: unitRaw, changed: false };
+        const converted = num * rule.factor;
+        return { qty: formatQuantity(converted), unit: rule.to, changed: true };
+    }
+
+    if (unit === "ml") {
+        const mlNum = num;
+        if (mlNum >= 960) {
+            return { qty: formatQuantity(mlNum / 240), unit: "cups", changed: true };
+        } else if (mlNum >= 15) {
+            const tbsp = mlNum / 15;
+            if (Number.isInteger(tbsp) || Math.abs(tbsp - Math.round(tbsp)) < 0.1) {
+                return { qty: formatQuantity(tbsp), unit: "tbsp", changed: true };
+            }
+            return { qty: formatQuantity(mlNum / 5), unit: "tsp", changed: true };
+        } else {
+            return { qty: formatQuantity(mlNum / 5), unit: "tsp", changed: true };
+        }
+    }
+    if (unit === "g") {
+        if (num >= 454) return { qty: formatQuantity(num / 454), unit: "lb", changed: true };
+        return { qty: formatQuantity(num / 28), unit: "oz", changed: true };
+    }
+    if (unit === "kg") {
+        return { qty: formatQuantity(num * 2.205), unit: "lb", changed: true };
+    }
+    return { qty, unit: unitRaw, changed: false };
+}
+
+function _detectDefaultPref(ul) {
+    let metricCount = 0, imperialCount = 0;
+    ul.querySelectorAll("li").forEach((li) => {
+        if (!li.dataset.origUnit) return;
+        const u = li.dataset.origUnit.toLowerCase().trim();
+        if (IMP_TO_MET[u]) imperialCount++;
+        else if (["ml","g","kg","l","liter","litre","liters","litres"].includes(u)) metricCount++;
+    });
+    return imperialCount >= metricCount ? "imperial" : "metric";
+}
+
+function _applyUnitPref(ul, toggleWrap, pref) {
+    toggleWrap.querySelectorAll(".unit-toggle-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.unit === pref);
+    });
+
+    ul.querySelectorAll("li").forEach((li) => {
+        if (!li.dataset.origText) return;
+        if (li.dataset.unitChanged === "0") return;
+
+        const target = li.querySelector("p") || li;
+        let textNode = null;
+        for (const node of target.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                textNode = node; break;
+            }
+        }
+        if (!textNode) return;
+
+        const suffix = li.dataset.origSuffix;
+        if (pref === "metric") {
+            textNode.textContent = `${li.dataset.metricQty} ${li.dataset.metricUnit}${suffix}`;
+        } else {
+            textNode.textContent = `${li.dataset.imperialQty} ${li.dataset.imperialUnit}${suffix}`;
+        }
+    });
+}
+
+function injectUnitToggle(bubble) {
+    if (bubble.dataset.unitToggleInit) return;
+
+    let ingredientsUl = null;
+    bubble.querySelectorAll("h2").forEach((h2) => {
+        if (h2.textContent.includes("🧂")) {
+            let el = h2.nextElementSibling;
+            while (el && el.tagName !== "UL") el = el.nextElementSibling;
+            if (el?.tagName === "UL") ingredientsUl = el;
+        }
+    });
+    if (!ingredientsUl) { bubble.dataset.unitToggleInit = "1"; return; }
+
+    let hasImperial = false, hasMetric = false;
+
+    ingredientsUl.querySelectorAll("li").forEach((li) => {
+        const target = li.querySelector("p") || li;
+        let textNode = null;
+        for (const node of target.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                textNode = node; break;
+            }
+        }
+        if (!textNode) return;
+
+        const rawText = textNode.textContent;
+        const match   = rawText.match(QTY_UNIT_RE);
+        if (!match) return;
+
+        const origQty  = match[1];
+        const origUnit = match[2];
+        const unitLow  = origUnit.toLowerCase().trim();
+
+        const isImperial = !!IMP_TO_MET[unitLow];
+        const isMetric   = ["ml", "g", "kg", "l", "liter", "litre", "liters", "litres"].includes(unitLow);
+
+        if (isImperial) hasImperial = true;
+        if (isMetric)   hasMetric   = true;
+
+        const metricResult   = convertQtyUnit(origQty, origUnit, "metric");
+        const imperialResult = convertQtyUnit(origQty, origUnit, "imperial");
+
+        const suffix = rawText.slice(match[0].length);
+
+        li.dataset.origText      = rawText;
+        li.dataset.origQty       = origQty;
+        li.dataset.origUnit      = origUnit;
+        li.dataset.origSuffix    = suffix;
+        li.dataset.metricQty     = metricResult.qty;
+        li.dataset.metricUnit    = metricResult.unit;
+        li.dataset.imperialQty   = imperialResult.qty;
+        li.dataset.imperialUnit  = imperialResult.unit;
+        li.dataset.unitChanged   = metricResult.changed || imperialResult.changed ? "1" : "0";
+    });
+
+    if (!hasImperial && !hasMetric) {
+        bubble.dataset.unitToggleInit = "1";
+        return;
+    }
+
+    const toggleWrap = document.createElement("div");
+    toggleWrap.className = "unit-toggle-wrap";
+
+    const metricBtn   = document.createElement("button");
+    metricBtn.type    = "button";
+    metricBtn.className = "unit-toggle-btn";
+    metricBtn.dataset.unit = "metric";
+    metricBtn.textContent = "Metric";
+
+    const imperialBtn   = document.createElement("button");
+    imperialBtn.type    = "button";
+    imperialBtn.className = "unit-toggle-btn";
+    imperialBtn.dataset.unit = "imperial";
+    imperialBtn.textContent = "Imperial";
+
+    toggleWrap.appendChild(metricBtn);
+    toggleWrap.appendChild(imperialBtn);
+
+    ingredientsUl.insertAdjacentElement("beforebegin", toggleWrap);
+
+    const pref = localStorage.getItem(UNIT_TOGGLE_KEY) || _detectDefaultPref(ingredientsUl);
+    _applyUnitPref(ingredientsUl, toggleWrap, pref);
+
+    toggleWrap.addEventListener("click", (e) => {
+        const btn = e.target.closest(".unit-toggle-btn");
+        if (!btn) return;
+        const chosen = btn.dataset.unit;
+        localStorage.setItem(UNIT_TOGGLE_KEY, chosen);
+        _applyUnitPref(ingredientsUl, toggleWrap, chosen);
+    });
+
+    bubble.dataset.unitToggleInit = "1";
+}
+
 function applyRecipeStyles(bubble) {
     bubble.querySelectorAll("p").forEach((p) => {
         if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
@@ -222,6 +432,7 @@ function applyRecipeStyles(bubble) {
         }
     });
     injectCountryBadge(bubble);
+    injectUnitToggle(bubble);
     stylePantryIngredients(bubble);
     styleNutritionTable(bubble);
     styleMealPlanTable(bubble);
@@ -585,8 +796,17 @@ function stylePantryIngredients(bubble) {
 function bubbleHtmlForSave(bubble) {
     const clone = bubble.cloneNode(true);
     clone.querySelectorAll(
-        ".recipe-hero-placeholder, .recipe-hero-single, .recipe-image-grid, .recipe-images-section"
+        ".recipe-hero-placeholder, .recipe-hero-single, .recipe-image-grid, .recipe-images-section, .unit-toggle-wrap"
     ).forEach(el => el.remove());
+    clone.querySelectorAll("li[data-orig-text]").forEach((li) => {
+        const target = li.querySelector("p") || li;
+        for (const node of target.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                node.textContent = li.dataset.origText;
+                break;
+            }
+        }
+    });
     return clone.innerHTML;
 }
 
