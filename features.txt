@@ -1,0 +1,60 @@
+  ---                                                                                                                   
+  Utility actions (right side)                                                                                          
+                                                                                                                        
+  ┌───────────────────┬───────────────────────────────────────┬─────────────────────────┐
+  │      Option       │             What it does              │      Already have?      │                               
+  ├───────────────────┼───────────────────────────────────────┼─────────────────────────┤
+  │ New Chat +        │ Start a fresh conversation            │ In sidebar only         │                               
+  ├───────────────────┼───────────────────────────────────────┼─────────────────────────┤
+  │ Clear chat        │ Wipe the current visible messages     │ No                      │                               
+  ├───────────────────┼───────────────────────────────────────┼─────────────────────────┤                               
+  │ Export / Download │ Download full chat as PDF or markdown │ PDF on each bubble only │                               
+  ├───────────────────┼───────────────────────────────────────┼─────────────────────────┤                               
+  │ Rename chat       │ Rename the current chat inline        │ In sidebar ⋯ menu only  │
+  ├───────────────────┼───────────────────────────────────────┼─────────────────────────┤                               
+  │ Share             │ Share the chat publicly               │ ✅ Already there        │
+  └───────────────────┴───────────────────────────────────────┴─────────────────────────┘                               
+                  
+  Context / info (left or center)                                                                                       
+                  
+  ┌────────────────────┬───────────────────────────────────────────────────────────┐                                    
+  │       Option       │                       What it does                        │
+  ├────────────────────┼───────────────────────────────────────────────────────────┤                                    
+  │ Current chat title │ Shows the active chat name (truncated), editable on click │
+  ├────────────────────┼───────────────────────────────────────────────────────────┤
+  │ Mode indicator     │ Shows active mode — Recipe / Pantry / Meal Plan           │                                    
+  ├────────────────────┼───────────────────────────────────────────────────────────┤                                    
+  │ Message count      │ e.g. 4 messages in this chat                              │                                    
+  └────────────────────┴───────────────────────────────────────────────────────────┘                                    
+                  
+  Quick toggles                                                                                                         
+                  
+  ┌──────────────────────┬─────────────────────────────────────────────┐
+  │        Option        │                What it does                 │
+  ├──────────────────────┼─────────────────────────────────────────────┤
+  │ Theme toggle (🌙/☀️ ) │ Dark/light switch without going to settings │
+  ├──────────────────────┼─────────────────────────────────────────────┤
+  │ Language picker      │ Quick language switcher inline              │                                                
+  └──────────────────────┴─────────────────────────────────────────────┘
+                                                                                                                        
+  ---             
+  The most useful additions for a recipe app would be:
+                                                                                                                        
+  1. Current chat title (center) — editable on click, replaces the static "Recipe Chef" text when in an active chat
+  2. New Chat button — currently buried in the sidebar                                                                  
+  3. Theme toggle — one-click dark/light without settings
+                                            
+
+---------------------------------------------------------------------------
+
+
+ Areas that could grow                                                                                                 
+  - The Wikipedia image source is clever but can miss niche dishes — a dedicated food image API (like Unsplash with food
+   queries) would be more reliable                                                                                      
+  - No user favorites/saved recipes yet — the chat history is there but a "save this recipe" pinning feature would add
+  retention                                                                                                             
+  - The recipe PDF download is underrated — could be surfaced more prominently                                          
+                                                                              
+  Overall — it's past the "demo" stage. The streaming + chat history + multi-mode + sharing + PDF export combination    
+  makes it feel like a real product. The main gap is discoverability of features; a first-time user might not realize   
+  Pantry Mode or step-detail explanations exist.   

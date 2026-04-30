@@ -11,7 +11,6 @@ migrations/*
 staticfiles/*
 *.log
 *.pot
-*.pyc
 *.mo
 *.sqlite3
 *.db

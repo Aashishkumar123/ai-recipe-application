@@ -186,7 +186,7 @@ function addChatToSidebar(chatId, title) {
     </svg>`;
 
     const item = document.createElement("div");
-    item.className = "chat-item group mb-2 relative flex items-center rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 transition-colors";
+    item.className = "chat-item group relative flex items-center rounded-md bg-zinc-800/60 hover:bg-zinc-800/80 transition-colors";
     item.innerHTML =
         `<a href="/chat/${chatId}/" class="flex-1 min-w-0 px-3 py-2 text-xs truncate transition-colors text-zinc-200">${title}</a>` +
         `<button class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
