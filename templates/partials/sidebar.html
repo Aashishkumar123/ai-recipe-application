@@ -71,6 +71,31 @@
     <!-- History (hidden when collapsed) -->
     <div id="sidebar-history" class="sc-hide flex-1 overflow-y-auto px-2 py-2 space-y-3">
         {% with active_id=request.resolver_match.kwargs.chat_id %}
+        {% if chats_pinned %}
+        <div id="sidebar-section-pinned">
+            <p class="text-orange-500/70 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1 flex items-center gap-1.5">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M16 2v6l2 4v2h-6v6l-1 2-1-2v-6H4v-2l2-4V2h10z"/></svg>
+                Pinned
+            </p>
+            <div id="sidebar-list-pinned" class="space-y-0.5">
+                {% for chat in chats_pinned %}
+                <div class="chat-item group relative flex items-center rounded-md {% if chat.id == active_id %}bg-zinc-800/60{% endif %} hover:bg-zinc-800/80 transition-colors border border-orange-500/10">
+                    <svg class="shrink-0 ml-2.5 text-orange-500/50" width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M16 2v6l2 4v2h-6v6l-1 2-1-2v-6H4v-2l2-4V2h10z"/></svg>
+                    <a href="{% url 'chat-history' chat.id %}"
+                       class="flex-1 min-w-0 px-2 py-2 text-xs truncate transition-colors {% if chat.id == active_id %}text-zinc-200{% else %}text-zinc-400 group-hover:text-zinc-200{% endif %}">
+                        {{ chat.title }}
+                    </a>
+                    <button class="chat-menu-btn shrink-0 {% if chat.id == active_id %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %} focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" data-pinned="true" title="Options">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% if chats_today %}
         <div id="sidebar-section-today">
             <p class="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1">Today</p>
@@ -82,7 +107,7 @@
                         {{ chat.title }}
                     </a>
                     <button class="chat-menu-btn shrink-0 {% if chat.id == active_id %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %} focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
-                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" data-pinned="false" title="Options">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                             <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
@@ -103,7 +128,7 @@
                         {{ chat.title }}
                     </a>
                     <button class="chat-menu-btn shrink-0 {% if chat.id == active_id %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %} focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
-                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" data-pinned="false" title="Options">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                             <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
@@ -124,7 +149,7 @@
                         {{ chat.title }}
                     </a>
                     <button class="chat-menu-btn shrink-0 {% if chat.id == active_id %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %} focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
-                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" data-pinned="false" title="Options">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                             <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
@@ -145,7 +170,7 @@
                         {{ chat.title }}
                     </a>
                     <button class="chat-menu-btn shrink-0 {% if chat.id == active_id %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %} focus:opacity-100 p-1.5 mr-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-opacity"
-                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" title="Options">
+                            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}" data-pinned="false" title="Options">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                             <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
@@ -155,7 +180,7 @@
             </div>
         </div>
         {% endif %}
-        {% if not chats_today and not chats_yesterday and not chats_week and not chats_older %}
+        {% if not chats_today and not chats_yesterday and not chats_week and not chats_older and not chats_pinned %}
         <div id="sidebar-empty" class="flex flex-col items-center gap-2 py-8 px-4">
             <div class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-base">🍳</div>
             <p class="text-zinc-600 text-xs text-center">No conversations yet.<br>Start a new chat!</p>

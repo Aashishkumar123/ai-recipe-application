@@ -178,6 +178,35 @@ def delete_chat(request):
 
 @csrf_protect
 @require_http_methods(["POST"])
+def pin_chat(request):
+    try:
+        data    = json.loads(request.body)
+        chat_id = data.get("chat_id", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if not chat_id:
+        return JsonResponse({"error": "chat_id is required"}, status=400)
+
+    chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+    if not chat_obj:
+        return JsonResponse({"error": "Chat not found"}, status=404)
+
+    if not chat_obj.is_pinned:
+        pinned_count = Chat.objects.filter(user=request.user, is_pinned=True).count()
+        if pinned_count >= 5:
+            return JsonResponse({"error": "limit", "message": "You can only pin up to 5 chats"}, status=400)
+
+    chat_obj.is_pinned = not chat_obj.is_pinned
+    chat_obj.save(update_fields=["is_pinned"])
+    logger.info("Chat pin toggled | chat_id={} user={} pinned={}", chat_id, request.user, chat_obj.is_pinned)
+    return JsonResponse({"ok": True, "pinned": chat_obj.is_pinned})
+
+
+@csrf_protect
+@require_http_methods(["POST"])
 def save_bot_message(request):
     """Save the rendered HTML of a bot reply after streaming completes."""
     try:

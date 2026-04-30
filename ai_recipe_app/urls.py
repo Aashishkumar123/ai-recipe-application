@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/share-chat/", views.share_chat, name="share_chat"),
     path("api/youtube-videos/", views.youtube_videos, name="youtube_videos"),
     path("api/step-detail/", views.step_detail, name="step_detail"),
+    path("api/pin-chat/", views.pin_chat, name="pin_chat"),
 ]

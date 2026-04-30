@@ -214,9 +214,13 @@ document.addEventListener("click", (e) => {
         e.stopPropagation();
         menuChatId    = btn.dataset.chatId;
         menuChatTitle = btn.dataset.chatTitle;
+        // Update pin label based on current pinned state
+        const isPinned = btn.dataset.pinned === "true";
+        const pinLabel = document.getElementById("chat-menu-pin-label");
+        if (pinLabel) pinLabel.textContent = isPinned ? "Unpin" : "Pin";
         const rect  = btn.getBoundingClientRect();
-        const dropW = 160;
-        const dropH = 76;
+        const dropW = 176;
+        const dropH = 108;
         // Open to the right of the button so it never overlaps chat titles
         let left = rect.right + 4;
         let top  = rect.top;
@@ -234,6 +238,89 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeChatMenu();
+});
+
+const pinSvg = `<svg class="shrink-0 ml-2.5 text-orange-500/50" width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M16 2v6l2 4v2h-6v6l-1 2-1-2v-6H4v-2l2-4V2h10z"/></svg>`;
+
+function showSidebarToast(msg) {
+    const toast = document.createElement("div");
+    toast.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-[300] px-4 py-2 bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl shadow-xl pointer-events-none";
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+document.getElementById("chat-menu-pin")?.addEventListener("click", async () => {
+    closeChatMenu();
+    const menuBtn = document.querySelector(`.chat-menu-btn[data-chat-id="${menuChatId}"]`);
+    if (!menuBtn) return;
+
+    const wasPinned = menuBtn.dataset.pinned === "true";
+
+    const res = await fetch("/chat/api/pin-chat/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ chat_id: menuChatId }),
+    }).catch(console.error);
+    if (!res) return;
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showSidebarToast(data.message || "Could not pin chat");
+        return;
+    }
+
+    const { pinned } = await res.json();
+    menuBtn.dataset.pinned = pinned ? "true" : "false";
+
+    const item = menuBtn.closest(".chat-item");
+    if (!item) return;
+
+    if (pinned) {
+        // Ensure pinned section exists
+        let pinnedSection = document.getElementById("sidebar-section-pinned");
+        if (!pinnedSection) {
+            pinnedSection = document.createElement("div");
+            pinnedSection.id = "sidebar-section-pinned";
+            pinnedSection.innerHTML =
+                `<p class="text-orange-500/70 text-[10px] font-semibold uppercase tracking-widest px-2 pb-1 pt-1 flex items-center gap-1.5">` +
+                `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M16 2v6l2 4v2h-6v6l-1 2-1-2v-6H4v-2l2-4V2h10z"/></svg>Pinned</p>` +
+                `<div id="sidebar-list-pinned" class="space-y-0.5"></div>`;
+            const history = document.getElementById("sidebar-history");
+            history?.insertBefore(pinnedSection, history.firstChild);
+        }
+
+        // Clone item, add pin indicator, move to pinned list
+        const clone = item.cloneNode(true);
+        clone.classList.add("border", "border-orange-500/10");
+        // Add small pin icon before the link
+        const link = clone.querySelector("a");
+        if (link && !clone.querySelector(".pin-dot")) {
+            const dot = document.createElement("span");
+            dot.className = "pin-dot";
+            dot.innerHTML = pinSvg;
+            clone.insertBefore(dot, link);
+        }
+        clone.querySelector(".chat-menu-btn").dataset.pinned = "true";
+
+        // Capture parent before removal
+        const parentList = item.parentElement;
+        document.getElementById("sidebar-list-pinned")?.prepend(clone);
+        item.remove();
+
+        // Remove the date section label if the list is now empty
+        if (parentList && parentList.children.length === 0) {
+            parentList.closest("div")?.remove();
+        }
+    } else {
+        // Remove from pinned list, reload to restore correct date bucket
+        item.remove();
+        const pinnedList = document.getElementById("sidebar-list-pinned");
+        if (pinnedList && pinnedList.children.length === 0) {
+            document.getElementById("sidebar-section-pinned")?.remove();
+        }
+        window.location.reload();
+    }
 });
 
 document.getElementById("chat-menu-rename")?.addEventListener("click", () => {

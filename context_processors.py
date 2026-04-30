@@ -9,6 +9,7 @@ def context_processors(request):
         "language": request.session.get("language", "English"),
         "font": request.session.get("font", "system"),
         "name": request.user.name if request.user.is_authenticated else "Guest",
+        "chats_pinned": [],
         "chats_today": [],
         "chats_yesterday": [],
         "chats_week": [],
@@ -23,7 +24,9 @@ def context_processors(request):
 
         chats = list(request.user.chats.order_by("-created_at"))
         for chat in chats:
-            if chat.created_at >= today_start:
+            if chat.is_pinned:
+                ctx["chats_pinned"].append(chat)
+            elif chat.created_at >= today_start:
                 ctx["chats_today"].append(chat)
             elif chat.created_at >= yesterday_start:
                 ctx["chats_yesterday"].append(chat)
