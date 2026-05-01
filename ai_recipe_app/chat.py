@@ -1,5 +1,4 @@
 from collections.abc import Iterator
-# from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from django.conf import settings
@@ -29,7 +28,7 @@ _parser = StrOutputParser()
 
 
 def _build_system_prompt(language: str, user=None) -> str:
-    base = RECIPE_SYSTEM_PROMPT.format(language=language)
+    base = RECIPE_SYSTEM_PROMPT.substitute(language=language)
 
     if user is None or not user.is_authenticated:
         return base
@@ -50,7 +49,7 @@ def _build_system_prompt(language: str, user=None) -> str:
         return base
 
     profile_block = "\n".join(lines)
-    return base + USER_PROFILE_BLOCK.format(profile_block=profile_block)
+    return base + USER_PROFILE_BLOCK.substitute(profile_block=profile_block)
 
 
 def stream_recipe(

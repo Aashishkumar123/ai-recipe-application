@@ -10,6 +10,7 @@ from loguru import logger
 from .chat import stream_recipe
 from .models import ChatMessage, Chat
 from .utils import html_to_text
+from .prompt import INSTRUCTION_STEPS_PROMPT
 
 logger.debug("Importing ai_recipe_app.views")
 
@@ -120,7 +121,7 @@ def chat_message(request):
             yield f"data: {json.dumps(done_payload)}\n\n"
         except Exception as e:
             logger.error("event_stream error | dish={!r} error={}", dish_name, e)
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"    
 
     response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"
@@ -454,13 +455,11 @@ def step_detail(request):
     from .chat import llm, _parser
 
     context = f'for the recipe "{recipe}"' if recipe else ""
-    prompt = (
-        f"You are a cooking coach. Explain this instruction step {context} in 2–3 short sentences. "
-        f"Cover: why this step matters, a common mistake to avoid, and one practical tip. "
-        f"Be concise and conversational. No bullet points, no headers.\n\nStep: {step}"
-    )
     try:
-        result = (llm | _parser).invoke([HumanMessage(content=prompt)])
+        result = (llm | _parser).invoke(
+            [HumanMessage(
+                content=INSTRUCTION_STEPS_PROMPT.substitute(
+                    context=context, step=step))])
         StepDetail.objects.create(key=cache_key, step_text=step, detail=result)
         logger.info("step_detail cached | key={} recipe={!r}", cache_key[:8], recipe)
         return JsonResponse({"detail": result, "cached": False})
