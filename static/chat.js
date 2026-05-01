@@ -431,6 +431,193 @@ function injectUnitToggle(bubble) {
     bubble.dataset.unitToggleInit = "1";
 }
 
+// ── HTML helpers ────────────────────────────────────────────────────────────
+function escHtml(str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function parseMarkdownLink(str) {
+    return String(str ?? "").replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+        (_, text, url) => `<a href="${url.replace(/"/g, "&quot;")}" target="_blank" rel="noopener noreferrer">${escHtml(text)}</a>`
+    );
+}
+
+// ── JSON rendering pipeline ──────────────────────────────────────────────────
+async function renderFromJson(bubble, data) {
+    switch (data.mode) {
+        case "recipe":       buildRecipeHtml(bubble, data);            break;
+        case "pantry":       buildPantryHtml(bubble, data);            break;
+        case "meal_plan":    buildMealPlanHtml(bubble, data);          break;
+        case "followup":     buildFollowupHtml(bubble, data);          break;
+        case "off_topic":    buildOffTopicHtml(bubble, data);          break;
+        case "multi_recipe": await buildMultiRecipeHtml(bubble, data); break;
+        default:
+            bubble.innerHTML = `<p class="text-sm text-gray-500">${escHtml(JSON.stringify(data, null, 2))}</p>`;
+            applyRecipeStyles(bubble);
+    }
+}
+
+async function buildMultiRecipeHtml(bubble, data) {
+    const recipes = data.recipes || [];
+    bubble.innerHTML = "";
+
+    for (let i = 0; i < recipes.length; i++) {
+        if (i > 0) {
+            const hr = document.createElement("hr");
+            hr.className = "recipe-divider";
+            bubble.appendChild(hr);
+        }
+        const block = document.createElement("div");
+        block.className = "recipe-block";
+        bubble.appendChild(block);
+        // Render recipe HTML into the block (applyRecipeStyles fires injectRecipeImage fire-and-forget)
+        buildRecipeHtml(block, recipes[i]);
+    }
+
+    // Await YouTube injection for every block before the caller saves the HTML
+    const blocks = [...bubble.querySelectorAll(".recipe-block")];
+    await Promise.all(blocks.map(block => injectYouTubeVideos(block)));
+}
+
+function _buildNutritionTable(n) {
+    if (!n) return "";
+    return `<h2>📊 Nutrition (per serving)</h2>
+        <table>
+            <thead><tr><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead>
+            <tbody><tr>
+                <td>${escHtml(n.kcal || "—")}</td>
+                <td>${escHtml(n.protein || "—")}</td>
+                <td>${escHtml(n.carbs || "—")}</td>
+                <td>${escHtml(n.fat || "—")}</td>
+            </tr></tbody>
+        </table>`;
+}
+
+function _buildFollowUpsSection(followUps) {
+    if (!followUps?.length) return "";
+    return `<h2>💬 Try asking</h2><ul>${followUps.map(q => `<li>${escHtml(q)}</li>`).join("")}</ul>`;
+}
+
+function _buildIngredients(ingredients, pantryMode) {
+    return (ingredients || []).map(ing => {
+        const nameHtml = parseMarkdownLink(ing.name || "");
+        const prepHtml = ing.prep ? `, <em>${escHtml(ing.prep)}</em>` : "";
+        const check    = (pantryMode && ing.has === true) ? "✓ " : "";
+        return `<li>${check}${escHtml(ing.qty || "")} ${nameHtml}${prepHtml}</li>`;
+    }).join("\n");
+}
+
+function buildRecipeHtml(bubble, data) {
+    const meta = data.meta || {};
+    const parts = [];
+    if (meta.prep)       parts.push(`Prep: ${escHtml(meta.prep)}`);
+    if (meta.cook)       parts.push(`Cook: ${escHtml(meta.cook)}`);
+    if (meta.serves)     parts.push(`Serves: ${escHtml(String(meta.serves))}`);
+    if (meta.difficulty) parts.push(`Difficulty: ${escHtml(meta.difficulty)}`);
+
+    const tipsHtml = (data.tips || []).map(t => `<li>${escHtml(t)}</li>`).join("");
+
+    bubble.innerHTML = [
+        data.wiki_slug ? `<!-- wiki: ${data.wiki_slug} -->`  : "",
+        data.country   ? `<!-- country: ${data.country} -->` : "",
+        `<h1>🍽️ ${escHtml(data.title || "")}</h1>`,
+        parts.length ? `<p>${parts.join(" · ")}</p>` : "",
+        data.description ? `<p>${escHtml(data.description)}</p>` : "",
+        `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, false)}</ul>`,
+        `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
+        _buildNutritionTable(data.nutrition),
+        _buildFollowUpsSection(data.follow_ups),
+    ].filter(Boolean).join("\n");
+
+    applyRecipeStyles(bubble);
+}
+
+function buildPantryHtml(bubble, data) {
+    const meta = data.meta || {};
+    const parts = [];
+    if (meta.prep)         parts.push(`Prep: ${escHtml(meta.prep)}`);
+    if (meta.cook)         parts.push(`Cook: ${escHtml(meta.cook)}`);
+    if (meta.serves)       parts.push(`Serves: ${escHtml(String(meta.serves))}`);
+    if (meta.difficulty)   parts.push(`Difficulty: ${escHtml(meta.difficulty)}`);
+    if (data.pantry_match) parts.push(`Pantry match: ${escHtml(data.pantry_match)}`);
+
+    const tipsHtml    = (data.tips || []).map(t => `<li>${escHtml(t)}</li>`).join("");
+    const missingHtml = (data.missing || []).map(m =>
+        `<li><strong>${escHtml(m.item)}</strong> — ${escHtml(m.substitute)}</li>`
+    ).join("");
+
+    bubble.innerHTML = [
+        data.wiki_slug ? `<!-- wiki: ${data.wiki_slug} -->`  : "",
+        data.country   ? `<!-- country: ${data.country} -->` : "",
+        `<h1>🧺 ${escHtml(data.title || "")}</h1>`,
+        parts.length ? `<p>${parts.join(" · ")}</p>` : "",
+        data.description ? `<p>${escHtml(data.description)}</p>` : "",
+        `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, true)}</ul>`,
+        missingHtml ? `<h2>🛒 Shopping needed</h2><ul>${missingHtml}</ul>` : "",
+        `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
+        _buildNutritionTable(data.nutrition),
+        _buildFollowUpsSection(data.follow_ups),
+    ].filter(Boolean).join("\n");
+
+    applyRecipeStyles(bubble);
+}
+
+function buildMealPlanHtml(bubble, data) {
+    const days = data.days || [];
+    const hasMeal = type => days.some(d => d[type]);
+    const showB = hasMeal("breakfast"), showL = hasMeal("lunch"), showD = hasMeal("dinner");
+
+    const mealCell = (meal) => {
+        if (!meal) return "<td>—</td>";
+        const link = meal.wiki
+            ? `<a href="https://en.wikipedia.org/wiki/${meal.wiki}" target="_blank" rel="noopener noreferrer">${escHtml(meal.name)}</a>`
+            : escHtml(meal.name || "");
+        const note = meal.note ? `<br><small>${escHtml(meal.note)}</small>` : "";
+        return `<td>${link}${note}</td>`;
+    };
+
+    const headers = ["Day", ...(showB ? ["Breakfast"] : []), ...(showL ? ["Lunch"] : []), ...(showD ? ["Dinner"] : [])];
+    const headRow = headers.map(h => `<th>${h}</th>`).join("");
+    const bodyRows = days.map(day =>
+        `<tr><td><strong>${escHtml(day.day)}</strong></td>` +
+        (showB ? mealCell(day.breakfast) : "") +
+        (showL ? mealCell(day.lunch) : "") +
+        (showD ? mealCell(day.dinner) : "") +
+        `</tr>`
+    ).join("\n");
+
+    const tipsHtml  = (data.tips  || []).map(t => `<li>${escHtml(t)}</li>`).join("");
+    const stockHtml = (data.stock || []).map(s => `<li>${escHtml(s)}</li>`).join("");
+
+    bubble.innerHTML = [
+        `<h1>🗓️ ${escHtml(data.title || "Meal Plan")}</h1>`,
+        data.subtitle ? `<p>${escHtml(data.subtitle)}</p>` : "",
+        `<table><thead><tr>${headRow}</tr></thead><tbody>${bodyRows}</tbody></table>`,
+        tipsHtml  ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>`         : "",
+        stockHtml ? `<h2>🛒 Stock up</h2><ul>${stockHtml}</ul>`    : "",
+        _buildFollowUpsSection(data.follow_ups),
+    ].filter(Boolean).join("\n");
+
+    applyRecipeStyles(bubble);
+}
+
+function buildFollowupHtml(bubble, data) {
+    bubble.innerHTML = [
+        `<div>${marked.parse(data.answer || "")}</div>`,
+        _buildFollowUpsSection(data.follow_ups),
+    ].filter(Boolean).join("\n");
+    applyRecipeStyles(bubble);
+}
+
+function buildOffTopicHtml(bubble, data) {
+    bubble.innerHTML = `<p>${escHtml(data.message || "I can only help with recipes. What would you like to cook?")}</p>`;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function applyRecipeStyles(bubble) {
     bubble.querySelectorAll("p").forEach((p) => {
         if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
@@ -450,6 +637,7 @@ function applyRecipeStyles(bubble) {
 
 async function injectYouTubeVideos(bubble) {
     if (bubble.dataset.ytState || bubble.querySelector(".recipe-videos")) return;
+    if (bubble.classList.contains("meal-plan-bubble")) return;
     bubble.dataset.ytState = "loading";
 
     const dishName = (bubble.querySelector("h1")?.textContent ?? "")
@@ -515,9 +703,8 @@ async function injectYouTubeVideos(bubble) {
 }
 
 function styleFollowUpSuggestions(bubble) {
-    const contentWrap = bubble.parentElement;
-    // Guard: chips already placed outside bubble
-    if (contentWrap?.querySelector(".followup-chips")) return;
+    // Guard: chips already placed immediately after this element (handles both single-bubble and multi-block)
+    if (bubble.nextElementSibling?.classList?.contains("followup-chips")) return;
     // Also migrate any old chips that are still inside the bubble
     const oldChips = bubble.querySelector(".followup-chips");
     if (oldChips) { bubble.insertAdjacentElement("afterend", oldChips); return; }
@@ -1093,6 +1280,7 @@ async function streamResponse(userMessage) {
 
     const bubble = appendBotMessage();
     bubble.classList.add("streaming");
+    bubble.innerHTML = `<div class="recipe-loading"><div class="recipe-loading-dots"><span></span><span></span><span></span></div><p class="recipe-loading-text">Crafting your recipe…</p></div>`;
     let fullText = "";
     let streamChatId = null; // received from server before first token
 
@@ -1124,13 +1312,17 @@ async function streamResponse(userMessage) {
                         streamChatId = data.chat_id;
                     } else if (data.token) {
                         fullText += data.token;
-                        bubble.innerHTML = marked.parse(fullText);
-                        messageList.scrollTop = messageList.scrollHeight;
+                        // JSON accumulates silently; loading indicator stays visible
                     } else if (data.error) {
                         bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`;
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
-                        applyRecipeStyles(bubble);
+                        try {
+                            await renderFromJson(bubble, JSON.parse(fullText));
+                        } catch {
+                            bubble.innerHTML = marked.parse(fullText);
+                            applyRecipeStyles(bubble);
+                        }
                         streamChatId = data.chat_id || streamChatId;
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
@@ -1139,8 +1331,7 @@ async function streamResponse(userMessage) {
                             updateHeaderTitle(data.chat_title || userMessage);
                         }
                         if (streamChatId) {
-                            // Fetch YouTube videos first so they're included in the saved HTML
-                            // and never need to be re-fetched on history reload.
+                            // For single recipe: inject YouTube now. For multi_recipe: already awaited inside renderFromJson.
                             await injectYouTubeVideos(bubble);
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
@@ -1154,18 +1345,23 @@ async function streamResponse(userMessage) {
         }
     } catch (error) {
         if (error.name === "AbortError") {
-            // User stopped — render whatever was streamed and save it to DB
-            if (fullText) bubble.innerHTML = marked.parse(fullText);
-            applyRecipeStyles(bubble);
+            // Update URL + sidebar for new chats aborted before done
+            if (!currentChatId && streamChatId) {
+                currentChatId = streamChatId;
+                window.history.pushState(null, "", `/chat/${currentChatId}/`);
+                addChatToSidebar(currentChatId, userMessage);
+                updateHeaderTitle(userMessage);
+            }
+            // Try to render whatever JSON we have; fallback to a stopped message
+            if (fullText.trim()) {
+                try {
+                    await renderFromJson(bubble, JSON.parse(fullText));
+                } catch {
+                    bubble.innerHTML = `<p class="text-sm text-gray-400">Response was stopped before completion.</p>`;
+                }
+            }
             const saveId = streamChatId || currentChatId;
             if (saveId && bubble.innerHTML) {
-                // Update URL + sidebar for new chats that were aborted before done
-                if (!currentChatId && streamChatId) {
-                    currentChatId = streamChatId;
-                    window.history.pushState(null, "", `/chat/${currentChatId}/`);
-                    addChatToSidebar(currentChatId, userMessage);
-                    updateHeaderTitle(userMessage);
-                }
                 fetch("/chat/api/save-bot-message/", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },

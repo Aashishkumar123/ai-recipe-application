@@ -87,14 +87,17 @@ def stream_recipe(
     )
 
     token_count = 0
+    chunks = ""
     try:
         for chunk in (llm | _parser).stream(messages):
             token_count += 1
+            chunks += chunk
             yield chunk
         logger.success(
             "stream_recipe DONE  | dish={!r} tokens_streamed={}",
             dish_name, token_count,
         )
+        logger.debug("stream_recipe FINAL OUTPUT\n{sep}\n{output}\n{sep}", sep=sep, output=chunks)
     except Exception:
         logger.exception("stream_recipe ERROR | dish={!r}", dish_name)
         raise
