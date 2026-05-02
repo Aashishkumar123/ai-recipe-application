@@ -675,6 +675,7 @@ function buildRecipeHtml(bubble, data) {
         data.description ? `<p>${escHtml(data.description)}</p>` : "",
         `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, false)}</ul>`,
         `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        `<button class="cook-now-btn" type="button">🍳 Cook Now — Step by Step</button>`,
         tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
         _buildNutritionTable(data.nutrition),
         _buildFollowUpsSection(data.follow_ups),
@@ -706,6 +707,7 @@ function buildPantryHtml(bubble, data) {
         `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, true)}</ul>`,
         missingHtml ? `<h2>🛒 Shopping needed</h2><ul>${missingHtml}</ul>` : "",
         `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        `<button class="cook-now-btn" type="button">🍳 Cook Now — Step by Step</button>`,
         tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
         _buildNutritionTable(data.nutrition),
         _buildFollowUpsSection(data.follow_ups),
@@ -1588,3 +1590,164 @@ mealPlanWelcomeBtn?.addEventListener("click", () => {
     enterMealPlanMode();
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });
+
+// ── Cooking Mode ─────────────────────────────────────────────────────────────
+(function initCookingMode() {
+    const overlay      = document.getElementById("cook-mode");
+    const titleEl      = document.getElementById("cook-mode-title");
+    const counterEl    = document.getElementById("cook-step-counter");
+    const progressFill = document.getElementById("cook-progress-fill");
+    const stepTextEl   = document.getElementById("cook-step-text");
+    const timerDisplay = document.getElementById("cook-timer-display");
+    const timerToggle  = document.getElementById("cook-timer-toggle");
+    const timerMinus   = document.getElementById("cook-timer-minus");
+    const timerPlus    = document.getElementById("cook-timer-plus");
+    const prevBtn      = document.getElementById("cook-prev");
+    const nextBtn      = document.getElementById("cook-next");
+    const exitBtn      = document.getElementById("cook-mode-exit");
+
+    if (!overlay) return;
+
+    let steps        = [];
+    let currentStep  = 0;
+    let timerSecs    = 0;
+    let timerRunning = false;
+    let timerHandle  = null;
+
+    // ── Timer helpers ────────────────────────────────────────────────────────
+    function fmtTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+    }
+
+    function parseStepTime(text) {
+        const m = text.match(/\b(\d+)\s*(hour|hr|minute|min|second|sec)s?\b/i);
+        if (!m) return 0;
+        const n = parseInt(m[1]);
+        const u = m[2].toLowerCase();
+        if (u.startsWith("h")) return n * 3600;
+        if (u.startsWith("m")) return n * 60;
+        return n;
+    }
+
+    function playBeep() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            [0, 0.35, 0.7].forEach(delay => {
+                const osc  = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.35, ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.35);
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + 0.35);
+            });
+        } catch (_) {}
+    }
+
+    function setTimer(secs) {
+        timerSecs = Math.max(0, secs);
+        timerDisplay.textContent = timerSecs ? fmtTime(timerSecs) : "—";
+        timerDisplay.classList.toggle("cook-timer-active", timerSecs > 0);
+    }
+
+    function stopTimer() {
+        clearInterval(timerHandle);
+        timerRunning = false;
+        timerToggle.textContent = "▶ Start";
+        timerToggle.classList.remove("cook-timer-running");
+    }
+
+    function tickTimer() {
+        timerSecs--;
+        timerDisplay.textContent = fmtTime(timerSecs);
+        if (timerSecs <= 0) {
+            stopTimer();
+            timerDisplay.textContent = "Done!";
+            timerDisplay.classList.add("cook-timer-done");
+            playBeep();
+        }
+    }
+
+    timerToggle?.addEventListener("click", () => {
+        if (!timerSecs && !timerRunning) return;
+        if (timerRunning) {
+            stopTimer();
+        } else {
+            timerDisplay.classList.remove("cook-timer-done");
+            timerRunning = true;
+            timerToggle.textContent = "⏸ Pause";
+            timerToggle.classList.add("cook-timer-running");
+            timerHandle = setInterval(tickTimer, 1000);
+        }
+    });
+
+    timerMinus?.addEventListener("click", () => { stopTimer(); setTimer(timerSecs - 60); });
+    timerPlus?.addEventListener("click",  () => { stopTimer(); setTimer(timerSecs + 60); });
+
+    // ── Step navigation ──────────────────────────────────────────────────────
+    function renderStep(idx) {
+        currentStep = Math.max(0, Math.min(idx, steps.length - 1));
+        const total = steps.length;
+        counterEl.textContent  = `Step ${currentStep + 1} of ${total}`;
+        progressFill.style.width = `${((currentStep + 1) / total) * 100}%`;
+        stepTextEl.textContent = steps[currentStep];
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === total - 1;
+        nextBtn.textContent = currentStep === total - 1 ? "✅ Done!" : "Next →";
+
+        // Stop running timer and auto-detect time for new step
+        stopTimer();
+        timerDisplay.classList.remove("cook-timer-done");
+        const detected = parseStepTime(steps[currentStep]);
+        setTimer(detected);
+    }
+
+    prevBtn?.addEventListener("click", () => renderStep(currentStep - 1));
+    nextBtn?.addEventListener("click", () => {
+        if (currentStep === steps.length - 1) closeCookingMode();
+        else renderStep(currentStep + 1);
+    });
+
+    // ── Open / close ─────────────────────────────────────────────────────────
+    function openCookingMode(bubble) {
+        const title   = (bubble.querySelector("h1")?.textContent ?? "Recipe")
+            .replace(/^[^\p{L}]+/u, "").trim();
+        const stepEls = bubble.querySelectorAll("ol li");
+        steps = Array.from(stepEls).map(li => li.textContent.trim()).filter(Boolean);
+        if (!steps.length) return;
+
+        titleEl.textContent = title;
+        overlay.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        renderStep(0);
+    }
+
+    function closeCookingMode() {
+        stopTimer();
+        overlay.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
+
+    exitBtn?.addEventListener("click", closeCookingMode);
+    overlay?.addEventListener("click", (e) => {
+        if (e.target === overlay) closeCookingMode();
+    });
+    document.addEventListener("keydown", (e) => {
+        if (overlay.classList.contains("hidden")) return;
+        if (e.key === "Escape")    closeCookingMode();
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") renderStep(currentStep + 1);
+        if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   renderStep(currentStep - 1);
+    });
+
+    // Delegated click on Cook Now buttons
+    messageList?.addEventListener("click", (e) => {
+        const btn = e.target.closest(".cook-now-btn");
+        if (!btn) return;
+        const bubble = btn.closest(".bot-bubble");
+        if (bubble) openCookingMode(bubble);
+    });
+}());

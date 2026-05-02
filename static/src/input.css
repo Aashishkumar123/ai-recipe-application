@@ -2119,3 +2119,205 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     background: #16a34a;
     color: #ffffff;
 }
+
+/* ── Cook Now button ── */
+.cook-now-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 1.25rem 0 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #f97316, #ea6c0a);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.cook-now-btn:hover {
+    background: linear-gradient(135deg, #ea6c0a, #c2410c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249,115,22,0.45);
+}
+.cook-now-btn:active { transform: translateY(0); }
+
+/* ── Cooking Mode Overlay ── */
+.cook-mode {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: #0f0f10;
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+}
+.cook-mode.hidden { display: none; }
+
+.cook-mode-inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+    overflow-y: auto;
+}
+
+/* Header */
+.cook-mode-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0 1rem;
+    border-bottom: 1px solid #2a2a2e;
+    gap: 1rem;
+}
+.cook-mode-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f97316;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+.cook-exit-btn {
+    flex-shrink: 0;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.cook-exit-btn:hover { color: #f87171; border-color: #f87171; }
+
+/* Progress */
+.cook-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0 0.75rem;
+}
+.cook-step-counter {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.cook-progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: #27272a;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.cook-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f97316, #fb923c);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* Step text */
+.cook-step-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 0;
+    min-height: 220px;
+}
+.cook-step-text {
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
+    line-height: 1.75;
+    color: #f4f4f5;
+    text-align: center;
+    margin: 0;
+}
+
+/* Timer */
+.cook-timer-section {
+    text-align: center;
+    padding: 1.25rem 0;
+    border-top: 1px solid #27272a;
+    border-bottom: 1px solid #27272a;
+    margin-bottom: 1.5rem;
+}
+.cook-timer-display {
+    font-size: 2.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    transition: color 0.2s;
+}
+.cook-timer-display.cook-timer-active { color: #f4f4f5; }
+.cook-timer-display.cook-timer-done   { color: #4ade80; }
+.cook-timer-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+.cook-timer-adj {
+    padding: 0.45rem 1rem;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.cook-timer-adj:hover { color: #f4f4f5; border-color: #71717a; }
+.cook-timer-toggle {
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    background: #27272a;
+    color: #e4e4e7;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    min-width: 130px;
+}
+.cook-timer-toggle:hover           { background: #3f3f46; }
+.cook-timer-toggle.cook-timer-running { background: #f97316; color: #fff; }
+
+/* Navigation */
+.cook-nav {
+    display: flex;
+    gap: 1rem;
+}
+.cook-nav-btn {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid #3f3f46;
+    background: #18181b;
+    color: #d4d4d8;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.cook-nav-btn:hover:not(:disabled) { background: #27272a; color: #fff; }
+.cook-nav-btn:disabled { opacity: 0.35; cursor: default; }
+.cook-nav-btn.cook-nav-next {
+    background: #f97316;
+    color: #fff;
+    border-color: transparent;
+}
+.cook-nav-btn.cook-nav-next:hover:not(:disabled) { background: #ea6c0a; }

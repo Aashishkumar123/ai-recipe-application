@@ -255,6 +255,40 @@
     </div>
 
 </div>
+<!-- Cooking Mode Overlay -->
+<div id="cook-mode" class="cook-mode hidden" role="dialog" aria-modal="true" aria-label="Step-by-step cooking mode">
+    <div class="cook-mode-inner">
+        <header class="cook-mode-header">
+            <h2 id="cook-mode-title" class="cook-mode-title"></h2>
+            <button id="cook-mode-exit" class="cook-exit-btn" aria-label="Exit cooking mode">✕ Exit</button>
+        </header>
+
+        <div class="cook-progress-row">
+            <span id="cook-step-counter" class="cook-step-counter">Step 1 of 1</span>
+            <div class="cook-progress-bar-wrap">
+                <div id="cook-progress-fill" class="cook-progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="cook-step-body">
+            <p id="cook-step-text" class="cook-step-text"></p>
+        </div>
+
+        <div class="cook-timer-section">
+            <div id="cook-timer-display" class="cook-timer-display">—</div>
+            <div class="cook-timer-controls">
+                <button id="cook-timer-minus" class="cook-timer-adj">−1 min</button>
+                <button id="cook-timer-toggle" class="cook-timer-toggle">▶ Start</button>
+                <button id="cook-timer-plus"  class="cook-timer-adj">+1 min</button>
+            </div>
+        </div>
+
+        <nav class="cook-nav">
+            <button id="cook-prev" class="cook-nav-btn">← Prev</button>
+            <button id="cook-next" class="cook-nav-btn cook-nav-next">Next →</button>
+        </nav>
+    </div>
+</div>
 <!-- Share modal -->
 <div id="share-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center px-4">
     <div id="share-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
