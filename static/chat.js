@@ -1236,7 +1236,7 @@ function appendUserMessage(content) {
     wrapper.appendChild(copyBtn);
     wrapper.appendChild(bubble);
     messageList.appendChild(wrapper);
-    messageList.scrollTop = messageList.scrollHeight;
+    messageList.scrollTo({ top: messageList.scrollHeight, behavior: "smooth" });
     updateMsgCount();
 }
 
@@ -1273,7 +1273,7 @@ function appendBotMessage() {
     wrapper.appendChild(avatar);
     wrapper.appendChild(contentWrap);
     messageList.appendChild(wrapper);
-    messageList.scrollTop = messageList.scrollHeight;
+    messageList.scrollTo({ top: messageList.scrollHeight, behavior: "smooth" });
     return bubble;
 }
 
