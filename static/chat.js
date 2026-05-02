@@ -651,11 +651,14 @@ function buildMealPlanHtml(bubble, data) {
 
     const mealCell = (meal) => {
         if (!meal) return "<td>—</td>";
-        const link = meal.wiki
-            ? `<a href="https://en.wikipedia.org/wiki/${meal.wiki}" target="_blank" rel="noopener noreferrer">${escHtml(meal.name)}</a>`
-            : escHtml(meal.name || "");
-        const note = meal.note ? `<br><small>${escHtml(meal.note)}</small>` : "";
-        return `<td>${link}${note}</td>`;
+        const name = escHtml(meal.name || "");
+        const note = meal.note ? `<small>${escHtml(meal.note)}</small>` : "";
+        return `<td>
+            <button class="meal-plan-recipe-btn" data-recipe="${name}" title="Generate recipe for ${name}">
+                ${name}
+            </button>
+            ${note ? `<br>${note}` : ""}
+        </td>`;
     };
 
     const headers = ["Day", ...(showB ? ["Breakfast"] : []), ...(showL ? ["Lunch"] : []), ...(showD ? ["Dinner"] : [])];
@@ -1285,6 +1288,15 @@ messageList?.addEventListener("click", (e) => {
     const recipe = chip.closest(".followup-chips")?.dataset.recipe;
     // Anchor question to the specific recipe so multi-recipe sessions don't confuse the LLM
     input.value = recipe ? `For the ${recipe}: ${chip.textContent.trim()}` : chip.textContent.trim();
+    input.dispatchEvent(new Event("input"));
+    form.requestSubmit();
+});
+
+// Meal plan recipe button clicks — generate recipe for selected meal
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".meal-plan-recipe-btn");
+    if (!btn || abortController) return;
+    input.value = btn.dataset.recipe;
     input.dispatchEvent(new Event("input"));
     form.requestSubmit();
 });

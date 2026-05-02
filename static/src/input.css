@@ -1406,6 +1406,28 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li::before { background: #7c3aed; }
 [data-theme="dark"] .bot-bubble.meal-plan-bubble ul li a { color: #a78bfa; }
 
+/* Clickable meal name buttons inside meal plan table */
+.meal-plan-recipe-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: #6d28d9;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-style: dotted;
+    transition: color 0.15s, text-decoration-style 0.15s;
+}
+.meal-plan-recipe-btn:hover {
+    color: #f97316;
+    text-decoration-style: solid;
+}
+[data-theme="dark"] .meal-plan-recipe-btn { color: #a78bfa; }
+[data-theme="dark"] .meal-plan-recipe-btn:hover { color: #fb923c; }
+
 /* ── YouTube Watch & Learn section ── */
 /* ── YouTube video section ── */
 .recipe-videos {
