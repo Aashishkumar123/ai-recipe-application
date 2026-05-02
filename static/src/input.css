@@ -44,6 +44,17 @@ body {
     @apply border-zinc-800 text-zinc-300;
 }
 
+/* ── Header message count badge ── */
+.msg-count-badge {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #9ca3af;
+    line-height: 1;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+[data-theme="dark"] .msg-count-badge { color: #6b7280; }
+
 /* ── Header chat title inline edit ── */
 #chat-title-input {
     color: inherit;

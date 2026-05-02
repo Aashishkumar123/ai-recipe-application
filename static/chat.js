@@ -133,6 +133,15 @@ const titleWrap    = document.getElementById("chat-title-wrap");
 const titleDisplay = document.getElementById("chat-title-display");
 const titlePencil  = document.getElementById("chat-title-pencil");
 const titleInput   = document.getElementById("chat-title-input");
+const msgCountBadge = document.getElementById("msg-count-badge");
+
+function updateMsgCount() {
+    if (!msgCountBadge) return;
+    const n = messageList?.querySelectorAll(".chat-msg").length ?? 0;
+    if (n === 0) { msgCountBadge.classList.add("hidden"); return; }
+    msgCountBadge.textContent = `${n} message${n === 1 ? "" : "s"}`;
+    msgCountBadge.classList.remove("hidden");
+}
 
 function updateHeaderTitle(title) {
     if (!titleDisplay) return;
@@ -1171,6 +1180,7 @@ function appendUserMessage(content) {
     wrapper.appendChild(bubble);
     messageList.appendChild(wrapper);
     messageList.scrollTop = messageList.scrollHeight;
+    updateMsgCount();
 }
 
 // User message copy — delegated
@@ -1296,6 +1306,7 @@ async function streamResponse(userMessage) {
                             bubble.innerHTML = marked.parse(fullText);
                             applyRecipeStyles(bubble);
                         }
+                        updateMsgCount();
                         streamChatId = data.chat_id || streamChatId;
                         if (data.chat_id && !currentChatId) {
                             currentChatId = data.chat_id;
