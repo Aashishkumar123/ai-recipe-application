@@ -9,6 +9,76 @@ const newChatBtn  = document.getElementById("new-chat-btn");
 const headerNewChatBtn = document.getElementById("header-new-chat-btn");
 const scrollBottomBtn  = document.getElementById("scroll-bottom-btn");
 
+// ── Voice input ──────────────────────────────────────────────────────────────
+(function initVoiceInput() {
+    const micBtn = document.getElementById("mic-btn");
+    if (!micBtn) return;
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { micBtn.classList.add("hidden"); return; }
+
+    let listening    = false;
+    let finalText    = "";
+    let restartTimer = null;
+
+    function setIdle() {
+        micBtn.classList.remove("is-recording");
+        input.placeholder = "Ask for a recipe...";
+    }
+
+    function createAndStart() {
+        if (!listening) return;
+
+        const r = new SR();
+        r.lang            = navigator.language || "en-US";
+        r.interimResults  = true;
+        r.continuous      = false;  // false is more reliable; we handle restart manually
+        r.maxAlternatives = 1;
+
+        r.onresult = (e) => {
+            let interim = "";
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const t = e.results[i][0].transcript;
+                if (e.results[i].isFinal) finalText += t + " ";
+                else interim = t;
+            }
+            input.value = (finalText + interim).trimStart();
+            input.dispatchEvent(new Event("input"));
+        };
+
+        r.onend = () => {
+            if (!listening) { setIdle(); return; }
+            restartTimer = setTimeout(createAndStart, 200);
+        };
+
+        r.onerror = (e) => {
+            if (e.error === "no-speech") return;
+            if (e.error === "aborted")   return;
+            listening = false;
+            setIdle();
+            console.warn("Voice input error:", e.error);
+        };
+
+        try { r.start(); } catch (err) { console.warn("SR start failed:", err); }
+    }
+
+    micBtn.addEventListener("click", () => {
+        if (abortController) return;
+        if (listening) {
+            listening = false;
+            clearTimeout(restartTimer);
+            setIdle();
+            return;
+        }
+        finalText = "";
+        listening = true;
+        micBtn.classList.add("is-recording");
+        input.placeholder = "Listening…";
+        createAndStart();
+    });
+}());
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ── Scroll-to-bottom button ──────────────────────────────────────────────────
 function _updateScrollBtn() {
     if (!scrollBottomBtn || !messageList) return;

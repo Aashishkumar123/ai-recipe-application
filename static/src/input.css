@@ -8,6 +8,22 @@ button, a, [role="button"], label[for] {
     cursor: pointer;
 }
 
+/* ── Mic / voice input button ── */
+#mic-btn {
+    color: #9ca3af;
+}
+#mic-btn:hover { color: #f97316; }
+#mic-btn.is-recording {
+    color: #ef4444;
+    animation: mic-pulse 1s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+    0%, 100% { transform: scale(1);    opacity: 1;   }
+    50%       { transform: scale(1.2); opacity: 0.65; }
+}
+[data-theme="dark"] #mic-btn { color: #6b7280; }
+[data-theme="dark"] #mic-btn:hover { color: #fb923c; }
+
 /* Stop-streaming state for the send button */
 #send-btn.is-stop {
     background-color: #ef4444 !important;
