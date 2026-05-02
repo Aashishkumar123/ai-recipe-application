@@ -38,3 +38,18 @@ class StepDetail(models.Model):
 
     def __str__(self):
         return f"StepDetail({self.key[:8]}…)"
+
+
+class FoodImageCache(models.Model):
+    """Cached Unsplash image results keyed by normalised dish query."""
+    key        = models.CharField(max_length=64, unique=True)  # sha256 of query
+    query      = models.CharField(max_length=255)
+    images_json = models.TextField()  # JSON array: [{url, alt, credit:{name,link}}]
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def make_key(query: str) -> str:
+        return hashlib.sha256(query.strip().lower().encode()).hexdigest()
+
+    def __str__(self):
+        return f"FoodImageCache({self.query!r})"

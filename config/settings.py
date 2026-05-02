@@ -160,6 +160,8 @@ AZURE_OPENAI_API_KEY   = os.environ.get("AZURE_OPENAI_API_KEY", "")
 AZURE_OPENAI_ENDPOINT  = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 AZURE_DEPLOYMENT_NAME  = os.environ.get("AZURE_DEPLOYMENT_NAME", "")
 
+UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "")
+
 # Email — defaults to console backend so OTP codes are printed to the terminal
 # during development. Set EMAIL_BACKEND and SMTP_* vars in .env for production.
 EMAIL_BACKEND   = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

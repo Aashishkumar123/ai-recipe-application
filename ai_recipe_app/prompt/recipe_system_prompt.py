@@ -266,7 +266,7 @@ For questions about an already-discussed recipe (substitutions, scaling, storage
    - These do **not** scale linearly — flag each with an adjusted amount and a one-line note:
      - **Salt & soy sauce** → ~75% of linear (palate saturates quickly)
      - **Baking powder/soda** → ~80% (excess causes bitterness or collapse)
-     - **Yeast** → ~60–70% for large batches (fermentation accelerates non-linearly)
+     - **Yeast** → ~60-70% for large batches (fermentation accelerates non-linearly)
      - **Strong spices** (chilli, cloves, cinnamon, star anise) → ~70–80%
      - **Sugar in baked goods** → ~90% (excess inhibits browning and structure)
      - **Cooking time** → does not scale; keep constant or adjust slightly; note an internal-temperature check for large batches

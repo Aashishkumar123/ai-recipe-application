@@ -29,7 +29,7 @@
     .ring-pulse { animation: ring-out 2s ease-out infinite; }
 </style>
 
-<div class="flex flex-col flex-1 overflow-hidden page-chat">
+<div class="flex flex-col flex-1 overflow-hidden page-chat relative">
 
     <!-- Top bar -->
     <header class="page-top-bar relative flex items-center justify-between px-3 md:px-6 py-3 border-b shrink-0">
@@ -189,6 +189,13 @@
         {% endfor %}
 
     </div>
+
+    <!-- Scroll-to-bottom button -->
+    <button id="scroll-bottom-btn" aria-label="Scroll to bottom" title="Scroll to bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    </button>
 
     <!-- Input area -->
     <div class="chat-input-area px-3 md:px-4 pb-4 md:pb-5 pt-2 md:pt-3 shrink-0">

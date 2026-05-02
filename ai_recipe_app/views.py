@@ -1,6 +1,7 @@
 import re
 import json
 from io import BytesIO
+from django.conf import settings
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
@@ -466,6 +467,62 @@ def step_detail(request):
     except Exception:
         logger.exception("step_detail failed | recipe={!r} step={!r}", recipe, step)
         return JsonResponse({"error": "Failed to get step detail"}, status=500)
+
+
+@require_http_methods(["GET"])
+def food_images(request):
+    """Return Unsplash food images, served from DB cache after the first fetch."""
+    import httpx
+    from .models import FoodImageCache
+
+    q = request.GET.get("q", "").strip()
+    if not q:
+        return JsonResponse({"images": []})
+
+    cache_key = FoodImageCache.make_key(q)
+    cached = FoodImageCache.objects.filter(key=cache_key).first()
+    if cached:
+        logger.debug("food_images cache hit | q={!r}", q)
+        return JsonResponse({"images": json.loads(cached.images_json)})
+
+    access_key = getattr(settings, "UNSPLASH_ACCESS_KEY", "")
+    if not access_key:
+        return JsonResponse({"images": []})
+
+    try:
+        resp = httpx.get(
+            "https://api.unsplash.com/search/photos",
+            params={"query": q, "per_page": 3, "orientation": "landscape", "content_filter": "high"},
+            headers={"Authorization": f"Client-ID {access_key}"},
+            timeout=5,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        logger.exception("food_images | Unsplash request failed q={!r}", q)
+        return JsonResponse({"images": []})
+
+    images = [
+        {
+            "url": photo["urls"]["small"],
+            "alt": photo.get("alt_description") or q,
+            "credit": {
+                "name": photo["user"]["name"],
+                "link": photo["user"]["links"]["html"]
+                    + "?utm_source=recipe_chef&utm_medium=referral",
+            },
+        }
+        for photo in data.get("results", [])
+        if photo.get("urls", {}).get("small")
+    ]
+
+    FoodImageCache.objects.create(
+        key=cache_key,
+        query=q[:255],
+        images_json=json.dumps(images),
+    )
+    logger.info("food_images | q={!r} fetched={} cached", q, len(images))
+    return JsonResponse({"images": images})
 
 
 @require_http_methods(["GET"])

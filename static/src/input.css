@@ -78,6 +78,42 @@ body {
     @apply border-zinc-800/60;
 }
 
+/* ── Scroll-to-bottom button ── */
+#scroll-bottom-btn {
+    position: absolute;
+    bottom: 140px;
+    right: 24px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f97316;
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(249, 115, 22, 0.45);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.15s;
+    pointer-events: none;
+    z-index: 30;
+    cursor: pointer;
+}
+#scroll-bottom-btn.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+#scroll-bottom-btn:hover  { background: #ea6c0a; }
+#scroll-bottom-btn:active { background: #c2410c; transform: scale(0.93); }
+[data-theme="dark"] #scroll-bottom-btn {
+    background: #c2410c;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] #scroll-bottom-btn:hover  { background: #9a3412; }
+[data-theme="dark"] #scroll-bottom-btn:active { background: #7c2d12; }
+
 /* ── Chat input box ── */
 .chat-input-box {
     @apply bg-gray-50 border border-gray-200 focus-within:border-orange-300 focus-within:ring-2 focus-within:ring-orange-100;
@@ -1084,6 +1120,16 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     background: rgba(0,0,0,0.45);
     padding: 2px 6px; border-radius: 999px;
     flex-shrink: 0;
+}
+.recipe-image-credit {
+    font-size: 0.6rem; color: rgba(255,255,255,0.75);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%; display: block; margin-top: 2px;
+}
+.recipe-image-credit a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 /* Top-right zoom icon */

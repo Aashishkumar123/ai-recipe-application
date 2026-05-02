@@ -7,6 +7,19 @@ const welcomeScreen = document.getElementById("welcome-screen");
 const sendBtn     = document.getElementById("send-btn");
 const newChatBtn  = document.getElementById("new-chat-btn");
 const headerNewChatBtn = document.getElementById("header-new-chat-btn");
+const scrollBottomBtn  = document.getElementById("scroll-bottom-btn");
+
+// ── Scroll-to-bottom button ──────────────────────────────────────────────────
+function _updateScrollBtn() {
+    if (!scrollBottomBtn || !messageList) return;
+    const dist = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;
+    scrollBottomBtn.classList.toggle("is-visible", dist > 200);
+}
+messageList?.addEventListener("scroll", _updateScrollBtn, { passive: true });
+scrollBottomBtn?.addEventListener("click", () => {
+    messageList?.scrollTo({ top: messageList.scrollHeight, behavior: "smooth" });
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // True if server pre-rendered history or user already sent a message this session
 let hasMessages = document.querySelectorAll(".chat-msg").length > 0;
@@ -1008,63 +1021,19 @@ async function injectRecipeImage(bubble) {
     if (bubble.dataset.imgState || bubble.querySelector(".recipe-hero-img, .recipe-image-grid, .recipe-images-section")) return;
     bubble.dataset.imgState = "loading";
 
-    const commentMatch = bubble.innerHTML.match(/<!--\s*wiki:\s*([A-Za-z0-9_%()\-]+)\s*-->/);
-    let slug = commentMatch?.[1]?.trim();
-
-    if (!slug) {
-        const h1text = bubble.querySelector("h1")?.textContent?.trim();
-        if (!h1text) return;
-        slug = h1text
-            .replace(/\p{Emoji}/gu, "")
-            .replace(/[^a-zA-Z0-9\s\-'()]/g, "")
-            .trim()
-            .replace(/\s+/g, "_");
-    }
-    if (!slug) return;
-
-    const label = slug.replace(/_/g, " ");
+    const label = (bubble.querySelector("h1")?.textContent ?? "")
+        .replace(/\p{Emoji}/gu, "").trim();
+    if (!label) { delete bubble.dataset.imgState; return; }
 
     const placeholder = document.createElement("div");
     placeholder.className = "recipe-hero-placeholder";
     bubble.insertBefore(placeholder, bubble.firstChild);
 
     try {
-        const SKIP  = /\.svg$/i;
-        const NOISE = /flag|map|icon|logo|symbol|seal|emblem|coat|crest|locator/i;
+        const res  = await fetch(`/chat/api/food-images/?q=${encodeURIComponent(label)}`);
+        const data = await res.json();
 
-        let srcs = [];
-
-        const mediaRes = await fetch(
-            `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(slug)}`
-        );
-        if (mediaRes.ok) {
-            const media = await mediaRes.json();
-            srcs = (media.items || [])
-                .filter(it =>
-                    it.type === "image" &&
-                    !SKIP.test(it.title || "") &&
-                    !NOISE.test(it.title || "")
-                )
-                .map(it => {
-                    const srcset = it.srcset || [];
-                    const rel    = srcset[srcset.length - 1]?.src || "";
-                    return rel.startsWith("//") ? "https:" + rel : rel;
-                })
-                .filter(src => src.startsWith("https://"))
-                .slice(0, 3);
-        }
-
-        if (srcs.length === 0) {
-            const summaryRes = await fetch(
-                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`
-            );
-            if (summaryRes.ok) {
-                const data = await summaryRes.json();
-                if (data.thumbnail?.source) srcs = [data.thumbnail.source];
-            }
-        }
-
-        if (!placeholder.isConnected || srcs.length === 0) {
+        if (!placeholder.isConnected || !data.images?.length) {
             placeholder.remove();
             return;
         }
@@ -1072,6 +1041,7 @@ async function injectRecipeImage(bubble) {
         const cameraSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
         const zoomSvg   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
 
+        const { images } = data;
         const section = document.createElement("div");
         section.className = "recipe-images-section";
         section.innerHTML = `
@@ -1079,30 +1049,33 @@ async function injectRecipeImage(bubble) {
             <div class="recipe-images-header-icon">${cameraSvg}</div>
             <div class="recipe-images-header-text">
               <span class="recipe-images-header-title">Recipe Gallery</span>
-              <span class="recipe-images-header-sub">Visual reference · Wikipedia</span>
+              <span class="recipe-images-header-sub">Photos · Unsplash</span>
             </div>
-            <span class="recipe-images-count-badge">${srcs.length} photo${srcs.length > 1 ? "s" : ""}</span>
+            <span class="recipe-images-count-badge">${images.length} photo${images.length > 1 ? "s" : ""}</span>
           </div>`;
 
         const grid = document.createElement("div");
-        grid.className = `recipe-img-grid recipe-img-grid--${srcs.length}`;
+        grid.className = `recipe-img-grid recipe-img-grid--${images.length}`;
 
-        srcs.forEach((src, i) => {
+        images.forEach((photo, i) => {
             const card = document.createElement("div");
             card.className = "recipe-image-card";
 
-            const img   = document.createElement("img");
-            img.src     = src;
-            img.alt     = `${label} — photo ${i + 1}`;
+            const img     = document.createElement("img");
+            img.src       = photo.url;
+            img.alt       = photo.alt || label;
             img.className = "recipe-hero-img";
-            img.loading = "lazy";
-            img.onerror = () => card.remove();
+            img.loading   = "lazy";
+            img.onerror   = () => card.remove();
 
             const overlay = document.createElement("div");
             overlay.className = "recipe-image-overlay";
-            overlay.innerHTML = `
-              <span class="recipe-image-card-label">${label}</span>
-              <span class="recipe-image-card-counter">${i + 1}/${srcs.length}</span>`;
+            overlay.innerHTML =
+                `<span class="recipe-image-card-label">${escHtml(label)}</span>` +
+                `<span class="recipe-image-card-counter">${i + 1}/${images.length}</span>` +
+                (photo.credit
+                    ? `<a class="recipe-image-credit" href="${photo.credit.link}" target="_blank" rel="noopener noreferrer">📷 ${escHtml(photo.credit.name)}</a>`
+                    : "");
 
             const zoomBtn = document.createElement("div");
             zoomBtn.className = "recipe-image-zoom-btn";
