@@ -56,9 +56,12 @@
                 <input id="chat-title-input" type="text" maxlength="255"
                        class="hidden text-sm font-medium bg-transparent border-b border-orange-400 outline-none w-40 md:w-56 truncate"/>
             </div>
-            <span id="msg-count-badge" class="msg-count-badge{% if not chat_history %} hidden{% endif %}">
-                {{ chat_history|length }} message{{ chat_history|length|pluralize }}
-            </span>
+            <div id="msg-nav-container">
+                <button id="msg-count-badge" class="msg-count-badge{% if not chat_history %} hidden{% endif %}" aria-haspopup="true" aria-expanded="false">
+                    <span id="msg-count-text">{{ chat_history|length }} message{{ chat_history|length|pluralize }}</span>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+            </div>
         </div>
 
         <div class="flex items-center gap-1">
@@ -163,7 +166,7 @@
 
         {% for msg in chat_history %}
             {% if msg.sender == "user" %}
-            <div class="chat-msg group flex justify-end items-end gap-2 px-4 md:px-6 py-3 max-w-4xl mx-auto w-full">
+            <div id="user-msg-{{ chat_obj.id }}-{{ msg.id }}" class="chat-msg group flex justify-end items-end gap-2 px-4 md:px-6 py-3 max-w-4xl mx-auto w-full">
                 <button class="user-copy-btn opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0 p-1.5 rounded-lg transition-all" title="Copy message">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -194,6 +197,9 @@
         {% endfor %}
 
     </div>
+
+    <!-- Message nav dropdown — must live outside any transformed ancestor so position:fixed works correctly -->
+    <div id="msg-nav-dropdown" class="msg-nav-dropdown hidden" role="menu"></div>
 
     <!-- Scroll-to-bottom button -->
     <button id="scroll-bottom-btn" aria-label="Scroll to bottom" title="Scroll to bottom">

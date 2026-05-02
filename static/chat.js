@@ -133,15 +133,71 @@ const titleWrap    = document.getElementById("chat-title-wrap");
 const titleDisplay = document.getElementById("chat-title-display");
 const titlePencil  = document.getElementById("chat-title-pencil");
 const titleInput   = document.getElementById("chat-title-input");
-const msgCountBadge = document.getElementById("msg-count-badge");
+const msgCountBadge   = document.getElementById("msg-count-badge");
+const msgCountText    = document.getElementById("msg-count-text");
+const msgNavDropdown  = document.getElementById("msg-nav-dropdown");
+let   _liveMsgCounter = 0;
 
 function updateMsgCount() {
-    if (!msgCountBadge) return;
+    if (!msgCountBadge || !msgCountText) return;
     const n = messageList?.querySelectorAll(".chat-msg").length ?? 0;
     if (n === 0) { msgCountBadge.classList.add("hidden"); return; }
-    msgCountBadge.textContent = `${n} message${n === 1 ? "" : "s"}`;
+    msgCountText.textContent = `${n} message${n === 1 ? "" : "s"}`;
     msgCountBadge.classList.remove("hidden");
 }
+
+function buildMsgNav() {
+    if (!msgNavDropdown) return;
+    msgNavDropdown.innerHTML = "";
+    const userMsgs = messageList?.querySelectorAll(".chat-msg:has(.user-bubble)") ?? [];
+    if (!userMsgs.length) {
+        const empty = document.createElement("p");
+        empty.className = "msg-nav-empty";
+        empty.textContent = "No messages yet";
+        msgNavDropdown.appendChild(empty);
+        return;
+    }
+    userMsgs.forEach((wrapper) => {
+        const text = wrapper.querySelector(".user-bubble")?.textContent?.trim() ?? "";
+        const btn  = document.createElement("button");
+        btn.className   = "msg-nav-item";
+        btn.textContent = text.length > 55 ? text.slice(0, 55) + "…" : text;
+        btn.setAttribute("role", "menuitem");
+        btn.addEventListener("click", () => {
+            wrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+            closeMsgNav();
+        });
+        msgNavDropdown.appendChild(btn);
+    });
+}
+
+function closeMsgNav() {
+    msgNavDropdown?.classList.add("hidden");
+    msgCountBadge?.setAttribute("aria-expanded", "false");
+}
+
+msgCountBadge?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = !msgNavDropdown?.classList.contains("hidden");
+    if (isOpen) { closeMsgNav(); return; }
+    buildMsgNav();
+    // Render off-screen to measure real width before positioning
+    msgNavDropdown.style.left = "-9999px";
+    msgNavDropdown.style.top  = "-9999px";
+    msgNavDropdown.style.transform = "none";
+    msgNavDropdown.classList.remove("hidden");
+    const dropW   = msgNavDropdown.offsetWidth;
+    const rect    = msgCountBadge.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const left    = Math.max(8, Math.min(window.innerWidth - dropW - 8, centerX - dropW / 2));
+    msgNavDropdown.style.top  = `${rect.bottom + 6}px`;
+    msgNavDropdown.style.left = `${left}px`;
+    msgCountBadge.setAttribute("aria-expanded", "true");
+});
+
+document.addEventListener("click", (e) => {
+    if (!document.getElementById("msg-nav-container")?.contains(e.target)) closeMsgNav();
+});
 
 function updateHeaderTitle(title) {
     if (!titleDisplay) return;
@@ -1169,6 +1225,7 @@ function appendUserMessage(content) {
     showMessages();
     const wrapper = document.createElement("div");
     wrapper.className = "chat-msg group flex justify-end items-end gap-2 px-4 md:px-6 py-3 max-w-4xl mx-auto w-full";
+    wrapper.id = `user-msg-${currentChatId || "new"}-live-${++_liveMsgCounter}`;
     const copyBtn = document.createElement("button");
     copyBtn.className = "user-copy-btn opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0 p-1.5 rounded-lg transition-all";
     copyBtn.title = "Copy message";
