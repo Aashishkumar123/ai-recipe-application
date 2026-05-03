@@ -1543,6 +1543,7 @@ document.addEventListener("click", (e) => {
 // Close menu when a mode is selected
 document.getElementById("pantry-btn")?.addEventListener("click", closePlusMenu, { capture: true });
 document.getElementById("meal-plan-btn")?.addEventListener("click", closePlusMenu, { capture: true });
+document.getElementById("image-recipe-btn")?.addEventListener("click", closePlusMenu, { capture: true });
 
 // --- Pantry mode ---
 const pantryBtn        = document.getElementById("pantry-btn");
@@ -1617,6 +1618,68 @@ mealPlanWelcomeBtn?.addEventListener("click", () => {
     enterMealPlanMode();
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });
+
+// --- Image to Recipe mode ---
+(function initImageRecipeMode() {
+    const btn     = document.getElementById("image-recipe-btn");
+    const wrap    = document.getElementById("image-recipe-wrap");
+    const fileIn  = document.getElementById("image-recipe-input");
+    const preview = document.getElementById("image-recipe-preview");
+    const thumb   = document.getElementById("image-recipe-thumb");
+    const removeBtn = document.getElementById("image-recipe-remove");
+    if (!btn) return;
+
+    let active = false;
+    let objectUrl = null;
+
+    function clearImage() {
+        fileIn.value = "";
+        preview?.classList.add("hidden");
+        if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+        if (thumb) thumb.src = "";
+    }
+
+    function enterMode() {
+        active = true;
+        exitPantryMode();
+        exitMealPlanMode();
+        btn.classList.add("is-active");
+        wrap?.classList.remove("hidden");
+        wrap?.classList.add("flex");
+        input.placeholder = "Describe the dish or ask what you'd like to make…";
+        input.value = "";
+        input.dispatchEvent(new Event("input"));
+        input.focus();
+    }
+
+    function exitMode() {
+        active = false;
+        btn.classList.remove("is-active");
+        wrap?.classList.add("hidden");
+        wrap?.classList.remove("flex");
+        clearImage();
+        input.placeholder = "What would you like to cook today?";
+    }
+
+    btn.addEventListener("click", () => { if (active) exitMode(); else enterMode(); });
+
+    fileIn?.addEventListener("change", () => {
+        const file = fileIn.files[0];
+        if (!file) return;
+        clearImage();
+        objectUrl = URL.createObjectURL(file);
+        if (thumb) thumb.src = objectUrl;
+        preview?.classList.remove("hidden");
+    });
+
+    removeBtn?.addEventListener("click", clearImage);
+
+    // Exit image mode when pantry or meal plan is activated
+    document.getElementById("pantry-btn")?.addEventListener("click", exitMode);
+    document.getElementById("meal-plan-btn")?.addEventListener("click", exitMode);
+    document.getElementById("pantry-welcome-btn")?.addEventListener("click", exitMode);
+    document.getElementById("meal-plan-welcome-btn")?.addEventListener("click", exitMode);
+}());
 
 // ── Cooking Mode ─────────────────────────────────────────────────────────────
 (function initCookingMode() {

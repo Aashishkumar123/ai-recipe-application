@@ -92,6 +92,77 @@ button, a, [role="button"], label[for] {
 [data-theme="dark"] #meal-plan-btn.plus-menu-item:hover        { background: #3b0764aa; color: #c084fc; }
 [data-theme="dark"] #meal-plan-btn.plus-menu-item.is-active    { background: #3b0764aa; color: #c084fc; }
 
+/* Image to Recipe — teal */
+#image-recipe-btn.plus-menu-item:hover { background: #f0fdfa; color: #0d9488; }
+#image-recipe-btn.plus-menu-item.is-active {
+    background: #f0fdfa; color: #0d9488; font-weight: 600;
+}
+#image-recipe-btn.plus-menu-item.is-active::after {
+    content: "✓"; margin-left: auto; font-size: 0.75rem;
+}
+[data-theme="dark"] #image-recipe-btn.plus-menu-item:hover     { background: #042f2e55; color: #2dd4bf; }
+[data-theme="dark"] #image-recipe-btn.plus-menu-item.is-active { background: #042f2e55; color: #2dd4bf; }
+
+/* Thin divider inside plus menu */
+.plus-menu-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 4px 0;
+}
+[data-theme="dark"] .plus-menu-divider { background: #27272a; }
+
+/* Image upload button */
+.image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #f0fdfa;
+    border: 1.5px dashed #0d9488;
+    color: #0d9488;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-style 0.15s;
+    white-space: nowrap;
+}
+.image-upload-btn:hover { background: #ccfbf1; border-style: solid; }
+[data-theme="dark"] .image-upload-btn {
+    background: #042f2e55;
+    border-color: #14b8a6;
+    color: #2dd4bf;
+}
+[data-theme="dark"] .image-upload-btn:hover { background: #042f2e99; }
+
+/* Thumbnail preview */
+.image-recipe-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1.5px solid #0d9488;
+    display: block;
+}
+.image-recipe-remove {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
 /* ── Send button ── */
 #send-btn {
     background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%);
