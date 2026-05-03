@@ -1517,6 +1517,33 @@ form?.addEventListener("submit", async (e) => {
     finally { input.focus(); }
 });
 
+// --- Plus menu (pantry / meal plan picker) ---
+const plusMenuBtn      = document.getElementById("plus-menu-btn");
+const plusMenuDropdown = document.getElementById("plus-menu-dropdown");
+
+function closePlusMenu() {
+    plusMenuDropdown?.classList.add("hidden");
+    plusMenuBtn?.setAttribute("aria-expanded", "false");
+    plusMenuBtn?.classList.remove("is-open");
+}
+
+plusMenuBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = !plusMenuDropdown?.classList.contains("hidden");
+    if (isOpen) { closePlusMenu(); return; }
+    plusMenuDropdown?.classList.remove("hidden");
+    plusMenuBtn.setAttribute("aria-expanded", "true");
+    plusMenuBtn.classList.add("is-open");
+});
+
+document.addEventListener("click", (e) => {
+    if (!document.getElementById("plus-menu-wrap")?.contains(e.target)) closePlusMenu();
+});
+
+// Close menu when a mode is selected
+document.getElementById("pantry-btn")?.addEventListener("click", closePlusMenu, { capture: true });
+document.getElementById("meal-plan-btn")?.addEventListener("click", closePlusMenu, { capture: true });
+
 // --- Pantry mode ---
 const pantryBtn        = document.getElementById("pantry-btn");
 const pantryWelcomeBtn = document.getElementById("pantry-welcome-btn");

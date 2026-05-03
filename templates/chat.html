@@ -212,24 +212,35 @@
     <div class="chat-input-area px-3 md:px-4 pb-4 md:pb-5 pt-2 md:pt-3 shrink-0">
         <form id="chat-form" class="max-w-3xl mx-auto">
             {% csrf_token %}
-            <!-- Mode quick-actions -->
-            <div class="flex items-center gap-2 mb-2 px-1">
-                <button type="button" id="pantry-btn" class="pantry-pill flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all">
-                    <span>🧺</span>
-                    <span>Pantry mode</span>
-                </button>
-                <button type="button" id="meal-plan-btn" class="meal-plan-pill flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all">
-                    <span>🗓️</span>
-                    <span>Meal plan</span>
-                </button>
-            </div>
-            <div class="chat-input-box flex items-end gap-2 md:gap-3 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 shadow-sm transition-all">
+            <div class="relative chat-input-box flex items-end gap-2 md:gap-3 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 shadow-sm transition-all">
+
+                <!-- Plus menu -->
+                <div class="relative shrink-0 mb-0.5" id="plus-menu-wrap">
+                    <button type="button" id="plus-menu-btn"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors plus-menu-trigger"
+                        title="Modes" aria-haspopup="true" aria-expanded="false">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <div id="plus-menu-dropdown" class="plus-menu-dropdown hidden" role="menu">
+                        <button type="button" id="pantry-btn" class="plus-menu-item" role="menuitem">
+                            <span>🧺</span><span>Pantry mode</span>
+                        </button>
+                        <button type="button" id="meal-plan-btn" class="plus-menu-item" role="menuitem">
+                            <span>🗓️</span><span>Meal plan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-divider"></div>
+
                 <span id="pantry-prefix" class="hidden shrink-0 text-sm font-medium text-green-600 whitespace-nowrap py-0.5 select-none">🧺 I have:</span>
                 <span id="meal-plan-prefix" class="hidden shrink-0 text-sm font-medium text-violet-500 whitespace-nowrap py-0.5 select-none">🗓️ Meal plan:</span>
                 <textarea
                     id="message-input"
                     name="message"
-                    placeholder="Ask for a recipe..."
+                    placeholder="What would you like to cook today?"
                     autocomplete="off"
                     rows="1"
                     class="flex-1 resize-none outline-none text-sm bg-transparent leading-relaxed max-h-40 py-0.5"

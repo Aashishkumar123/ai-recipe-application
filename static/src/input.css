@@ -24,6 +24,93 @@ button, a, [role="button"], label[for] {
 [data-theme="dark"] #mic-btn { color: #6b7280; }
 [data-theme="dark"] #mic-btn:hover { color: #fb923c; }
 
+/* ── Plus menu (mode picker) ── */
+.plus-menu-trigger {
+    color: #9ca3af;
+    transition: color 0.15s, background 0.15s;
+}
+.plus-menu-trigger:hover { color: #f97316; background: #fff7ed; }
+.plus-menu-trigger.is-open { color: #f97316; background: #fff7ed; }
+[data-theme="dark"] .plus-menu-trigger { color: #6b7280; }
+[data-theme="dark"] .plus-menu-trigger:hover,
+[data-theme="dark"] .plus-menu-trigger.is-open { color: #fb923c; background: #27272a; }
+
+.plus-menu-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    min-width: 170px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    padding: 5px;
+    z-index: 300;
+}
+[data-theme="dark"] .plus-menu-dropdown {
+    background: #1c1c1f;
+    border-color: #3f3f46;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.plus-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s, color 0.12s;
+}
+[data-theme="dark"] .plus-menu-item { color: #d4d4d8; }
+
+/* Pantry — green */
+#pantry-btn.plus-menu-item:hover  { background: #f0fdf4; color: #16a34a; }
+#pantry-btn.plus-menu-item.is-active {
+    background: #f0fdf4; color: #16a34a; font-weight: 600;
+}
+#pantry-btn.plus-menu-item.is-active::after {
+    content: "✓"; margin-left: auto; font-size: 0.75rem;
+}
+[data-theme="dark"] #pantry-btn.plus-menu-item:hover          { background: #14532d22; color: #4ade80; }
+[data-theme="dark"] #pantry-btn.plus-menu-item.is-active      { background: #14532d22; color: #4ade80; }
+
+/* Meal plan — purple */
+#meal-plan-btn.plus-menu-item:hover  { background: #faf5ff; color: #7c3aed; }
+#meal-plan-btn.plus-menu-item.is-active {
+    background: #faf5ff; color: #7c3aed; font-weight: 600;
+}
+#meal-plan-btn.plus-menu-item.is-active::after {
+    content: "✓"; margin-left: auto; font-size: 0.75rem;
+}
+[data-theme="dark"] #meal-plan-btn.plus-menu-item:hover        { background: #3b0764aa; color: #c084fc; }
+[data-theme="dark"] #meal-plan-btn.plus-menu-item.is-active    { background: #3b0764aa; color: #c084fc; }
+
+/* ── Send button ── */
+#send-btn {
+    background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%);
+    box-shadow: 0 2px 8px rgba(249,115,22,0.4);
+    border-radius: 14px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+#send-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ea6c0a 0%, #c2410c 100%);
+    box-shadow: 0 4px 14px rgba(249,115,22,0.5);
+    transform: translateY(-1px);
+}
+#send-btn:active:not(:disabled) { transform: translateY(0); }
+#send-btn:disabled {
+    background: #d1d5db;
+    box-shadow: none;
+}
+[data-theme="dark"] #send-btn:disabled { background: #3f3f46; }
+
 /* Stop-streaming state for the send button */
 #send-btn.is-stop {
     background-color: #ef4444 !important;
@@ -152,11 +239,25 @@ body {
 
 /* ── Chat input area (bottom bar wrapper) ── */
 .chat-input-area {
-    @apply bg-white border-gray-100;
+    background: #fff;
+    position: relative;
+}
+.chat-input-area::before {
+    content: "";
+    position: absolute;
+    top: -32px;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(to top, #fff 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
 }
 [data-theme="dark"] .chat-input-area {
     background: #0f0f10;
-    @apply border-zinc-800/60;
+}
+[data-theme="dark"] .chat-input-area::before {
+    background: linear-gradient(to top, #0f0f10 0%, transparent 100%);
 }
 
 /* ── Scroll-to-bottom button ── */
@@ -197,24 +298,51 @@ body {
 
 /* ── Chat input box ── */
 .chat-input-box {
-    @apply bg-gray-50 border border-gray-200 focus-within:border-orange-300 focus-within:ring-2 focus-within:ring-orange-100;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.chat-input-box:focus-within {
+    border-color: #f97316;
+    box-shadow: 0 2px 16px rgba(249,115,22,0.12), 0 0 0 3px rgba(249,115,22,0.08);
 }
 [data-theme="dark"] .chat-input-box {
-    @apply bg-zinc-900 border-zinc-700/80 focus-within:border-orange-700 focus-within:ring-orange-900/20;
+    background: #18181b;
+    border-color: #3f3f46;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .chat-input-box:focus-within {
+    border-color: #f97316;
+    box-shadow: 0 2px 16px rgba(249,115,22,0.15), 0 0 0 3px rgba(249,115,22,0.08);
 }
 
 .chat-input-box textarea {
-    @apply text-gray-900;
+    color: #111827;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 .chat-input-box textarea::placeholder {
-    @apply text-gray-400;
+    color: #9ca3af;
 }
 [data-theme="dark"] .chat-input-box textarea {
-    @apply text-zinc-100;
+    color: #f4f4f5;
 }
 [data-theme="dark"] .chat-input-box textarea::placeholder {
-    color: #71717a; /* zinc-500 */
+    color: #52525b;
 }
+
+/* Thin vertical divider between + button and textarea */
+.input-divider {
+    width: 1px;
+    height: 18px;
+    background: #e5e7eb;
+    align-self: center;
+    flex-shrink: 0;
+    border-radius: 1px;
+}
+[data-theme="dark"] .input-divider { background: #3f3f46; }
 
 /* ── Suggestion chips ── */
 .suggestion-chip {
