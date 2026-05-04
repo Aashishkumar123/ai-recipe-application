@@ -364,9 +364,9 @@ const META_ICONS = {
 };
 
 function styleRecipeMeta(p) {
-    if (p.querySelector(".recipe-meta-chip")) return;
+    if (p.querySelector(".recipe-meta-item") || p.querySelector(".recipe-meta-chip")) return;
     const segments = p.textContent.trim().split(/[|·\n]/).map(s => s.trim()).filter(Boolean);
-    const chips = [];
+    const items = [];
     segments.forEach(seg => {
         const colon = seg.indexOf(":");
         if (colon === -1) return;
@@ -374,11 +374,20 @@ function styleRecipeMeta(p) {
         const val = seg.slice(colon + 1).trim();
         const icon = META_ICONS[key];
         if (!icon) return;
-        if (key === "Pantry match") chips.push(`<span class="recipe-meta-divider"></span>`);
-        const diffClass = key === "Difficulty" ? ` recipe-meta-chip--${val.toLowerCase()}` : "";
-        chips.push(`<span class="recipe-meta-chip${diffClass}">${icon}<b>${key}</b>${val}</span>`);
+        if (key === "Pantry match") items.push(`<div class="recipe-meta-sep"></div>`);
+        const diffClass = key === "Difficulty" ? ` recipe-meta-item--${val.toLowerCase()}` : "";
+        items.push(`<div class="recipe-meta-item${diffClass}">
+            <span class="recipe-meta-item-icon">${icon}</span>
+            <span class="recipe-meta-item-val">${escHtml(val)}</span>
+            <span class="recipe-meta-item-key">${escHtml(key)}</span>
+        </div>`);
     });
-    if (chips.length) p.innerHTML = chips.join("");
+    if (items.length) {
+        const div = document.createElement("div");
+        div.className = p.className;
+        div.innerHTML = items.join("");
+        p.replaceWith(div);
+    }
 }
 
 function parseFraction(str) {
