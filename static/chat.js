@@ -798,8 +798,10 @@ function buildOffTopicHtml(bubble, data) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function applyRecipeStyles(bubble) {
+    const metaKeyNames = Object.keys(META_ICONS); // ["Prep","Cook","Serves","Difficulty","Pantry match","Missing"]
     bubble.querySelectorAll("p").forEach((p) => {
-        if (p.textContent.includes("Prep:") && p.textContent.includes("Cook:")) {
+        const txt = p.textContent;
+        if (metaKeyNames.some(k => txt.includes(k + ":"))) {
             p.classList.add("recipe-meta");
             styleRecipeMeta(p);
         }
