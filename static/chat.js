@@ -593,6 +593,12 @@ function parseMarkdownLink(str) {
 }
 
 // ── JSON rendering pipeline ──────────────────────────────────────────────────
+function parseJsonSafe(text) {
+    // Strip markdown code fences the LLM occasionally wraps around JSON
+    const clean = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+    return JSON.parse(clean);
+}
+
 async function renderFromJson(bubble, data) {
     switch (data.mode) {
         case "recipe":       buildRecipeHtml(bubble, data);            break;
@@ -767,7 +773,15 @@ function buildFollowupHtml(bubble, data) {
 }
 
 function buildOffTopicHtml(bubble, data) {
-    bubble.innerHTML = `<p>${escHtml(data.message || "I can only help with recipes. What would you like to cook?")}</p>`;
+    const msg = escHtml(data.message || "I can only help with recipes. What would you like to cook?");
+    bubble.innerHTML = `
+        <div class="off-topic-card">
+            <div class="off-topic-icon">🍳</div>
+            <div class="off-topic-body">
+                <p class="off-topic-msg">${msg}</p>
+                <p class="off-topic-hint">Try asking for a dish name, ingredients you have, or a meal plan.</p>
+            </div>
+        </div>`;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1442,7 +1456,7 @@ async function streamResponse(userMessage) {
                     } else if (data.done) {
                         bubble.classList.remove("streaming");
                         try {
-                            await renderFromJson(bubble, JSON.parse(fullText));
+                            await renderFromJson(bubble, parseJsonSafe(fullText));
                         } catch {
                             bubble.innerHTML = marked.parse(fullText);
                             applyRecipeStyles(bubble);
@@ -1480,7 +1494,7 @@ async function streamResponse(userMessage) {
             // Try to render whatever JSON we have; fallback to a stopped message
             if (fullText.trim()) {
                 try {
-                    await renderFromJson(bubble, JSON.parse(fullText));
+                    await renderFromJson(bubble, parseJsonSafe(fullText));
                 } catch {
                     bubble.innerHTML = `<p class="text-sm text-gray-400">Response was stopped before completion.</p>`;
                 }
