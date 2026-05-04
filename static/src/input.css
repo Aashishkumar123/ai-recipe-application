@@ -111,6 +111,81 @@ button, a, [role="button"], label[for] {
 }
 [data-theme="dark"] .plus-menu-divider { background: #27272a; }
 
+/* ── Mode badges (shown inside input box when a mode is active) ── */
+.mode-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 3px 6px 3px 9px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1.5px solid;
+    user-select: none;
+    letter-spacing: 0.01em;
+}
+.mode-badge.hidden { display: none; }
+.mode-badge-label { line-height: 1; }
+
+.mode-badge-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.08);
+    cursor: pointer;
+    padding: 0;
+    color: inherit;
+    opacity: 0.65;
+    transition: opacity 0.12s, background 0.12s;
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+.mode-badge-close:hover { opacity: 1; background: rgba(0,0,0,0.18); }
+
+/* Pantry — green */
+.mode-badge-pantry {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+[data-theme="dark"] .mode-badge-pantry {
+    background: #052e16aa;
+    border-color: #166534;
+    color: #4ade80;
+}
+[data-theme="dark"] .mode-badge-pantry .mode-badge-close { background: rgba(255,255,255,0.1); }
+
+/* Meal plan — purple */
+.mode-badge-mealplan {
+    background: #faf5ff;
+    border-color: #e9d5ff;
+    color: #7c3aed;
+}
+[data-theme="dark"] .mode-badge-mealplan {
+    background: #3b0764aa;
+    border-color: #6d28d9;
+    color: #c084fc;
+}
+[data-theme="dark"] .mode-badge-mealplan .mode-badge-close { background: rgba(255,255,255,0.1); }
+
+/* Image to Recipe — teal */
+.mode-badge-teal {
+    background: #f0fdfa;
+    border-color: #99f6e4;
+    color: #0d9488;
+}
+[data-theme="dark"] .mode-badge-teal {
+    background: #042f2e99;
+    border-color: #0f766e;
+    color: #2dd4bf;
+}
+[data-theme="dark"] .mode-badge-teal .mode-badge-close { background: rgba(255,255,255,0.1); }
+
 /* Image upload button */
 .image-upload-btn {
     display: inline-flex;

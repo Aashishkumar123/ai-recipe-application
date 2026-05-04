@@ -239,11 +239,33 @@
 
                 <div class="input-divider"></div>
 
-                <span id="pantry-prefix" class="hidden shrink-0 text-sm font-medium text-green-600 whitespace-nowrap py-0.5 select-none">🧺 I have:</span>
-                <span id="meal-plan-prefix" class="hidden shrink-0 text-sm font-medium text-violet-500 whitespace-nowrap py-0.5 select-none">🗓️ Meal plan:</span>
+                <!-- Pantry mode badge -->
+                <div id="pantry-prefix" class="hidden shrink-0 mode-badge mode-badge-pantry" aria-label="Pantry mode active">
+                    <span class="text-sm leading-none">🧺</span>
+                    <span class="mode-badge-label">Pantry mode</span>
+                    <button type="button" id="pantry-exit-btn" class="mode-badge-close" aria-label="Exit pantry mode">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Meal plan mode badge -->
+                <div id="meal-plan-prefix" class="hidden shrink-0 mode-badge mode-badge-mealplan" aria-label="Meal plan mode active">
+                    <span class="text-sm leading-none">🗓️</span>
+                    <span class="mode-badge-label">Meal plan</span>
+                    <button type="button" id="meal-plan-exit-btn" class="mode-badge-close" aria-label="Exit meal plan mode">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
 
                 <!-- Image to Recipe upload area -->
                 <div id="image-recipe-wrap" class="hidden items-center gap-2 shrink-0">
+                    <div class="mode-badge mode-badge-teal">
+                        <span class="text-sm leading-none">📸</span>
+                        <span class="mode-badge-label">Image mode</span>
+                        <button type="button" id="image-exit-btn" class="mode-badge-close" aria-label="Exit image mode">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                     <label for="image-recipe-input" class="image-upload-btn" title="Choose an image">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
@@ -409,7 +431,7 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="{% static 'chat.js' %}?v=13"></script>
+<script src="{% static 'chat.js' %}?v=14"></script>
 {% if chat_history %}
 <script>
     // Scroll to bottom so latest message is visible

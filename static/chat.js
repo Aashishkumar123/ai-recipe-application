@@ -1557,6 +1557,7 @@ function enterPantryMode() {
     exitMealPlanMode();
     pantryBtn?.classList.add("is-active");
     pantryPrefix?.classList.remove("hidden");
+    pantryPrefix?.classList.add("flex");
     input.placeholder = "potatoes, garlic, chicken...";
     input.value = "";
     input.dispatchEvent(new Event("input"));
@@ -1567,6 +1568,7 @@ function exitPantryMode() {
     pantryActive = false;
     pantryBtn?.classList.remove("is-active");
     pantryPrefix?.classList.add("hidden");
+    pantryPrefix?.classList.remove("flex");
     input.placeholder = "Ask for a recipe...";
 }
 
@@ -1584,6 +1586,11 @@ pantryWelcomeBtn?.addEventListener("click", () => {
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });
 
+document.getElementById("pantry-exit-btn")?.addEventListener("click", () => {
+    exitPantryMode();
+    input.focus();
+});
+
 // --- Meal plan mode ---
 const mealPlanBtn        = document.getElementById("meal-plan-btn");
 const mealPlanWelcomeBtn = document.getElementById("meal-plan-welcome-btn");
@@ -1596,6 +1603,7 @@ function enterMealPlanMode() {
     exitPantryMode();
     mealPlanBtn?.classList.add("is-active");
     mealPlanPrefix?.classList.remove("hidden");
+    mealPlanPrefix?.classList.add("flex");
     input.placeholder = "7 days, vegetarian, low-carb…";
     input.value = "";
     input.dispatchEvent(new Event("input"));
@@ -1606,6 +1614,7 @@ function exitMealPlanMode() {
     mealPlanActive = false;
     mealPlanBtn?.classList.remove("is-active");
     mealPlanPrefix?.classList.add("hidden");
+    mealPlanPrefix?.classList.remove("flex");
     input.placeholder = "Ask for a recipe...";
 }
 
@@ -1619,6 +1628,11 @@ mealPlanWelcomeBtn?.addEventListener("click", () => {
     document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });
 
+document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
+    exitMealPlanMode();
+    input.focus();
+});
+
 // --- Image to Recipe mode ---
 (function initImageRecipeMode() {
     const btn     = document.getElementById("image-recipe-btn");
@@ -1627,6 +1641,7 @@ mealPlanWelcomeBtn?.addEventListener("click", () => {
     const preview = document.getElementById("image-recipe-preview");
     const thumb   = document.getElementById("image-recipe-thumb");
     const removeBtn = document.getElementById("image-recipe-remove");
+    const exitBtn   = document.getElementById("image-exit-btn");
     if (!btn) return;
 
     let active = false;
@@ -1673,6 +1688,7 @@ mealPlanWelcomeBtn?.addEventListener("click", () => {
     });
 
     removeBtn?.addEventListener("click", clearImage);
+    exitBtn?.addEventListener("click", exitMode);
 
     // Exit image mode when pantry or meal plan is activated
     document.getElementById("pantry-btn")?.addEventListener("click", exitMode);
