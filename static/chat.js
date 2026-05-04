@@ -766,7 +766,10 @@ function buildMealPlanHtml(bubble, data) {
 
 function buildFollowupHtml(bubble, data) {
     bubble.innerHTML = [
-        `<div>${marked.parse(data.answer || "")}</div>`,
+        `<div class="followup-answer-wrap">
+            <span class="followup-badge">💬 Follow-up</span>
+            <div class="followup-answer-body">${marked.parse(data.answer || "")}</div>
+        </div>`,
         _buildFollowUpsSection(data.follow_ups),
     ].filter(Boolean).join("\n");
     applyRecipeStyles(bubble);
@@ -902,11 +905,18 @@ function styleFollowUpSuggestions(bubble) {
     const wrapper = document.createElement("div");
     wrapper.className = "followup-chips";
     if (recipeName) wrapper.dataset.recipe = recipeName;
+
+    const label = document.createElement("p");
+    label.className = "followup-chips-label";
+    label.textContent = "You might also ask";
+    wrapper.appendChild(label);
+
     questions.forEach(q => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "followup-chip";
-        btn.textContent = q;
+        btn.dataset.question = q;
+        btn.innerHTML = `<span class="followup-chip-icon">💬</span><span class="followup-chip-text">${escHtml(q)}</span><span class="followup-chip-arrow">→</span>`;
         wrapper.appendChild(btn);
     });
 
@@ -1373,7 +1383,8 @@ messageList?.addEventListener("click", (e) => {
     if (!chip || abortController) return;
     const recipe = chip.closest(".followup-chips")?.dataset.recipe;
     // Anchor question to the specific recipe so multi-recipe sessions don't confuse the LLM
-    input.value = recipe ? `For the ${recipe}: ${chip.textContent.trim()}` : chip.textContent.trim();
+    const question = chip.dataset.question || chip.querySelector(".followup-chip-text")?.textContent.trim() || chip.textContent.trim();
+    input.value = recipe ? `For the ${recipe}: ${question}` : question;
     input.dispatchEvent(new Event("input"));
     form.requestSubmit();
 });
