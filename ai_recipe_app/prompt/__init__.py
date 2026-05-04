@@ -1,3 +1,4 @@
 from .recipe_system_prompt import RECIPE_SYSTEM_PROMPT
 from .user_profile_prompt import USER_PROFILE_BLOCK
 from .instruction_steps_prompt import INSTRUCTION_STEPS_PROMPT
+from .image_recipe_prompt import IMAGE_IDENTIFY_PROMPT
