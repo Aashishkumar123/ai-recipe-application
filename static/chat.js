@@ -1697,10 +1697,11 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
         btn.classList.add("is-active");
         wrap?.classList.remove("hidden");
         wrap?.classList.add("flex");
-        input.placeholder = "Describe the dish or ask what you'd like to make…";
+        input.placeholder = "Add a photo above — recipe will be generated from your image";
         input.value = "";
         input.dispatchEvent(new Event("input"));
-        input.focus();
+        input.disabled = true;
+        input.classList.add("input-disabled-image");
     }
 
     function exitMode() {
@@ -1709,7 +1710,10 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
         wrap?.classList.add("hidden");
         wrap?.classList.remove("flex");
         clearImage();
+        input.disabled = false;
+        input.classList.remove("input-disabled-image");
         input.placeholder = "What would you like to cook today?";
+        input.focus();
     }
 
     btn.addEventListener("click", () => { if (active) exitMode(); else enterMode(); });
