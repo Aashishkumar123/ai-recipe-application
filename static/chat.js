@@ -1713,6 +1713,7 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
         input.disabled = false;
         input.classList.remove("input-disabled-image");
         input.placeholder = "What would you like to cook today?";
+        input.style.height = "auto";
         input.focus();
     }
 
