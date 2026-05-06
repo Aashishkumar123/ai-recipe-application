@@ -621,9 +621,13 @@ async function renderFromJson(bubble, data) {
     }
 }
 
+function _h2(icon, label) {
+    return `<h2><span class="h2-icon">${icon}</span><span class="h2-label">${label}</span></h2>`;
+}
+
 function _buildNutritionTable(n) {
     if (!n) return "";
-    return `<h2>📊 Nutrition (per serving)</h2>
+    return `${_h2("📊", "Nutrition (per serving)")}
         <table>
             <thead><tr><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead>
             <tbody><tr>
@@ -637,7 +641,7 @@ function _buildNutritionTable(n) {
 
 function _buildFollowUpsSection(followUps) {
     if (!followUps?.length) return "";
-    return `<h2>💬 Try asking</h2><ul>${followUps.map(q => `<li>${escHtml(q)}</li>`).join("")}</ul>`;
+    return `${_h2("💬", "Try asking")}<ul>${followUps.map(q => `<li>${escHtml(q)}</li>`).join("")}</ul>`;
 }
 
 function _buildIngredients(ingredients, pantryMode) {
@@ -684,10 +688,10 @@ function buildRecipeHtml(bubble, data) {
         `<h1>🍽️ ${escHtml(data.title || "")}</h1>`,
         parts.length ? `<p>${parts.join(" · ")}</p>` : "",
         data.description ? `<p>${escHtml(data.description)}</p>` : "",
-        `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, false)}</ul>`,
-        `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        `${_h2("🧂", "Ingredients")}<ul>${_buildIngredients(data.ingredients, false)}</ul>`,
+        `${_h2("👨‍🍳", "Instructions")}<ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
         `<button class="cook-now-btn" type="button">🍳 Cook Now — Step by Step</button>`,
-        tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
+        tipsHtml ? `${_h2("💡", "Tips")}<ul>${tipsHtml}</ul>` : "",
         _buildNutritionTable(data.nutrition),
         _buildFollowUpsSection(data.follow_ups),
     ].filter(Boolean).join("\n");
@@ -720,11 +724,11 @@ function buildPantryHtml(bubble, data) {
         `<h1>🧺 ${escHtml(data.title || "")}</h1>`,
         parts.length ? `<p>${parts.join(" · ")}</p>` : "",
         data.description ? `<p>${escHtml(data.description)}</p>` : "",
-        `<h2>🧂 Ingredients</h2><ul>${_buildIngredients(data.ingredients, true)}</ul>`,
-        missingHtml ? `<h2>🛒 Shopping needed</h2><ul>${missingHtml}</ul>` : "",
-        `<h2>👨‍🍳 Instructions</h2><ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
+        `${_h2("🧂", "Ingredients")}<ul>${_buildIngredients(data.ingredients, true)}</ul>`,
+        missingHtml ? `${_h2("🛒", "Shopping needed")}<ul>${missingHtml}</ul>` : "",
+        `${_h2("👨‍🍳", "Instructions")}<ol>${(data.steps || []).map(s => `<li>${escHtml(s)}</li>`).join("")}</ol>`,
         `<button class="cook-now-btn" type="button">🍳 Cook Now — Step by Step</button>`,
-        tipsHtml ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>` : "",
+        tipsHtml ? `${_h2("💡", "Tips")}<ul>${tipsHtml}</ul>` : "",
         _buildNutritionTable(data.nutrition),
         _buildFollowUpsSection(data.follow_ups),
     ].filter(Boolean).join("\n");
@@ -766,8 +770,8 @@ function buildMealPlanHtml(bubble, data) {
         `<h1>🗓️ ${escHtml(data.title || "Meal Plan")}</h1>`,
         data.subtitle ? `<p>${escHtml(data.subtitle)}</p>` : "",
         `<table><thead><tr>${headRow}</tr></thead><tbody>${bodyRows}</tbody></table>`,
-        tipsHtml  ? `<h2>💡 Tips</h2><ul>${tipsHtml}</ul>`         : "",
-        stockHtml ? `<h2>🛒 Stock up</h2><ul>${stockHtml}</ul>`    : "",
+        tipsHtml  ? `${_h2("💡", "Tips")}<ul>${tipsHtml}</ul>`         : "",
+        stockHtml ? `${_h2("🛒", "Stock up")}<ul>${stockHtml}</ul>` : "",
         _buildFollowUpsSection(data.follow_ups),
     ].filter(Boolean).join("\n");
 
@@ -1258,15 +1262,6 @@ async function injectRecipeImage(bubble) {
         const { images } = data;
         const section = document.createElement("div");
         section.className = "recipe-images-section";
-        section.innerHTML = `
-          <div class="recipe-images-header">
-            <div class="recipe-images-header-icon">${cameraSvg}</div>
-            <div class="recipe-images-header-text">
-              <span class="recipe-images-header-title">Recipe Gallery</span>
-              <span class="recipe-images-header-sub">Photos · Unsplash</span>
-            </div>
-            <span class="recipe-images-count-badge">${images.length} photo${images.length > 1 ? "s" : ""}</span>
-          </div>`;
 
         const grid = document.createElement("div");
         grid.className = `recipe-img-grid recipe-img-grid--${images.length}`;
