@@ -786,12 +786,50 @@ function buildFollowupHtml(bubble, data) {
 
 function buildOffTopicHtml(bubble, data) {
     const msg = escHtml(data.message || "I can only help with recipes. What would you like to cook?");
+    const suggestions = [
+        { flag: "🇮🇳", name: "Chicken Tikka Masala" },
+        { flag: "🇯🇵", name: "Miso Ramen" },
+        { flag: "🇮🇹", name: "Pasta Carbonara" },
+        { flag: "🇹🇭", name: "Pad Thai" },
+        { flag: "🇲🇽", name: "Tacos al Pastor" },
+        { flag: "🇬🇷", name: "Moussaka" },
+    ];
+    const suggBtns = suggestions.map(s =>
+        `<button type="button" class="off-topic-recipe-btn" data-recipe="${escHtml(s.name)}">${s.flag} ${escHtml(s.name)}</button>`
+    ).join("");
     bubble.innerHTML = `
         <div class="off-topic-card">
-            <div class="off-topic-icon">🍳</div>
-            <div class="off-topic-body">
-                <p class="off-topic-msg">${msg}</p>
-                <p class="off-topic-hint">Try asking for a dish name, ingredients you have, or a meal plan.</p>
+            <div class="off-topic-header">
+                <span class="off-topic-icon">🍳</span>
+                <div class="off-topic-body">
+                    <p class="off-topic-msg">${msg}</p>
+                    <p class="off-topic-hint">Here are some ideas to get you started:</p>
+                </div>
+            </div>
+            <div class="off-topic-section">
+                <p class="off-topic-section-label">✨ Try a recipe</p>
+                <div class="off-topic-suggestions">${suggBtns}</div>
+            </div>
+            <div class="off-topic-section">
+                <p class="off-topic-section-label">🔀 Or explore a mode</p>
+                <div class="off-topic-modes">
+                    <button type="button" class="off-topic-mode-btn off-topic-mode-pantry" data-mode="pantry">
+                        <span class="off-topic-mode-icon">🧺</span>
+                        <span class="off-topic-mode-text">
+                            <span class="off-topic-mode-title">Pantry mode</span>
+                            <span class="off-topic-mode-desc">Cook with what you have</span>
+                        </span>
+                        <span class="off-topic-mode-arrow">→</span>
+                    </button>
+                    <button type="button" class="off-topic-mode-btn off-topic-mode-mealplan" data-mode="meal_plan">
+                        <span class="off-topic-mode-icon">🗓️</span>
+                        <span class="off-topic-mode-text">
+                            <span class="off-topic-mode-title">Meal plan</span>
+                            <span class="off-topic-mode-desc">Plan your week's meals</span>
+                        </span>
+                        <span class="off-topic-mode-arrow">→</span>
+                    </button>
+                </div>
             </div>
         </div>`;
 }
@@ -1407,6 +1445,24 @@ messageList?.addEventListener("click", (e) => {
     input.value = btn.dataset.recipe;
     input.dispatchEvent(new Event("input"));
     form.requestSubmit();
+});
+
+// Off-topic: recipe suggestion clicks
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".off-topic-recipe-btn");
+    if (!btn || abortController) return;
+    input.value = btn.dataset.recipe;
+    input.dispatchEvent(new Event("input"));
+    form.requestSubmit();
+});
+
+// Off-topic: mode button clicks
+messageList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".off-topic-mode-btn");
+    if (!btn) return;
+    if (btn.dataset.mode === "pantry") enterPantryMode();
+    else if (btn.dataset.mode === "meal_plan") enterMealPlanMode();
+    document.getElementById("chat-form")?.scrollIntoView({ behavior: "smooth", block: "end" });
 });
 
 // YouTube thumbnail → inline iframe
