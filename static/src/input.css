@@ -1513,6 +1513,8 @@ aside ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
     margin: 28px 0;
 }
 [data-theme="dark"] .recipe-divider { border-top-color: #431407; }
+.bot-bubble.pantry-bubble .recipe-divider { border-top-color: #bbf7d0; }
+[data-theme="dark"] .bot-bubble.pantry-bubble .recipe-divider { border-top-color: #166534; }
 
 .recipe-block {
     display: block;

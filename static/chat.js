@@ -610,38 +610,15 @@ function parseJsonSafe(text) {
 
 async function renderFromJson(bubble, data) {
     switch (data.mode) {
-        case "recipe":       buildRecipeHtml(bubble, data);            break;
-        case "pantry":       buildPantryHtml(bubble, data);            break;
-        case "meal_plan":    buildMealPlanHtml(bubble, data);          break;
-        case "followup":     buildFollowupHtml(bubble, data);          break;
-        case "off_topic":    buildOffTopicHtml(bubble, data);          break;
-        case "multi_recipe": await buildMultiRecipeHtml(bubble, data); break;
+        case "recipe":    buildRecipeHtml(bubble, data);    break;
+        case "pantry":    buildPantryHtml(bubble, data);    break;
+        case "meal_plan": buildMealPlanHtml(bubble, data);  break;
+        case "followup":  buildFollowupHtml(bubble, data);  break;
+        case "off_topic": buildOffTopicHtml(bubble, data);  break;
         default:
             bubble.innerHTML = `<p class="text-sm text-gray-500">${escHtml(JSON.stringify(data, null, 2))}</p>`;
             applyRecipeStyles(bubble);
     }
-}
-
-async function buildMultiRecipeHtml(bubble, data) {
-    const recipes = data.recipes || [];
-    bubble.innerHTML = "";
-
-    for (let i = 0; i < recipes.length; i++) {
-        if (i > 0) {
-            const hr = document.createElement("hr");
-            hr.className = "recipe-divider";
-            bubble.appendChild(hr);
-        }
-        const block = document.createElement("div");
-        block.className = "recipe-block";
-        bubble.appendChild(block);
-        // Render recipe HTML into the block (applyRecipeStyles fires injectRecipeImage fire-and-forget)
-        buildRecipeHtml(block, recipes[i]);
-    }
-
-    // Await YouTube injection for every block before the caller saves the HTML
-    const blocks = [...bubble.querySelectorAll(".recipe-block")];
-    await Promise.all(blocks.map(block => injectYouTubeVideos(block)));
 }
 
 function _buildNutritionTable(n) {
@@ -672,7 +649,26 @@ function _buildIngredients(ingredients, pantryMode) {
     }).join("\n");
 }
 
+function _renderMultipleRecipes(bubble, recipes, renderFn) {
+    bubble.innerHTML = "";
+    recipes.forEach((recipe, i) => {
+        if (i > 0) {
+            const hr = document.createElement("hr");
+            hr.className = "recipe-divider";
+            bubble.appendChild(hr);
+        }
+        const block = document.createElement("div");
+        block.className = "recipe-block";
+        bubble.appendChild(block);
+        renderFn(block, recipe);
+    });
+}
+
 function buildRecipeHtml(bubble, data) {
+    if (data.recipes?.length) {
+        _renderMultipleRecipes(bubble, data.recipes, buildRecipeHtml);
+        return;
+    }
     const meta = data.meta || {};
     const parts = [];
     if (meta.prep)       parts.push(`Prep: ${escHtml(meta.prep)}`);
@@ -700,6 +696,11 @@ function buildRecipeHtml(bubble, data) {
 }
 
 function buildPantryHtml(bubble, data) {
+    if (data.recipes?.length) {
+        _renderMultipleRecipes(bubble, data.recipes, buildPantryHtml);
+        bubble.classList.add("pantry-bubble");
+        return;
+    }
     const meta = data.meta || {};
     const parts = [];
     if (meta.prep)         parts.push(`Prep: ${escHtml(meta.prep)}`);
@@ -1318,7 +1319,12 @@ function showMessages() {
 document.querySelectorAll(".bot-bubble .recipe-hero-placeholder").forEach(el => el.remove());
 document.querySelectorAll(".bot-bubble").forEach(bubble => {
     applyRecipeStyles(bubble);
-    injectYouTubeVideos(bubble); // no-op if videos already in saved HTML; fallback for old messages
+    const ytBlocks = bubble.querySelectorAll(".recipe-block");
+    if (ytBlocks.length) {
+        ytBlocks.forEach(b => injectYouTubeVideos(b));
+    } else {
+        injectYouTubeVideos(bubble);
+    }
 });
 
 const copyIconSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
@@ -1548,8 +1554,12 @@ async function streamResponse(userMessage) {
                             updateHeaderTitle(data.chat_title || userMessage);
                         }
                         if (streamChatId) {
-                            // For single recipe: inject YouTube now. For multi_recipe: already awaited inside renderFromJson.
-                            await injectYouTubeVideos(bubble);
+                            const ytBlocks = bubble.querySelectorAll(".recipe-block");
+                            if (ytBlocks.length) {
+                                await Promise.all([...ytBlocks].map(b => injectYouTubeVideos(b)));
+                            } else {
+                                await injectYouTubeVideos(bubble);
+                            }
                             fetch("/chat/api/save-bot-message/", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
