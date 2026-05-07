@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from langchain_core.messages import HumanMessage, AIMessage
 from loguru import logger
-from .chat import stream_recipe
+from .chat import stream_recipe, identify_dish_from_image
 from .models import ChatMessage, Chat
 from .utils import html_to_text
 from .prompt import INSTRUCTION_STEPS_PROMPT
@@ -123,6 +123,54 @@ def chat_message(request):
         except Exception as e:
             logger.error("event_stream error | dish={!r} error={}", dish_name, e)
             yield f"data: {json.dumps({'error': str(e)})}\n\n"    
+
+    response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+    response["Cache-Control"] = "no-cache"
+    response["X-Accel-Buffering"] = "no"
+    return response
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def image_recipe(request):
+    """Two-step flow: identify dish from uploaded image, then stream the recipe."""
+    image_file = request.FILES.get("image")
+    if not image_file:
+        return JsonResponse({"error": "No image uploaded"}, status=400)
+
+    language    = request.session.get("language", "English")
+    image_bytes = image_file.read()
+
+    result    = identify_dish_from_image(image_bytes, language)
+    dish_name = result.get("dish")
+    logger.info("image_recipe | dish={!r} user={}", dish_name, request.user)
+
+    chat_obj = None
+    if request.user.is_authenticated:
+        title    = dish_name[:255] if dish_name else "Image Recipe"
+        chat_obj = Chat.objects.create(title=title, user=request.user)
+        ChatMessage.objects.create(chat=chat_obj, sender="user", content="[Uploaded an image]")
+
+    def event_stream():
+        try:
+            if chat_obj:
+                yield f"data: {json.dumps({'chat_id': str(chat_obj.id), 'chat_title': chat_obj.title})}\n\n"
+
+            if not dish_name:
+                error_msg = result.get("error", "Could not identify the specific dish.")
+                yield f"data: {json.dumps({'token': json.dumps({'mode': 'off_topic', 'message': error_msg})})}\n\n"
+            else:
+                for token in stream_recipe(dish_name, language, user=request.user):
+                    yield f"data: {json.dumps({'token': token})}\n\n"
+
+            done_payload = {"done": True}
+            if chat_obj:
+                done_payload["chat_id"]    = str(chat_obj.id)
+                done_payload["chat_title"] = chat_obj.title
+            yield f"data: {json.dumps(done_payload)}\n\n"
+        except Exception as e:
+            logger.error("image_recipe stream error | {}", e)
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"

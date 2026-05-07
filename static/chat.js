@@ -104,6 +104,11 @@ let currentChatId = (function () {
 // AbortController for the active stream (null when idle)
 let abortController = null;
 
+// Image-to-recipe mode state (set by initImageRecipeMode)
+let imageActive      = false;
+let imagePendingFile = null;
+let exitImageMode    = () => {};
+
 // SVG icons
 const sendIconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></svg>`;
 const stopIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2.5"/></svg>`;
@@ -1491,6 +1496,88 @@ messageList?.addEventListener("click", (e) => {
     }).catch(console.error);
 });
 
+async function streamImageRecipe(file) {
+    abortController = new AbortController();
+    setStopMode(true);
+
+    const bubble = appendBotMessage();
+    bubble.classList.add("streaming");
+    bubble.innerHTML = `<div class="recipe-loading"><div class="recipe-loading-dots"><span></span><span></span><span></span></div><p class="recipe-loading-text">Analysing your image…</p></div>`;
+
+    let fullText    = "";
+    let streamChatId = null;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    if (currentChatId) formData.append("chat_id", currentChatId);
+
+    try {
+        const response = await fetch("/chat/api/image-recipe/", {
+            method: "POST",
+            headers: { "X-CSRFToken": getCsrfToken() },
+            body: formData,
+            signal: abortController.signal,
+        });
+        if (!response.ok) { bubble.textContent = "⚠️ Error processing image."; return; }
+
+        const reader  = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split("\n\n");
+            buffer = parts.pop();
+            for (const part of parts) {
+                if (!part.startsWith("data: ")) continue;
+                try {
+                    const data = JSON.parse(part.slice(6));
+                    if (data.chat_id && !data.done && !data.token) {
+                        streamChatId = data.chat_id;
+                    } else if (data.token) {
+                        fullText += data.token;
+                    } else if (data.error) {
+                        bubble.innerHTML = `<span class="text-red-500">⚠️ ${data.error}</span>`;
+                    } else if (data.done) {
+                        bubble.classList.remove("streaming");
+                        try {
+                            await renderFromJson(bubble, parseJsonSafe(fullText));
+                        } catch {
+                            bubble.innerHTML = marked.parse(fullText);
+                            applyRecipeStyles(bubble);
+                        }
+                        updateMsgCount();
+                        streamChatId = data.chat_id || streamChatId;
+                        if (data.chat_id && !currentChatId) {
+                            currentChatId = data.chat_id;
+                            window.history.pushState(null, "", `/chat/${currentChatId}/`);
+                            addChatToSidebar(currentChatId, data.chat_title || "Image Recipe");
+                            updateHeaderTitle(data.chat_title || "Image Recipe");
+                        }
+                        if (streamChatId) {
+                            await injectYouTubeVideos(bubble);
+                            fetch("/chat/api/save-bot-message/", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+                                body: JSON.stringify({ chat_id: streamChatId, content: bubbleHtmlForSave(bubble), markdown: fullText }),
+                            }).catch(console.error);
+                        }
+                    }
+                } catch (ex) { console.error("SSE parse error", ex); }
+            }
+        }
+    } catch (error) {
+        if (error.name !== "AbortError") {
+            bubble.textContent = `⚠️ Network error: ${error.message}`;
+        }
+    } finally {
+        bubble.classList.remove("streaming");
+        setStopMode(false);
+    }
+}
+
 async function streamResponse(userMessage) {
     abortController = new AbortController();
     setStopMode(true);
@@ -1601,8 +1688,21 @@ async function streamResponse(userMessage) {
 
 form?.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // Image-to-recipe path
+    if (imageActive) {
+        if (!imagePendingFile || abortController) return;
+        const file = imagePendingFile;
+        if (window.innerWidth < 768) closeSidebar();
+        appendUserMessage("🖼️ Generating recipe from your image…");
+        exitImageMode();
+        try { await streamImageRecipe(file); }
+        finally { input.focus(); }
+        return;
+    }
+
     const raw = input.value.trim();
-    if (!raw || abortController) return; // ignore submit while streaming
+    if (!raw || abortController) return;
     const userMessage = pantryActive ? `I have: ${raw}` : mealPlanActive ? `Meal plan: ${raw}` : raw;
     if (window.innerWidth < 768) closeSidebar();
     appendUserMessage(userMessage);
@@ -1732,27 +1832,27 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
 
 // --- Image to Recipe mode ---
 (function initImageRecipeMode() {
-    const btn     = document.getElementById("image-recipe-btn");
-    const wrap    = document.getElementById("image-recipe-wrap");
-    const fileIn  = document.getElementById("image-recipe-input");
-    const preview = document.getElementById("image-recipe-preview");
-    const thumb   = document.getElementById("image-recipe-thumb");
+    const btn       = document.getElementById("image-recipe-btn");
+    const wrap      = document.getElementById("image-recipe-wrap");
+    const fileIn    = document.getElementById("image-recipe-input");
+    const preview   = document.getElementById("image-recipe-preview");
+    const thumb     = document.getElementById("image-recipe-thumb");
     const removeBtn = document.getElementById("image-recipe-remove");
     const exitBtn   = document.getElementById("image-exit-btn");
     if (!btn) return;
 
-    let active = false;
     let objectUrl = null;
 
     function clearImage() {
-        fileIn.value = "";
+        fileIn.value   = "";
+        imagePendingFile = null;
         preview?.classList.add("hidden");
         if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
         if (thumb) thumb.src = "";
     }
 
     function enterMode() {
-        active = true;
+        imageActive = true;
         exitPantryMode();
         exitMealPlanMode();
         btn.classList.add("is-active");
@@ -1766,7 +1866,8 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
     }
 
     function exitMode() {
-        active = false;
+        imageActive = false;
+        imagePendingFile = null;
         btn.classList.remove("is-active");
         wrap?.classList.add("hidden");
         wrap?.classList.remove("flex");
@@ -1778,12 +1879,15 @@ document.getElementById("meal-plan-exit-btn")?.addEventListener("click", () => {
         input.focus();
     }
 
-    btn.addEventListener("click", () => { if (active) exitMode(); else enterMode(); });
+    exitImageMode = exitMode;  // expose to module scope for form submit
+
+    btn.addEventListener("click", () => { if (imageActive) exitMode(); else enterMode(); });
 
     fileIn?.addEventListener("change", () => {
         const file = fileIn.files[0];
         if (!file) return;
         clearImage();
+        imagePendingFile = file;
         objectUrl = URL.createObjectURL(file);
         if (thumb) thumb.src = objectUrl;
         preview?.classList.remove("hidden");

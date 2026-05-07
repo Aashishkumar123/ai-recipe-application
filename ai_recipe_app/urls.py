@@ -6,6 +6,7 @@ urlpatterns = [
     path("<uuid:chat_id>/", views.chat, name="chat-history"),
     path("public/<uuid:chat_id>/", views.public_chat, name="public-chat"),
     path("api/message/", views.chat_message, name="message"),
+    path("api/image-recipe/", views.image_recipe, name="image_recipe"),
     path("api/save-bot-message/", views.save_bot_message, name="save_bot_message"),
     path("api/rename-chat/", views.rename_chat, name="rename_chat"),
     path("api/delete-chat/", views.delete_chat, name="delete_chat"),

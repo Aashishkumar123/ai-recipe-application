@@ -3,7 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from django.conf import settings
 from loguru import logger
-from .prompt import RECIPE_SYSTEM_PROMPT, USER_PROFILE_BLOCK
+from .prompt import RECIPE_SYSTEM_PROMPT, USER_PROFILE_BLOCK, IMAGE_IDENTIFY_PROMPT
 from langchain_openai import AzureChatOpenAI
 
 
@@ -50,6 +50,21 @@ def _build_system_prompt(language: str, user=None) -> str:
 
     profile_block = "\n".join(lines)
     return base + USER_PROFILE_BLOCK.substitute(profile_block=profile_block)
+
+
+def identify_dish_from_image(image_bytes: bytes, language: str = "English") -> dict:
+    """Identify the dish shown in an image.
+
+    Returns {"dish": str, "confidence": str} on success, or
+    {"dish": None, "error": str} when the dish cannot be determined.
+
+    TODO: swap the body below for a real multimodal model call that passes
+    IMAGE_IDENTIFY_PROMPT and the image bytes once an image-capable model is
+    configured.
+    """
+    logger.info("identify_dish_from_image | bytes={} language={}", len(image_bytes), language)
+    # Stub — image model not yet configured
+    return {"dish": None, "confidence": None, "error": "Could not identify the specific dish."}
 
 
 def stream_recipe(
