@@ -148,8 +148,13 @@ def image_recipe(request):
 
     chat_obj = None
     if request.user.is_authenticated:
-        title    = dish_name[:255] if dish_name else "Image Recipe"
-        chat_obj = Chat.objects.create(title=title, user=request.user)
+        chat_id = request.POST.get("chat_id", "").strip()
+        if chat_id:
+            chat_obj = Chat.objects.filter(id=chat_id, user=request.user).first()
+        if chat_obj is None:
+            title    = dish_name[:255] if dish_name else "Image Recipe"
+            chat_obj = Chat.objects.create(title=title, user=request.user)
+            logger.info("image_recipe | new chat created | chat_id={}", chat_obj.id)
         user_msg = ChatMessage(chat=chat_obj, sender="user", content="Recipe from image")
         user_msg.image.save(image_file.name or "upload.jpg", image_file, save=True)
         logger.info("image_recipe | image saved to chat message | chat_id={}", chat_obj.id)
