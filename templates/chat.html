@@ -172,7 +172,12 @@
                         <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
                     </svg>
                 </button>
-                <div class="user-bubble">{{ msg.content }}</div>
+                <div class="user-bubble">
+                    {% if msg.image %}
+                    <img src="{{ msg.image.url }}" class="user-msg-img" alt="Uploaded image">
+                    {% endif %}
+                    <span>{{ msg.content }}</span>
+                </div>
             </div>
             {% else %}
             <div class="chat-msg group flex gap-3 md:gap-4 px-4 md:px-6 py-4 max-w-4xl mx-auto w-full">

@@ -1375,7 +1375,7 @@ messageList?.addEventListener("click", async (e) => {
     }
 });
 
-function appendUserMessage(content) {
+function appendUserMessage(content, imageUrl = null) {
     showMessages();
     const wrapper = document.createElement("div");
     wrapper.className = "chat-msg group flex justify-end items-end gap-2 px-4 md:px-6 py-3 max-w-4xl mx-auto w-full";
@@ -1386,7 +1386,16 @@ function appendUserMessage(content) {
     copyBtn.innerHTML = copyIconSvg;
     const bubble = document.createElement("div");
     bubble.className = "user-bubble";
-    bubble.textContent = content;
+    if (imageUrl) {
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.className = "user-msg-img";
+        img.alt = "Uploaded image";
+        bubble.appendChild(img);
+    }
+    const textNode = document.createElement("span");
+    textNode.textContent = content;
+    bubble.appendChild(textNode);
     wrapper.appendChild(copyBtn);
     wrapper.appendChild(bubble);
     messageList.appendChild(wrapper);
@@ -1694,7 +1703,9 @@ form?.addEventListener("submit", async (e) => {
         if (!imagePendingFile || abortController) return;
         const file = imagePendingFile;
         if (window.innerWidth < 768) closeSidebar();
-        appendUserMessage("🖼️ Generating recipe from your image…");
+        // Create a fresh object URL for the user bubble (exitImageMode revokes the thumb URL)
+        const previewUrl = URL.createObjectURL(file);
+        appendUserMessage("Recipe from image", previewUrl);
         exitImageMode();
         try { await streamImageRecipe(file); }
         finally { input.focus(); }

@@ -140,6 +140,7 @@ def image_recipe(request):
 
     language    = request.session.get("language", "English")
     image_bytes = image_file.read()
+    image_file.seek(0)  # rewind so we can save to storage after reading
 
     result    = identify_dish_from_image(image_bytes, language)
     dish_name = result.get("dish")
@@ -149,7 +150,9 @@ def image_recipe(request):
     if request.user.is_authenticated:
         title    = dish_name[:255] if dish_name else "Image Recipe"
         chat_obj = Chat.objects.create(title=title, user=request.user)
-        ChatMessage.objects.create(chat=chat_obj, sender="user", content="[Uploaded an image]")
+        user_msg = ChatMessage(chat=chat_obj, sender="user", content="Recipe from image")
+        user_msg.image.save(image_file.name or "upload.jpg", image_file, save=True)
+        logger.info("image_recipe | image saved to chat message | chat_id={}", chat_obj.id)
 
     def event_stream():
         try:

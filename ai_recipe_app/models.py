@@ -18,7 +18,8 @@ class ChatMessage(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
     sender = models.CharField(max_length=10, choices=[('user', 'User'), ('bot', 'Bot')])
     content = models.TextField()
-    raw_content = models.TextField(blank=True, default='')  # raw markdown for LLM history
+    raw_content = models.TextField(blank=True, default='')
+    image = models.ImageField(upload_to='chat_images/', null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
