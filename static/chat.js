@@ -1518,7 +1518,6 @@ async function streamImageRecipe(file) {
 
     const formData = new FormData();
     formData.append("image", file);
-    if (currentChatId) formData.append("chat_id", currentChatId);
 
     try {
         const response = await fetch("/chat/api/image-recipe/", {
@@ -1559,11 +1558,15 @@ async function streamImageRecipe(file) {
                         }
                         updateMsgCount();
                         streamChatId = data.chat_id || streamChatId;
-                        if (data.chat_id && !currentChatId) {
+                        // image_recipe always creates a new chat — unconditionally update URL
+                        if (data.chat_id) {
+                            const isNew = currentChatId !== data.chat_id;
                             currentChatId = data.chat_id;
                             window.history.pushState(null, "", `/chat/${currentChatId}/`);
-                            addChatToSidebar(currentChatId, data.chat_title || "Image Recipe");
-                            updateHeaderTitle(data.chat_title || "Image Recipe");
+                            if (isNew) {
+                                addChatToSidebar(currentChatId, data.chat_title || "Image Recipe");
+                                updateHeaderTitle(data.chat_title || "Image Recipe");
+                            }
                         }
                         if (streamChatId) {
                             await injectYouTubeVideos(bubble);
